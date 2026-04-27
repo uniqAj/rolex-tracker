@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Swissonly Tracker" />
+  <meta name="apple-mobile-web-app-title" content="Service Tracker" />
   <meta name="theme-color" content="#0a0a0a" />
-  <title>Swissonly Service Tracker</title>
+  <title>Service Tracker</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -68,7 +68,7 @@ body {
   background: rgba(10,10,10,0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-gold);
-  padding: env(safe-area-inset-top, 12px) 20px 12px;
+  padding: max(env(safe-area-inset-top), 20px) 20px 16px;
   display: flex; align-items: center; justify-content: space-between;
 }
 .topbar-title {
@@ -85,7 +85,7 @@ body {
   background: rgba(10,10,10,0.97);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--border-gold);
-  padding: 10px 0 env(safe-area-inset-bottom, 10px);
+  padding: 14px 0 max(env(safe-area-inset-bottom), 16px);
   display: flex;
 }
 .nav-btn {
@@ -95,10 +95,10 @@ body {
   cursor: pointer; padding: 4px 0; transition: color 0.2s;
 }
 .nav-btn.active { color: var(--gold); }
-.nav-btn svg { width: 20px; height: 20px; }
+.nav-btn svg { width: 22px; height: 22px; }
 
 /* ── PAGES ── */
-.page { display: none; padding: 0 0 90px; margin-top: 70px; }
+.page { display: none; padding: 0 0 100px; margin-top: 80px; }
 .page.active { display: block; }
 
 /* ── SECTION HEADER ── */
@@ -453,7 +453,7 @@ body {
 
 <div class="topbar">
   <div>
-    <div class="topbar-title">⌚ Swissonly Service Tracker</div>
+    <div class="topbar-title">⌚ Service Tracker</div>
     <div class="topbar-subtitle">Workshop Log</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
