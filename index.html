@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Service Tracker" />
+  <meta name="apple-mobile-web-app-title" content="Swissonly Tracker" />
   <meta name="theme-color" content="#0a0a0a" />
-  <title>Rolex Service Tracker</title>
+  <title>Swissonly Service Tracker</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -30,6 +30,25 @@
       --red: #c94c4c;
       --blue: #4c82c9;
     }
+    :root.light {
+      --gold: #a07828;
+      --gold-light: #c9a84c;
+      --gold-dim: #7a5c1e;
+      --bg: #f5f2ed;
+      --bg2: #ffffff;
+      --bg3: #ede9e2;
+      --bg4: #e0dbd2;
+      --border: #d4cfc6;
+      --border-gold: rgba(160,120,40,0.25);
+      --text: #1a1814;
+      --text-dim: #8a8278;
+      --text-mid: #5a5550;
+      --green: #2e7d54;
+      --red: #a83232;
+      --blue: #2e5ca8;
+    }
+    :root.light .topbar { background: rgba(245,242,237,0.95); }
+    :root.light .bottomnav { background: rgba(245,242,237,0.97); }
 
 ```
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -38,7 +57,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'DM Mono', monospace;
-  font-size: 13px;
+  font-size: 18px;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -54,11 +73,11 @@ body {
 }
 .topbar-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 18px; font-weight: 500;
+  font-size: 22px; font-weight: 500;
   letter-spacing: 0.12em;
   color: var(--gold);
 }
-.topbar-subtitle { font-size: 9px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; }
+.topbar-subtitle { font-size: 12px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; }
 
 /* ── BOTTOM NAV ── */
 .bottomnav {
@@ -72,7 +91,7 @@ body {
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
   background: none; border: none; color: var(--text-dim);
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
+  font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.1em;
   cursor: pointer; padding: 4px 0; transition: color 0.2s;
 }
 .nav-btn.active { color: var(--gold); }
@@ -89,10 +108,10 @@ body {
 }
 .section-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-weight: 400; color: var(--text);
+  font-size: 26px; font-weight: 400; color: var(--text);
   letter-spacing: 0.05em;
 }
-.section-meta { font-size: 10px; color: var(--text-dim); letter-spacing: 0.15em; }
+.section-meta { font-size: 13px; color: var(--text-dim); letter-spacing: 0.15em; }
 
 /* ── CARDS ── */
 .card {
@@ -111,12 +130,12 @@ body {
 }
 .card-ref {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 17px; font-weight: 500; color: var(--gold);
+  font-size: 22px; font-weight: 500; color: var(--gold);
   letter-spacing: 0.08em;
 }
-.card-model { font-size: 10px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.1em; }
+.card-model { font-size: 13px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.1em; }
 .badge {
-  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
   padding: 3px 8px; border-radius: 2px; font-weight: 500;
 }
 .badge-full { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border-gold); }
@@ -142,17 +161,17 @@ body {
 
 .card-stats { display: flex; gap: 16px; }
 .stat { display: flex; flex-direction: column; gap: 2px; }
-.stat-val { font-size: 13px; color: var(--text); }
-.stat-lbl { font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
+.stat-val { font-size: 16px; color: var(--text); }
+.stat-lbl { font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
 
 .card-footer {
   padding: 10px 16px;
   border-top: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
-.card-date { font-size: 10px; color: var(--text-dim); }
+.card-date { font-size: 13px; color: var(--text-dim); }
 .card-action {
-  font-size: 10px; color: var(--gold); letter-spacing: 0.1em;
+  font-size: 13px; color: var(--gold); letter-spacing: 0.1em;
   text-transform: uppercase; cursor: pointer;
 }
 
@@ -166,9 +185,9 @@ body {
   display: flex; align-items: center; justify-content: space-between;
 }
 .active-step-info {}
-.active-step-label { font-size: 10px; color: var(--gold-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
-.active-step-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--text); }
-.active-step-timer { font-size: 22px; color: var(--gold); letter-spacing: 0.05em; font-weight: 300; }
+.active-step-label { font-size: 13px; color: var(--gold-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
+.active-step-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--text); }
+.active-step-timer { font-size: 26px; color: var(--gold); letter-spacing: 0.05em; font-weight: 300; }
 
 /* ── FAB ── */
 .fab {
@@ -207,7 +226,7 @@ body {
 }
 .modal-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 20px; font-weight: 400;
+  font-size: 24px; font-weight: 400;
   padding: 16px 20px 0;
   color: var(--gold);
   letter-spacing: 0.08em;
@@ -217,14 +236,14 @@ body {
 /* ── FORM ── */
 .form-group { margin-bottom: 16px; }
 .form-label {
-  display: block; font-size: 9px; color: var(--text-dim);
+  display: block; font-size: 12px; color: var(--text-dim);
   letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;
 }
 .form-input, .form-select, .form-textarea {
   width: 100%; background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: 3px; color: var(--text);
-  font-family: 'DM Mono', monospace; font-size: 13px;
+  font-family: 'DM Mono', monospace; font-size: 16px;
   padding: 10px 12px;
   outline: none; transition: border-color 0.2s;
   -webkit-appearance: none;
@@ -239,10 +258,10 @@ body {
 
 /* ── BUTTONS ── */
 .btn {
-  width: 100%; padding: 13px;
+  width: 100%; padding: 14px;
   border-radius: 3px; border: none;
   font-family: 'DM Mono', monospace;
-  font-size: 11px; letter-spacing: 0.18em;
+  font-size: 14px; letter-spacing: 0.18em;
   text-transform: uppercase; cursor: pointer;
   transition: opacity 0.2s, transform 0.1s;
 }
@@ -259,7 +278,7 @@ body {
 .steps-container { padding: 0 16px; }
 .steps-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 14px; color: var(--text-dim);
+  font-size: 17px; color: var(--text-dim);
   letter-spacing: 0.12em; text-transform: uppercase;
   margin: 16px 0 8px;
   display: flex; align-items: center; gap: 8px;
@@ -282,21 +301,21 @@ body {
   cursor: pointer;
 }
 .step-num {
-  width: 22px; height: 22px; border-radius: 50%;
+  width: 26px; height: 26px; border-radius: 50%;
   border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 10px; color: var(--text-dim); flex-shrink: 0;
+  font-size: 13px; color: var(--text-dim); flex-shrink: 0;
   transition: all 0.2s;
 }
 .step-active .step-num { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
 .step-done .step-num { border-color: var(--green); color: var(--green); background: rgba(76,175,130,0.1); }
 
 .step-info { flex: 1; }
-.step-name { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }
-.step-duration { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.step-name { font-size: 15px; color: var(--text); letter-spacing: 0.05em; }
+.step-duration { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
 
 .step-timer-display {
-  font-size: 15px; color: var(--gold); letter-spacing: 0.04em;
+  font-size: 18px; color: var(--gold); letter-spacing: 0.04em;
 }
 
 .step-actions {
@@ -304,8 +323,8 @@ body {
   display: flex; gap: 8px;
 }
 .step-btn {
-  flex: 1; padding: 9px; border-radius: 3px; border: none;
-  font-family: 'DM Mono', monospace; font-size: 10px;
+  flex: 1; padding: 10px; border-radius: 3px; border: none;
+  font-family: 'DM Mono', monospace; font-size: 13px;
   letter-spacing: 0.12em; text-transform: uppercase;
   cursor: pointer; transition: opacity 0.15s;
 }
@@ -316,14 +335,14 @@ body {
 
 .step-notes {
   padding: 0 14px 12px;
-  font-size: 11px; color: var(--text-dim); line-height: 1.5;
+  font-size: 14px; color: var(--text-dim); line-height: 1.5;
   border-top: 1px solid var(--border); margin-top: 4px; padding-top: 10px;
 }
 .note-tag {
   display: inline-block;
   background: var(--bg3); border: 1px solid var(--border);
   border-radius: 2px; padding: 2px 6px;
-  font-size: 10px; color: var(--text-mid); margin: 2px 2px 0 0;
+  font-size: 13px; color: var(--text-mid); margin: 2px 2px 0 0;
 }
 
 /* ── STATS PAGE ── */
@@ -337,9 +356,9 @@ body {
 }
 .stat-card-val {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 28px; color: var(--gold); font-weight: 300;
+  font-size: 32px; color: var(--gold); font-weight: 300;
 }
-.stat-card-lbl { font-size: 9px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+.stat-card-lbl { font-size: 12px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
 
 .chart-container {
   margin: 0 16px 16px;
@@ -347,15 +366,15 @@ body {
   border-radius: 4px; padding: 16px;
 }
 .chart-title {
-  font-size: 9px; color: var(--text-dim);
+  font-size: 12px; color: var(--text-dim);
   letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;
 }
 .bar-chart { display: flex; flex-direction: column; gap: 8px; }
 .bar-row { display: flex; align-items: center; gap: 10px; }
-.bar-label { font-size: 10px; color: var(--text-dim); width: 90px; flex-shrink: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.bar-label { font-size: 13px; color: var(--text-dim); width: 100px; flex-shrink: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 .bar-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .bar-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.6s ease; }
-.bar-val { font-size: 10px; color: var(--text-dim); width: 36px; text-align: right; flex-shrink: 0; }
+.bar-val { font-size: 13px; color: var(--text-dim); width: 42px; text-align: right; flex-shrink: 0; }
 
 /* ── HISTORY PAGE ── */
 .history-item {
@@ -367,12 +386,12 @@ body {
 .history-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
 .history-ref {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 16px; color: var(--gold); letter-spacing: 0.08em;
+  font-size: 20px; color: var(--gold); letter-spacing: 0.08em;
 }
-.history-date { font-size: 10px; color: var(--text-dim); }
-.history-model { font-size: 10px; color: var(--text-mid); margin-bottom: 8px; }
+.history-date { font-size: 13px; color: var(--text-dim); }
+.history-model { font-size: 13px; color: var(--text-mid); margin-bottom: 8px; }
 .history-times { display: flex; gap: 12px; flex-wrap: wrap; }
-.history-time { font-size: 10px; color: var(--text-dim); }
+.history-time { font-size: 13px; color: var(--text-dim); }
 .history-time span { color: var(--text-mid); }
 
 /* ── EMPTY STATE ── */
@@ -380,12 +399,12 @@ body {
   display: flex; flex-direction: column; align-items: center;
   padding: 60px 40px; text-align: center;
 }
-.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.3; }
+.empty-icon { font-size: 44px; margin-bottom: 16px; opacity: 0.3; }
 .empty-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 18px; color: var(--text-dim); margin-bottom: 8px;
+  font-size: 22px; color: var(--text-dim); margin-bottom: 8px;
 }
-.empty-text { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+.empty-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
 
 /* ── DIVIDER ── */
 .divider { height: 1px; background: var(--border); margin: 4px 16px 16px; }
@@ -408,9 +427,9 @@ body {
   display: flex; gap: 6px; flex-wrap: wrap;
 }
 .qt-btn {
-  padding: 6px 10px; border-radius: 3px; border: 1px solid var(--border);
+  padding: 7px 12px; border-radius: 3px; border: 1px solid var(--border);
   background: var(--bg3); color: var(--text-dim);
-  font-family: 'DM Mono', monospace; font-size: 10px;
+  font-family: 'DM Mono', monospace; font-size: 13px;
   letter-spacing: 0.08em; cursor: pointer;
   transition: all 0.15s;
 }
@@ -434,10 +453,13 @@ body {
 
 <div class="topbar">
   <div>
-    <div class="topbar-title">⌚ Service Tracker</div>
-    <div class="topbar-subtitle">Rolex Workshop</div>
+    <div class="topbar-title">⌚ Swissonly Service Tracker</div>
+    <div class="topbar-subtitle">Workshop Log</div>
   </div>
-  <div id="topbar-clock" style="font-size:12px;color:var(--text-dim);letter-spacing:0.08em;"></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;">☀️ Светлая</button>
+    <div id="topbar-clock" style="font-size:12px;color:var(--text-dim);letter-spacing:0.08em;"></div>
+  </div>
 </div>
 
 <!-- PAGES -->
@@ -536,6 +558,10 @@ body {
     <div class="modal-handle"></div>
     <div class="modal-title">Новые часы</div>
     <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Серийный / идентификационный номер</label>
+        <input class="form-input" id="inp-serial" placeholder="напр. 3D28F419" autocomplete="off" />
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Ref номер</label>
@@ -545,10 +571,6 @@ body {
           <label class="form-label">Модель</label>
           <input class="form-input" id="inp-model" placeholder="Submariner" autocomplete="off" />
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Серийный номер</label>
-        <input class="form-input" id="inp-serial" placeholder="опционально" autocomplete="off" />
       </div>
       <div class="form-group">
         <label class="form-label">Тип работы</label>
@@ -838,8 +860,8 @@ function jobCard(j) {
   <div class="card" onclick="openJob('${j.id}')">
     <div class="card-header">
       <div>
-        <div class="card-ref">${j.ref}</div>
-        <div class="card-model">${j.model || '—'}</div>
+        <div class="card-ref">${j.serial || j.ref}</div>
+        <div class="card-model">${j.ref ? 'Ref ' + j.ref : ''}${j.ref && j.model ? ' · ' : ''}${j.model || ''}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
         ${typeBadge}${statusBadge}
@@ -868,8 +890,8 @@ function openJob(id) {
   if (!job) return;
 
   currentJobId = id;
-  document.getElementById('work-ref').textContent = job.ref;
-  document.getElementById('work-model').textContent = job.model || '';
+  document.getElementById('work-ref').textContent = job.serial || job.ref;
+  document.getElementById('work-model').textContent = (job.ref ? 'Ref ' + job.ref : '') + (job.ref && job.model ? ' · ' : '') + (job.model || '');
   document.getElementById('work-badge').innerHTML = job.type === 'full'
     ? `<span class="badge badge-full">Full Service + Сборка</span>`
     : `<span class="badge badge-assembly">Только Сборка</span>`;
@@ -1086,10 +1108,10 @@ function historyCard(j, compact) {
   return `
   <div class="history-item" onclick="openHistoryDetail('${j.id}')">
     <div class="history-header">
-      <div class="history-ref">${j.ref}</div>
+      <div class="history-ref">${j.serial || j.ref}</div>
       <div class="history-date">${fmtDate(j.completedAt || j.createdAt)}</div>
     </div>
-    <div class="history-model">${j.model || '—'} ${j.serial ? '· ' + j.serial : ''}</div>
+    <div class="history-model">${j.ref ? 'Ref ' + j.ref : ''}${j.ref && j.model ? ' · ' : ''}${j.model || ''}</div>
     <div class="history-times">
       <div class="history-time">Итого: <span>${fmtMs(total)}</span></div>
       ${j.type === 'full' ? `<div class="history-time">Service: <span>${fmtMs(fsTime)}</span></div>` : ''}
@@ -1115,7 +1137,7 @@ function openHistoryDetail(id) {
   const job = (d.done || []).find(j => j.id === id);
   if (!job) return;
 
-  document.getElementById('hd-ref').textContent = job.ref + (job.model ? ' · ' + job.model : '');
+  document.getElementById('hd-ref').textContent = (job.serial || job.ref) + (job.model ? ' · ' + job.model : '');
 
   let html = '';
   const phases = job.type === 'full'
@@ -1259,6 +1281,22 @@ function applyCustomTime() {
   closeModal('modal-custom-time');
   addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
   customTimeTarget = null;
+}
+
+// ─── THEME ───────────────────────────────────────────────────────────────────
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('rst_theme', isLight ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = isLight ? '🌙 Тёмная' : '☀️ Светлая';
+}
+
+if (localStorage.getItem('rst_theme') === 'light') {
+  document.documentElement.classList.add('light');
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = '🌙 Тёмная';
+  });
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
