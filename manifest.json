@@ -1,0 +1,10 @@
+{
+  "name": "Rolex Service Tracker",
+  "short_name": "ServiceTracker",
+  "description": "Tracker for Rolex watch servicing",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait"
+}
