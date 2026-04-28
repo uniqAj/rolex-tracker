@@ -891,6 +891,18 @@ function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
 }
 
+function speedBadge(hours, type) {
+  if (type === 'full') {
+    if (hours <= 5) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
+    if (hours <= 7) return `<span class="speed-badge speed-mid">⏱ Средне</span>`;
+    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
+  } else {
+    if (hours < 3) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
+    if (hours <= 4) return `<span class="speed-badge speed-mid">⏱ Хорошо</span>`;
+    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
+  }
+}
+
 function totalTime(job) {
   return job.steps.reduce((acc, s) => acc + (s.elapsed || 0), 0);
 }
@@ -1293,17 +1305,6 @@ function renderHistory() {
   }
 }
 
-function speedBadge(hours, type) {
-  if (type === 'full') {
-    if (hours <= 5) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
-    if (hours <= 7) return `<span class="speed-badge speed-mid">⏱ Средне</span>`;
-    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
-  } else {
-    if (hours < 3) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
-    if (hours <= 4) return `<span class="speed-badge speed-mid">⏱ Хорошо</span>`;
-    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
-  }
-}
 
 function openHistoryDetail(id) {
   const d = load();
