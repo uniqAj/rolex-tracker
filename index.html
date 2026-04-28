@@ -14,519 +14,157 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --gold: #c9a84c;
-      --gold-light: #e8c97a;
-      --gold-dim: #8a6f2e;
-      --bg: #0a0a0a;
-      --bg2: #111111;
-      --bg3: #1a1a1a;
-      --bg4: #222222;
-      --border: #2a2a2a;
-      --border-gold: rgba(201,168,76,0.25);
-      --text: #f0ece4;
-      --text-dim: #7a756a;
-      --text-mid: #b0a898;
-      --green: #4caf82;
-      --red: #c94c4c;
-      --blue: #4c82c9;
+      --gold: #c9a84c; --gold-light: #e8c97a; --gold-dim: #8a6f2e;
+      --bg: #0a0a0a; --bg2: #111111; --bg3: #1a1a1a; --bg4: #222222;
+      --border: #2a2a2a; --border-gold: rgba(201,168,76,0.25);
+      --text: #f0ece4; --text-dim: #7a756a; --text-mid: #b0a898;
+      --green: #4caf82; --red: #c94c4c; --blue: #4c82c9;
     }
     :root.light {
-      --gold: #a07828;
-      --gold-light: #c9a84c;
-      --gold-dim: #7a5c1e;
-      --bg: #f5f2ed;
-      --bg2: #ffffff;
-      --bg3: #ede9e2;
-      --bg4: #e0dbd2;
-      --border: #d4cfc6;
-      --border-gold: rgba(160,120,40,0.25);
-      --text: #1a1814;
-      --text-dim: #8a8278;
-      --text-mid: #5a5550;
-      --green: #2e7d54;
-      --red: #a83232;
-      --blue: #2e5ca8;
+      --gold: #a07828; --gold-light: #c9a84c; --gold-dim: #7a5c1e;
+      --bg: #f5f2ed; --bg2: #ffffff; --bg3: #ede9e2; --bg4: #e0dbd2;
+      --border: #d4cfc6; --border-gold: rgba(160,120,40,0.25);
+      --text: #1a1814; --text-dim: #8a8278; --text-mid: #5a5550;
+      --green: #2e7d54; --red: #a83232; --blue: #2e5ca8;
     }
     :root.light .topbar { background: rgba(245,242,237,0.95); }
     :root.light .bottomnav { background: rgba(245,242,237,0.97); }
-
-```
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  font-size: 18px;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ── TOP BAR ── */
-.topbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,10,10,0.95);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-gold);
-  padding: max(env(safe-area-inset-top), 20px) 20px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.topbar-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 22px; font-weight: 500;
-  letter-spacing: 0.12em;
-  color: var(--gold);
-}
-.topbar-subtitle { font-size: 12px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; }
-
-/* ── BOTTOM NAV ── */
-.bottomnav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,10,10,0.97);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border-gold);
-  padding: 14px 0 max(env(safe-area-inset-bottom), 16px);
-  display: flex;
-}
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  background: none; border: none; color: var(--text-dim);
-  font-family: 'Outfit', sans-serif; font-size: 12px; letter-spacing: 0.1em;
-  cursor: pointer; padding: 4px 0; transition: color 0.2s;
-}
-.nav-btn.active { color: var(--gold); }
-.nav-btn svg { width: 22px; height: 22px; }
-
-/* ── PAGES ── */
-.page { display: none; padding: 0 0 100px; margin-top: 80px; }
-.page.active { display: block; }
-
-/* ── SECTION HEADER ── */
-.section-header {
-  padding: 20px 20px 12px;
-  display: flex; align-items: baseline; justify-content: space-between;
-}
-.section-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 26px; font-weight: 400; color: var(--text);
-  letter-spacing: 0.05em;
-}
-.section-meta { font-size: 13px; color: var(--text-dim); letter-spacing: 0.15em; }
-
-/* ── CARDS ── */
-.card {
-  margin: 0 16px 12px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-.card:active { border-color: var(--gold-dim); }
-.card-header {
-  padding: 14px 16px 10px;
-  display: flex; align-items: flex-start; justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-}
-.card-ref {
-  font-family: 'Outfit', sans-serif;
-  font-size: 22px; font-weight: 500; color: var(--gold);
-  letter-spacing: 0.08em;
-}
-.card-model { font-size: 13px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.1em; }
-.badge {
-  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 2px; font-weight: 500;
-}
-.badge-full { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border-gold); }
-.badge-assembly { background: rgba(76,130,201,0.12); color: var(--blue); border: 1px solid rgba(76,130,201,0.25); }
-.badge-active { background: rgba(76,175,130,0.12); color: var(--green); border: 1px solid rgba(76,175,130,0.25); }
-.badge-done { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--border); }
-
-.card-body { padding: 12px 16px; }
-.card-progress {
-  display: flex; gap: 3px; margin-bottom: 10px;
-}
-.progress-dot {
-  flex: 1; height: 3px; border-radius: 1px;
-  background: var(--border);
-  transition: background 0.3s;
-}
-.progress-dot.done { background: var(--gold); }
-.progress-dot.active { background: var(--gold-light); animation: pulse-bar 1.5s ease-in-out infinite; }
-
-@keyframes pulse-bar {
-  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
-}
-
-.card-stats { display: flex; gap: 16px; }
-.stat { display: flex; flex-direction: column; gap: 2px; }
-.stat-val { font-size: 16px; color: var(--text); }
-.stat-lbl { font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
-
-.card-footer {
-  padding: 10px 16px;
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.card-date { font-size: 13px; color: var(--text-dim); }
-.card-action {
-  font-size: 13px; color: var(--gold); letter-spacing: 0.1em;
-  text-transform: uppercase; cursor: pointer;
-}
-
-/* ── ACTIVE STEP INDICATOR ── */
-.active-step {
-  margin: 0 16px 12px;
-  background: rgba(201,168,76,0.06);
-  border: 1px solid var(--border-gold);
-  border-radius: 4px;
-  padding: 14px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.active-step-info {}
-.active-step-label { font-size: 13px; color: var(--gold-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
-.active-step-name { font-family: 'Outfit', sans-serif; font-size: 20px; color: var(--text); }
-.active-step-timer { font-size: 26px; color: var(--gold); letter-spacing: 0.05em; font-weight: 300; }
-
-/* ── FAB ── */
-.fab {
-  position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); right: 20px;
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--gold); color: #000;
-  border: none; cursor: pointer; z-index: 99;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(201,168,76,0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.fab:active { transform: scale(0.93); box-shadow: 0 2px 10px rgba(201,168,76,0.3); }
-.fab svg { width: 22px; height: 22px; }
-
-/* ── MODAL ── */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(4px);
-  display: none; align-items: flex-end;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  width: 100%; background: var(--bg2);
-  border-top: 1px solid var(--border-gold);
-  border-radius: 12px 12px 0 0;
-  padding: 0 0 env(safe-area-inset-bottom, 20px);
-  max-height: 92vh; overflow-y: auto;
-  animation: slideUp 0.3s ease;
-}
-@keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.modal-handle {
-  width: 36px; height: 3px; background: var(--border);
-  border-radius: 2px; margin: 12px auto 0;
-}
-.modal-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 24px; font-weight: 400;
-  padding: 16px 20px 0;
-  color: var(--gold);
-  letter-spacing: 0.08em;
-}
-.modal-body { padding: 16px 20px; }
-
-/* ── FORM ── */
-.form-group { margin-bottom: 16px; }
-.form-label {
-  display: block; font-size: 12px; color: var(--text-dim);
-  letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;
-}
-.form-input, .form-select, .form-textarea {
-  width: 100%; background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 3px; color: var(--text);
-  font-family: 'Outfit', sans-serif; font-size: 16px;
-  padding: 10px 12px;
-  outline: none; transition: border-color 0.2s;
-  -webkit-appearance: none;
-}
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  border-color: var(--gold-dim);
-}
-.form-textarea { resize: none; min-height: 80px; }
-.form-select option { background: var(--bg3); }
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-/* ── BUTTONS ── */
-.btn {
-  width: 100%; padding: 14px;
-  border-radius: 3px; border: none;
-  font-family: 'Outfit', sans-serif;
-  font-size: 14px; letter-spacing: 0.18em;
-  text-transform: uppercase; cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-}
-.btn:active { transform: scale(0.98); opacity: 0.85; }
-.btn-gold { background: var(--gold); color: #000; }
-.btn-outline {
-  background: none; color: var(--text-dim);
-  border: 1px solid var(--border);
-  margin-top: 8px;
-}
-.btn-danger { background: rgba(201,76,76,0.15); color: var(--red); border: 1px solid rgba(201,76,76,0.25); margin-top: 8px; }
-
-/* ── WORK PAGE ── */
-.steps-container { padding: 0 16px; }
-.steps-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 17px; color: var(--text-dim);
-  letter-spacing: 0.12em; text-transform: uppercase;
-  margin: 16px 0 8px;
-  display: flex; align-items: center; gap: 8px;
-}
-.steps-title::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-
-.step-item {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 4px; margin-bottom: 8px;
-  overflow: hidden; transition: border-color 0.2s;
-}
-.step-item.step-active { border-color: var(--gold-dim); }
-.step-item.step-done { border-color: var(--border); opacity: 0.7; }
-
-.step-header {
-  padding: 12px 14px;
-  display: flex; align-items: center; gap: 10px;
-  cursor: pointer;
-}
-.step-num {
-  width: 26px; height: 26px; border-radius: 50%;
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; color: var(--text-dim); flex-shrink: 0;
-  transition: all 0.2s;
-}
-.step-active .step-num { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
-.step-done .step-num { border-color: var(--green); color: var(--green); background: rgba(76,175,130,0.1); }
-
-.step-info { flex: 1; }
-.step-name { font-size: 15px; color: var(--text); letter-spacing: 0.05em; }
-.step-duration { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
-
-.step-timer-display {
-  font-size: 18px; color: var(--gold); letter-spacing: 0.04em;
-}
-
-.step-actions {
-  padding: 0 14px 12px;
-  display: flex; gap: 8px;
-}
-.step-btn {
-  flex: 1; padding: 10px; border-radius: 3px; border: none;
-  font-family: 'Outfit', sans-serif; font-size: 13px;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  cursor: pointer; transition: opacity 0.15s;
-}
-.step-btn:active { opacity: 0.7; }
-.step-btn-start { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border-gold); }
-.step-btn-stop { background: rgba(201,76,76,0.12); color: var(--red); border: 1px solid rgba(201,76,76,0.25); }
-.step-btn-note { background: var(--bg3); color: var(--text-dim); border: 1px solid var(--border); }
-
-.step-notes {
-  padding: 0 14px 12px;
-  font-size: 14px; color: var(--text-dim); line-height: 1.5;
-  border-top: 1px solid var(--border); margin-top: 4px; padding-top: 10px;
-}
-.note-tag {
-  display: inline-block;
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 2px; padding: 2px 6px;
-  font-size: 13px; color: var(--text-mid); margin: 2px 2px 0 0;
-}
-
-/* ── STATS PAGE ── */
-.stats-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; padding: 0 16px 16px;
-}
-.stat-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 4px; padding: 14px;
-}
-.stat-card-val {
-  font-family: 'Outfit', sans-serif;
-  font-size: 32px; color: var(--gold); font-weight: 300;
-}
-.stat-card-lbl { font-size: 12px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
-
-.chart-container {
-  margin: 0 16px 16px;
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 4px; padding: 16px;
-}
-.chart-title {
-  font-size: 12px; color: var(--text-dim);
-  letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;
-}
-.bar-chart { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: flex; align-items: center; gap: 10px; }
-.bar-label { font-size: 13px; color: var(--text-dim); width: 100px; flex-shrink: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-.bar-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.bar-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.6s ease; }
-.bar-val { font-size: 13px; color: var(--text-dim); width: 42px; text-align: right; flex-shrink: 0; }
-
-/* ── HISTORY PAGE ── */
-.history-item {
-  margin: 0 16px 10px;
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 4px; padding: 14px 16px;
-  cursor: pointer;
-}
-.history-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
-.history-ref {
-  font-family: 'Outfit', sans-serif;
-  font-size: 20px; color: var(--gold); letter-spacing: 0.08em;
-}
-.history-date { font-size: 13px; color: var(--text-dim); }
-.history-model { font-size: 13px; color: var(--text-mid); margin-bottom: 8px; }
-.history-times { display: flex; gap: 12px; flex-wrap: wrap; }
-.history-time { font-size: 13px; color: var(--text-dim); }
-.history-time span { color: var(--text-mid); }
-
-/* ── EMPTY STATE ── */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 60px 40px; text-align: center;
-}
-.empty-icon { font-size: 44px; margin-bottom: 16px; opacity: 0.3; }
-.empty-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 22px; color: var(--text-dim); margin-bottom: 8px;
-}
-.empty-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 4px 16px 16px; }
-
-/* ── TOAST ── */
-.toast {
-  position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
-  left: 50%; transform: translateX(-50%) translateY(20px);
-  background: var(--bg3); border: 1px solid var(--border-gold);
-  color: var(--text-mid); font-size: 11px; letter-spacing: 0.08em;
-  padding: 10px 18px; border-radius: 3px;
-  opacity: 0; transition: all 0.3s; pointer-events: none;
-  white-space: nowrap; z-index: 300;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ── PHASE BLOCK ── */
-.phase-block {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 8px; margin-bottom: 12px; overflow: hidden;
-}
-.phase-block-header {
-  padding: 14px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; user-select: none;
-}
-.phase-block-header:active { opacity: 0.7; }
-.phase-block-left {}
-.phase-block-title { font-size: 16px; font-weight: 600; color: var(--text); }
-.phase-block-meta { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
-.phase-block-right { display: flex; align-items: center; gap: 8px; }
-.phase-total { font-size: 16px; color: var(--gold); font-weight: 600; }
-.phase-chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.25s; display: inline-block; }
-.phase-chevron.open { transform: rotate(180deg); }
-
-.phase-quick-times {
-  padding: 0 14px 14px;
-  border-top: 1px solid var(--border);
-}
-.phase-qt-label {
-  font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em;
-  text-transform: uppercase; margin: 12px 0 8px;
-}
-.phase-qt-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.phase-qt-btn {
-  padding: 10px 0; border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg3); color: var(--text);
-  font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 500;
-  cursor: pointer; transition: all 0.15s; flex: 1;
-  text-align: center;
-}
-.phase-qt-btn:active { background: var(--bg4); border-color: var(--gold-dim); color: var(--gold); }
-.phase-qt-btn-custom {
-  background: none; border-style: dashed; color: var(--text-dim); flex: 1;
-}
-
-.phase-steps-detail {
-  border-top: 1px solid var(--border);
-  display: none; padding: 8px 0;
-}
-.phase-steps-detail.open { display: block; }
-
-/* ── QUICK TIME ── */
-.quick-time-row {
-  padding: 0 14px 12px;
-  display: flex; gap: 6px; flex-wrap: wrap;
-}
-.qt-btn {
-  padding: 7px 12px; border-radius: 3px; border: 1px solid var(--border);
-  background: var(--bg3); color: var(--text-dim);
-  font-family: 'Outfit', sans-serif; font-size: 13px;
-  cursor: pointer; transition: all 0.15s;
-}
-.qt-btn:active { background: var(--bg4); color: var(--gold); border-color: var(--gold-dim); }
-.qt-btn-custom {
-  background: none; color: var(--text-dim);
-  border: 1px dashed var(--border);
-}
-
-/* ── RETURN (REWORK) ── */
-.badge-return { background: rgba(201,76,76,0.15); color: #e05555; border: 1px solid rgba(201,76,76,0.4); }
-.card-return { border-color: rgba(201,76,76,0.45) !important; }
-.return-block {
-  margin: 0 16px 12px;
-  background: rgba(201,76,76,0.06);
-  border: 1px solid rgba(201,76,76,0.3);
-  border-radius: 8px; overflow: hidden;
-}
-.return-block-header {
-  padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.return-block-title { font-size: 15px; font-weight: 600; color: #e05555; }
-.return-item {
-  padding: 10px 16px; border-top: 1px solid rgba(201,76,76,0.2);
-  display: flex; justify-content: space-between; align-items: flex-start;
-}
-.return-item-desc { font-size: 13px; color: var(--text); flex: 1; }
-.return-item-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-.return-item-time { font-size: 14px; color: #e05555; font-weight: 600; flex-shrink: 0; margin-left: 12px; }
-
-/* ── SPEED BADGE ── */
-.speed-badge {
-  display: inline-block; padding: 3px 10px; border-radius: 20px;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
-}
-.speed-fast { background: rgba(76,175,130,0.15); color: #4caf82; border: 1px solid rgba(76,175,130,0.35); }
-.speed-mid  { background: rgba(255,193,7,0.15);  color: #e6ac00; border: 1px solid rgba(255,193,7,0.35); }
-.speed-slow { background: rgba(201,76,76,0.15);  color: #c94c4c; border: 1px solid rgba(201,76,76,0.35); }
-
-/* scrollbar */
-::-webkit-scrollbar { width: 2px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 1px; }
-```
-
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 18px; min-height: 100vh; overflow-x: hidden; }
+    .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-gold); padding: max(env(safe-area-inset-top), 20px) 20px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-title { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; color: var(--gold); }
+    .topbar-subtitle { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em; }
+    .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--border-gold); padding: 14px 0 max(env(safe-area-inset-bottom), 16px); display: flex; }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; color: var(--text-dim); font-family: 'Outfit', sans-serif; font-size: 12px; cursor: pointer; padding: 4px 0; transition: color 0.2s; }
+    .nav-btn.active { color: var(--gold); }
+    .nav-btn svg { width: 22px; height: 22px; }
+    .page { display: none; padding: 0 0 100px; margin-top: 80px; }
+    .page.active { display: block; }
+    .section-header { padding: 20px 20px 12px; display: flex; align-items: baseline; justify-content: space-between; }
+    .section-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 500; color: var(--text); }
+    .section-meta { font-size: 13px; color: var(--text-dim); }
+    .card { margin: 0 16px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s; }
+    .card:active { border-color: var(--gold-dim); }
+    .card-header { padding: 14px 16px 10px; display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .card-ref { font-size: 20px; font-weight: 600; color: var(--gold); }
+    .card-model { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+    .badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .badge-full { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border-gold); }
+    .badge-assembly { background: rgba(76,130,201,0.12); color: var(--blue); border: 1px solid rgba(76,130,201,0.25); }
+    .badge-active { background: rgba(76,175,130,0.12); color: var(--green); border: 1px solid rgba(76,175,130,0.25); }
+    .card-body { padding: 12px 16px; }
+    .card-progress { display: flex; gap: 3px; margin-bottom: 10px; }
+    .progress-dot { flex: 1; height: 3px; border-radius: 1px; background: var(--border); transition: background 0.3s; }
+    .progress-dot.done { background: var(--gold); }
+    .progress-dot.active { background: var(--gold-light); animation: pulse-bar 1.5s ease-in-out infinite; }
+    @keyframes pulse-bar { 0%,100%{opacity:1}50%{opacity:0.4} }
+    .card-stats { display: flex; gap: 16px; }
+    .stat { display: flex; flex-direction: column; gap: 2px; }
+    .stat-val { font-size: 16px; font-weight: 600; color: var(--text); }
+    .stat-lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+    .card-footer { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-date { font-size: 13px; color: var(--text-dim); }
+    .card-action { font-size: 13px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; }
+    .fab { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); right: 20px; width: 54px; height: 54px; border-radius: 50%; background: var(--gold); color: #000; border: none; cursor: pointer; z-index: 99; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(201,168,76,0.4); transition: transform 0.2s; }
+    .fab:active { transform: scale(0.93); }
+    .fab svg { width: 24px; height: 24px; }
+    .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; align-items: flex-end; }
+    .modal-overlay.open { display: flex; }
+    .modal { width: 100%; background: var(--bg2); border-top: 1px solid var(--border-gold); border-radius: 16px 16px 0 0; padding: 0 0 env(safe-area-inset-bottom, 20px); max-height: 92vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal-handle { width: 36px; height: 3px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+    .modal-title { font-size: 22px; font-weight: 600; padding: 16px 20px 0; color: var(--gold); }
+    .modal-body { padding: 16px 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 16px; padding: 12px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold-dim); }
+    .form-textarea { resize: none; min-height: 80px; }
+    .form-select option { background: var(--bg3); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn { width: 100%; padding: 14px; border-radius: 6px; border: none; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+    .btn:active { transform: scale(0.98); opacity: 0.85; }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-outline { background: none; color: var(--text-dim); border: 1px solid var(--border); margin-top: 8px; }
+    .btn-danger { background: rgba(201,76,76,0.15); color: var(--red); border: 1px solid rgba(201,76,76,0.25); margin-top: 8px; }
+    .steps-container { padding: 0 16px; }
+    .phase-block { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .phase-block-header { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .phase-block-header:active { opacity: 0.7; }
+    .phase-block-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .phase-block-meta { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+    .phase-block-right { display: flex; align-items: center; gap: 8px; }
+    .phase-total { font-size: 16px; color: var(--gold); font-weight: 700; }
+    .phase-chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.25s; display: inline-block; }
+    .phase-chevron.open { transform: rotate(180deg); }
+    .phase-quick-times { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+    .phase-qt-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin: 12px 0 8px; }
+    .phase-qt-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .phase-qt-btn { padding: 10px 0; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; flex: 1; text-align: center; }
+    .phase-qt-btn:active { background: var(--bg4); border-color: var(--gold-dim); color: var(--gold); }
+    .phase-qt-btn-custom { background: none; border-style: dashed; color: var(--text-dim); flex: 1; }
+    .phase-steps-detail { border-top: 1px solid var(--border); display: none; padding: 8px 0; }
+    .phase-steps-detail.open { display: block; }
+    .step-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 0 10px 8px; overflow: hidden; transition: border-color 0.2s; }
+    .step-item.step-active { border-color: var(--gold-dim); }
+    .step-item.step-done { opacity: 0.75; }
+    .step-header { padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text-dim); flex-shrink: 0; transition: all 0.2s; }
+    .step-active .step-num { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+    .step-done .step-num { border-color: var(--green); color: var(--green); background: rgba(76,175,130,0.1); }
+    .step-info { flex: 1; }
+    .step-name { font-size: 15px; color: var(--text); }
+    .step-duration { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+    .step-timer-display { font-size: 18px; color: var(--gold); font-weight: 600; }
+    .step-actions { padding: 0 14px 12px; display: flex; gap: 8px; }
+    .step-btn { flex: 1; padding: 10px; border-radius: 6px; border: none; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .step-btn:active { opacity: 0.7; }
+    .step-btn-start { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border-gold); }
+    .step-btn-stop { background: rgba(201,76,76,0.12); color: var(--red); border: 1px solid rgba(201,76,76,0.25); }
+    .step-btn-note { background: var(--bg4); color: var(--text-dim); border: 1px solid var(--border); }
+    .step-notes { padding: 0 14px 12px; font-size: 13px; color: var(--text-dim); line-height: 1.5; border-top: 1px solid var(--border); padding-top: 10px; }
+    .note-tag { display: inline-block; background: var(--bg4); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 12px; color: var(--text-mid); margin: 2px 2px 0 0; }
+    .quick-time-row { padding: 0 14px 12px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .qt-btn { padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); color: var(--text-dim); font-family: 'Outfit', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .qt-btn:active { background: var(--bg); color: var(--gold); border-color: var(--gold-dim); }
+    .qt-btn-custom { background: none; border-style: dashed; }
+    .speed-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .speed-fast { background: rgba(76,175,130,0.15); color: #4caf82; border: 1px solid rgba(76,175,130,0.35); }
+    .speed-mid  { background: rgba(255,193,7,0.15); color: #e6ac00; border: 1px solid rgba(255,193,7,0.35); }
+    .speed-slow { background: rgba(201,76,76,0.15); color: #c94c4c; border: 1px solid rgba(201,76,76,0.35); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
+    .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .stat-card-val { font-size: 30px; color: var(--gold); font-weight: 300; }
+    .stat-card-lbl { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+    .chart-container { margin: 0 16px 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .chart-title { font-size: 12px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 14px; }
+    .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: 13px; color: var(--text-dim); width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.6s ease; }
+    .bar-val { font-size: 13px; color: var(--text-dim); width: 42px; text-align: right; flex-shrink: 0; }
+    .history-item { margin: 0 16px 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: pointer; }
+    .history-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+    .history-ref { font-size: 18px; font-weight: 600; color: var(--gold); }
+    .history-date { font-size: 13px; color: var(--text-dim); }
+    .history-model { font-size: 13px; color: var(--text-mid); margin-bottom: 8px; }
+    .history-times { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .history-time { font-size: 13px; color: var(--text-dim); }
+    .history-time span { color: var(--text-mid); }
+    .empty-state { display: flex; flex-direction: column; align-items: center; padding: 60px 40px; text-align: center; }
+    .empty-icon { font-size: 44px; margin-bottom: 16px; opacity: 0.3; }
+    .empty-title { font-size: 22px; font-weight: 500; color: var(--text-dim); margin-bottom: 8px; }
+    .empty-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+    .divider { height: 1px; background: var(--border); margin: 4px 16px 16px; }
+    .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom,0px) + 90px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); border: 1px solid var(--border-gold); color: var(--text-mid); font-size: 13px; padding: 10px 18px; border-radius: 6px; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 300; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 1px; }
   </style>
 </head>
 <body>
-
-<!-- TOP BAR -->
 
 <div class="topbar">
   <div>
@@ -534,19 +172,15 @@ body {
     <div class="topbar-subtitle">Workshop Log</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
-    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:11px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;">☀️ Светлая</button>
-    <div id="topbar-clock" style="font-size:12px;color:var(--text-dim);letter-spacing:0.08em;"></div>
+    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 10px;cursor:pointer;">☀️ Светлая</button>
+    <div id="topbar-clock" style="font-size:13px;color:var(--text-dim);"></div>
   </div>
 </div>
-
-<!-- PAGES -->
-
-<!-- HOME -->
 
 <div class="page active" id="page-home">
   <div class="section-header">
     <div class="section-title">Активные</div>
-    <div class="section-meta" id="home-count">— часов</div>
+    <div class="section-meta" id="home-count"></div>
   </div>
   <div id="active-jobs-list"></div>
   <div class="divider"></div>
@@ -557,39 +191,33 @@ body {
   <div id="recent-jobs-list"></div>
 </div>
 
-<!-- WORK (active job detail) -->
-
 <div class="page" id="page-work">
   <div class="section-header" style="flex-direction:column;align-items:flex-start;gap:4px;">
     <div style="display:flex;align-items:center;gap:10px;width:100%;">
-      <button onclick="goBack()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;font-size:18px;">←</button>
+      <button onclick="goBack()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;font-size:20px;">←</button>
       <div>
-        <div id="work-ref" style="font-family:'Outfit',sans-serif;font-size:20px;color:var(--gold);"></div>
-        <div id="work-model" style="font-size:10px;color:var(--text-dim);margin-top:1px;"></div>
+        <div id="work-ref" style="font-size:20px;font-weight:700;color:var(--gold);"></div>
+        <div id="work-model" style="font-size:13px;color:var(--text-dim);margin-top:2px;"></div>
       </div>
       <div style="margin-left:auto;" id="work-badge"></div>
     </div>
   </div>
   <div id="work-steps-container" class="steps-container"></div>
-  <div id="work-returns-container"></div>
   <div style="padding:16px;">
     <button class="btn btn-gold" onclick="completeJob()">Завершить работу</button>
-    <button class="btn" style="background:rgba(201,76,76,0.12);color:#e05555;border:1px solid rgba(201,76,76,0.3);margin-top:8px;" onclick="openReturnModal()">🔴 Добавить возврат</button>
     <button class="btn btn-danger" onclick="deleteJob()">Удалить запись</button>
   </div>
 </div>
 
-<!-- STATS -->
-
 <div class="page" id="page-stats">
   <div class="section-header">
     <div class="section-title">Статистика</div>
-    <div class="section-meta" id="stats-period">Всё время</div>
+    <div class="section-meta">Всё время</div>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
   <div id="stats-speed"></div>
   <div class="chart-container">
-    <div class="chart-title">Среднее время по этапам (мин)</div>
+    <div class="chart-title">Среднее время по этапам</div>
     <div class="bar-chart" id="stage-chart"></div>
   </div>
   <div class="chart-container">
@@ -598,8 +226,6 @@ body {
   </div>
 </div>
 
-<!-- HISTORY -->
-
 <div class="page" id="page-history">
   <div class="section-header">
     <div class="section-title">История</div>
@@ -607,8 +233,6 @@ body {
   </div>
   <div id="history-list"></div>
 </div>
-
-<!-- BOTTOM NAV -->
 
 <div class="bottomnav">
   <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
@@ -625,13 +249,9 @@ body {
   </button>
 </div>
 
-<!-- FAB -->
-
 <button class="fab" onclick="openNewJobModal()">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
-
-<!-- MODAL: New Job -->
 
 <div class="modal-overlay" id="modal-new">
   <div class="modal">
@@ -669,8 +289,6 @@ body {
   </div>
 </div>
 
-<!-- MODAL: Step Note -->
-
 <div class="modal-overlay" id="modal-note">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -690,8 +308,6 @@ body {
   </div>
 </div>
 
-<!-- MODAL: History Detail -->
-
 <div class="modal-overlay" id="modal-history-detail">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -699,8 +315,6 @@ body {
     <div class="modal-body" id="hd-body"></div>
   </div>
 </div>
-
-<!-- MODAL: Custom Time -->
 
 <div class="modal-overlay" id="modal-custom-time">
   <div class="modal">
@@ -717,29 +331,6 @@ body {
   </div>
 </div>
 
-<!-- MODAL: Add Return -->
-
-<div class="modal-overlay" id="modal-return">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" style="color:#e05555;">🔴 Возврат</div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Что нужно переделать</label>
-        <textarea class="form-textarea" id="inp-return-desc" placeholder="Опишите проблему..."></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Время на переделку (мин)</label>
-        <input class="form-input" id="inp-return-time" type="number" placeholder="напр. 45" min="0" />
-      </div>
-      <button class="btn" style="background:rgba(201,76,76,0.15);color:#e05555;border:1px solid rgba(201,76,76,0.3);" onclick="saveReturn()">Сохранить возврат</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-return')">Отмена</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Edit Done Job -->
-
 <div class="modal-overlay" id="modal-edit-job">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -751,31 +342,28 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-
+// ── DATA ──────────────────────────────────────────────────────────────────────
 const FULL_STEPS = [
-  { id: 'measure',   name: 'Замер показаний / осмотр' },
-  { id: 'disassem',  name: 'Разборка' },
-  { id: 'precleaning', name: 'Pre-cleaning + люфты' },
-  { id: 'cleaning',  name: 'Cleaning (машина ~40 мин)' },
-  { id: 'service',   name: 'Сборка механизма' },
-  { id: 'mechcheck', name: 'Проверка хода механизма' },
+  {id:'measure',    name:'Замер показаний / осмотр'},
+  {id:'disassem',   name:'Разборка'},
+  {id:'precleaning',name:'Pre-cleaning + люфты'},
+  {id:'cleaning',   name:'Cleaning (машина ~40 мин)'},
+  {id:'service',    name:'Сборка механизма'},
+  {id:'mechcheck',  name:'Проверка хода механизма'},
 ];
-
 const ASSEMBLY_STEPS = [
-  { id: 'dial',      name: 'Установка циферблата' },
-  { id: 'hands',     name: 'Выбор и установка стрелок' },
-  { id: 'colleague', name: 'Проверка у коллеги' },
-  { id: 'polish',    name: 'Проверка полировки корпуса' },
-  { id: 'casebuild', name: 'Сборка корпуса (тюб, стекло, безель)' },
-  { id: 'waterproof','name': 'Waterproof тест' },
-  { id: 'mechanism', name: 'Установка механизма в корпус' },
-  { id: 'cleanlook', name: 'Финальная проверка чистоты' },
-  { id: 'close',     name: 'Закрытие + снятие показаний' },
-  { id: 'bracelet',  name: 'Браслет + end links' },
-  { id: 'qa',        name: 'Отправка на QA' },
+  {id:'dial',      name:'Установка циферблата'},
+  {id:'hands',     name:'Выбор и установка стрелок'},
+  {id:'colleague', name:'Проверка у коллеги'},
+  {id:'polish',    name:'Проверка полировки корпуса'},
+  {id:'casebuild', name:'Сборка корпуса (тюб, стекло, безель)'},
+  {id:'waterproof',name:'Waterproof тест'},
+  {id:'mechanism', name:'Установка механизма в корпус'},
+  {id:'cleanlook', name:'Финальная проверка чистоты'},
+  {id:'close',     name:'Закрытие + снятие показаний'},
+  {id:'bracelet',  name:'Браслет + end links'},
+  {id:'qa',        name:'Отправка на QA'},
 ];
-
 function getStepsFor(type) {
   if (type === 'full') return [
     ...FULL_STEPS.map(s => ({...s, phase:'service'})),
@@ -784,8 +372,7 @@ function getStepsFor(type) {
   return ASSEMBLY_STEPS.map(s => ({...s, phase:'assembly'}));
 }
 
-// ─── STORAGE ────────────────────────────────────────────────────────────────
-
+// ── STORAGE ───────────────────────────────────────────────────────────────────
 function load() {
   try {
     const raw = localStorage.getItem('rst_data');
@@ -793,7 +380,6 @@ function load() {
     const d = JSON.parse(raw);
     if (!d.jobs) d.jobs = [];
     if (!d.done) d.done = [];
-    // Migrate: ensure all jobs have returns array
     [...d.jobs, ...d.done].forEach(j => {
       if (!j.returns) j.returns = [];
       if (!j.steps) j.steps = [];
@@ -803,245 +389,143 @@ function load() {
       });
     });
     return d;
-  } catch(e) {
-    console.warn('Data load error, resetting:', e);
-    return {jobs:[], done:[]};
-  }
+  } catch(e) { return {jobs:[], done:[]}; }
 }
 function save(d) { localStorage.setItem('rst_data', JSON.stringify(d)); }
 
-// ─── STATE ──────────────────────────────────────────────────────────────────
-
+// ── STATE ─────────────────────────────────────────────────────────────────────
 let currentJobId = null;
 let noteTargetStep = null;
-let timers = {}; // jobId_stepId -> intervalId
+let customTimeTarget = null;
+let phaseCustomTarget = null;
+let timers = {};
 
-// ─── CLOCK ──────────────────────────────────────────────────────────────────
-
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
 function updateClock() {
-  const now = new Date();
-  document.getElementById('topbar-clock').textContent =
-    now.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const el = document.getElementById('topbar-clock');
+  if (el) el.textContent = new Date().toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ─── NAVIGATION ─────────────────────────────────────────────────────────────
+// ── FORMAT ────────────────────────────────────────────────────────────────────
+function fmtMs(ms) {
+  if (!ms || ms <= 0) return '—';
+  const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
+  if (h > 0) return h+'ч '+(m%60)+'м';
+  if (m > 0) return m+'м '+(s%60)+'с';
+  return s+'с';
+}
+function fmtMsLive(ms) {
+  const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
+  return (h>0 ? h+':' : '') + String(m%60).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+function fmtDate(ts) {
+  return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
+}
+function totalTime(job) {
+  return job.steps.reduce((a, s) => a + (s.elapsed||0), 0);
+}
+function speedBadge(hours, type) {
+  if (type === 'full') {
+    if (hours <= 5) return '<span class="speed-badge speed-fast">⚡ Быстро</span>';
+    if (hours <= 7) return '<span class="speed-badge speed-mid">⏱ Средне</span>';
+    return '<span class="speed-badge speed-slow">🐢 Долго</span>';
+  } else {
+    if (hours < 3) return '<span class="speed-badge speed-fast">⚡ Быстро</span>';
+    if (hours <= 4) return '<span class="speed-badge speed-mid">⏱ Хорошо</span>';
+    return '<span class="speed-badge speed-slow">🐢 Долго</span>';
+  }
+}
 
+// ── NAV ───────────────────────────────────────────────────────────────────────
 function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('nav-' + page)?.classList.add('active');
+  document.getElementById('page-'+page).classList.add('active');
+  const nb = document.getElementById('nav-'+page);
+  if (nb) nb.classList.add('active');
   document.querySelector('.fab').style.display = page === 'home' ? 'flex' : 'none';
-
   if (page === 'stats') renderStats();
   if (page === 'history') renderHistory();
   if (page === 'home') renderHome();
 }
+function goBack() { navigate('home'); }
 
-function goBack() {
-  navigate('home');
-}
-
-// ─── MODAL ──────────────────────────────────────────────────────────────────
-
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-// ─── TOAST ──────────────────────────────────────────────────────────────────
-
+// ── TOAST ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ─── FORMAT ─────────────────────────────────────────────────────────────────
-
-function fmtMs(ms) {
-  if (!ms || ms < 0) return '—';
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const h = Math.floor(m / 60);
-  if (h > 0) return `${h}ч ${m%60}м`;
-  if (m > 0) return `${m}м ${s%60}с`;
-  return `${s}с`;
-}
-
-function fmtMsLive(ms) {
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const h = Math.floor(m / 60);
-  const mm = String(m%60).padStart(2,'0');
-  const ss = String(s%60).padStart(2,'0');
-  if (h > 0) return `${h}:${mm}:${ss}`;
-  return `${mm}:${ss}`;
-}
-
-function fmtDate(ts) {
-  return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
-}
-
-function speedBadge(hours, type) {
-  if (type === 'full') {
-    if (hours <= 5) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
-    if (hours <= 7) return `<span class="speed-badge speed-mid">⏱ Средне</span>`;
-    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
-  } else {
-    if (hours < 3) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
-    if (hours <= 4) return `<span class="speed-badge speed-mid">⏱ Хорошо</span>`;
-    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
-  }
-}
-
-function totalTime(job) {
-  return job.steps.reduce((acc, s) => acc + (s.elapsed || 0), 0);
-}
-
-// ─── CREATE JOB ─────────────────────────────────────────────────────────────
-
-function openNewJobModal() {
-  document.getElementById('inp-ref').value = '';
-  document.getElementById('inp-model').value = '';
-  document.getElementById('inp-serial').value = '';
-  document.getElementById('inp-note').value = '';
-  openModal('modal-new');
-}
-
-function createJob() {
-  const ref = document.getElementById('inp-ref').value.trim();
-  const model = document.getElementById('inp-model').value.trim();
-  if (!ref) { showToast('Введите Ref номер'); return; }
-
-  const type = document.getElementById('inp-type').value;
-  const serial = document.getElementById('inp-serial').value.trim();
-  const note = document.getElementById('inp-note').value.trim();
-
-  const steps = getStepsFor(type).map(s => ({
-    ...s, startTime: null, elapsed: 0, running: false,
-    notes: '', parts: ''
-  }));
-
-  const job = {
-    id: Date.now().toString(),
-    ref, model, serial, type, note,
-    createdAt: Date.now(),
-    steps,
-    done: false,
-    completedAt: null
-  };
-
-  const d = load();
-  d.jobs.push(job);
-  save(d);
-
-  closeModal('modal-new');
-  showToast('Часы добавлены');
-  renderHome();
-  setTimeout(() => openJob(job.id), 300);
-}
-
-// ─── RENDER HOME ────────────────────────────────────────────────────────────
-
+// ── HOME ──────────────────────────────────────────────────────────────────────
 function renderHome() {
   const d = load();
   const active = d.jobs.filter(j => !j.done);
-  const recent = (d.done || []).slice(-5).reverse();
-
+  const recent = (d.done||[]).slice(-5).reverse();
   document.getElementById('home-count').textContent = active.length + ' активных';
-
   const al = document.getElementById('active-jobs-list');
-  if (active.length === 0) {
-    al.innerHTML = `<div class="empty-state"><div class="empty-icon">⌚</div><div class="empty-title">Нет активных работ</div><div class="empty-text">Нажмите + чтобы добавить часы</div></div>`;
-  } else {
-    al.innerHTML = active.map(j => jobCard(j)).join('');
-  }
-
+  al.innerHTML = active.length === 0
+    ? '<div class="empty-state"><div class="empty-icon">⌚</div><div class="empty-title">Нет активных работ</div><div class="empty-text">Нажмите + чтобы добавить часы</div></div>'
+    : active.map(jobCard).join('');
   const rl = document.getElementById('recent-jobs-list');
-  document.getElementById('recent-count').textContent = recent.length > 0 ? recent.length + ' завершённых' : '';
-  if (recent.length === 0) {
-    rl.innerHTML = `<div style="padding:12px 16px 0;font-size:11px;color:var(--text-dim);">Завершённые работы появятся здесь</div>`;
-  } else {
-    rl.innerHTML = recent.map(j => historyCard(j, true)).join('');
-  }
+  document.getElementById('recent-count').textContent = recent.length > 0 ? recent.length+' завершённых' : '';
+  rl.innerHTML = recent.length === 0
+    ? '<div style="padding:12px 16px 0;font-size:13px;color:var(--text-dim);">Завершённые работы появятся здесь</div>'
+    : recent.map(j => historyCard(j, true)).join('');
 }
 
 function jobCard(j) {
-  const steps = j.steps;
-  const total = steps.length;
+  const steps = j.steps, total = steps.length;
   const done = steps.filter(s => s.elapsed > 0 && !s.running).length;
   const activeStep = steps.find(s => s.running);
   const elapsed = totalTime(j);
-
-  const dots = steps.map((s, i) => {
-    let cls = '';
-    if (s.running) cls = 'active';
-    else if (s.elapsed > 0) cls = 'done';
-    return `<div class="progress-dot ${cls}"></div>`;
+  const dots = steps.map(s => {
+    let cls = s.running ? 'active' : (s.elapsed > 0 ? 'done' : '');
+    return '<div class="progress-dot '+cls+'"></div>';
   }).join('');
-
-  const hasReturn = j.returns && j.returns.length > 0;
   const typeBadge = j.type === 'full'
-    ? `<span class="badge badge-full">Full Service</span>`
-    : `<span class="badge badge-assembly">Сборка</span>`;
-
+    ? '<span class="badge badge-full">Full Service</span>'
+    : '<span class="badge badge-assembly">Сборка</span>';
   const statusBadge = activeStep
-    ? `<span class="badge badge-active">● В работе</span>`
-    : `<span class="badge">${done}/${total}</span>`;
-
-  const returnBadge = hasReturn ? `<span class="badge badge-return">🔴 Возврат ×${j.returns.length}</span>` : '';
-
-  return `
-  <div class="card ${hasReturn ? 'card-return' : ''}" onclick="openJob('${j.id}')">
-    <div class="card-header">
-      <div>
-        <div class="card-ref">${j.serial || j.ref}</div>
-        <div class="card-model">${j.ref ? 'Ref ' + j.ref : ''}${j.ref && j.model ? ' · ' : ''}${j.model || ''}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-        ${typeBadge}${statusBadge}${returnBadge}
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="card-progress">${dots}</div>
-      <div class="card-stats">
-        <div class="stat"><div class="stat-val">${fmtMs(elapsed) || '—'}</div><div class="stat-lbl">Потрачено</div></div>
-        <div class="stat"><div class="stat-val">${done}/${total}</div><div class="stat-lbl">Этапов</div></div>
-        ${activeStep ? `<div class="stat"><div class="stat-val" style="color:var(--gold)">${activeStep.name.split(' ')[0]}…</div><div class="stat-lbl">Сейчас</div></div>` : ''}
-      </div>
-    </div>
-    <div class="card-footer">
-      <div class="card-date">${fmtDate(j.createdAt)}</div>
-      <div class="card-action">Открыть →</div>
-    </div>
-  </div>`;
+    ? '<span class="badge badge-active">● В работе</span>'
+    : '<span class="badge">'+done+'/'+total+'</span>';
+  return '<div class="card" onclick="openJob(\''+j.id+'\')">'
+    +'<div class="card-header"><div>'
+    +'<div class="card-ref">'+(j.serial||j.ref)+'</div>'
+    +'<div class="card-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' · ':'')+( j.model||'')+'</div>'
+    +'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'
+    +typeBadge+statusBadge+'</div></div>'
+    +'<div class="card-body"><div class="card-progress">'+dots+'</div>'
+    +'<div class="card-stats">'
+    +'<div class="stat"><div class="stat-val">'+(fmtMs(elapsed)||'—')+'</div><div class="stat-lbl">Потрачено</div></div>'
+    +'<div class="stat"><div class="stat-val">'+done+'/'+total+'</div><div class="stat-lbl">Этапов</div></div>'
+    +(activeStep ? '<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'…</div><div class="stat-lbl">Сейчас</div></div>' : '')
+    +'</div></div>'
+    +'<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">Открыть →</div></div>'
+    +'</div>';
 }
 
-// ─── OPEN JOB ───────────────────────────────────────────────────────────────
-
+// ── OPEN JOB ──────────────────────────────────────────────────────────────────
 function openJob(id) {
   const d = load();
   const job = d.jobs.find(j => j.id === id) || (d.done||[]).find(j => j.id === id);
   if (!job) return;
-
   currentJobId = id;
   document.getElementById('work-ref').textContent = job.serial || job.ref;
-  document.getElementById('work-model').textContent = (job.ref ? 'Ref ' + job.ref : '') + (job.ref && job.model ? ' · ' : '') + (job.model || '');
+  document.getElementById('work-model').textContent = (job.ref?'Ref '+job.ref:'')+(job.ref&&job.model?' · ':'')+( job.model||'');
   document.getElementById('work-badge').innerHTML = job.type === 'full'
-    ? `<span class="badge badge-full">Full Service + Сборка</span>`
-    : `<span class="badge badge-assembly">Только Сборка</span>`;
-
+    ? '<span class="badge badge-full">Full Service + Сборка</span>'
+    : '<span class="badge badge-assembly">Только Сборка</span>';
   renderWorkSteps(job);
-  renderReturns(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-work').classList.add('active');
@@ -1050,670 +534,408 @@ function openJob(id) {
 
 function renderWorkSteps(job) {
   const container = document.getElementById('work-steps-container');
-  let html = '';
-
   const phases = job.type === 'full'
     ? [{id:'service', label:'Full Service'}, {id:'assembly', label:'Сборка'}]
     : [{id:'assembly', label:'Сборка'}];
-
+  let html = '';
   phases.forEach(phase => {
     const phaseSteps = job.steps.filter(s => s.phase === phase.id);
-    const phaseElapsed = phaseSteps.reduce((a, s) => a + (s.elapsed || 0), 0);
+    const phaseElapsed = phaseSteps.reduce((a,s) => a+(s.elapsed||0), 0);
     const doneCount = phaseSteps.filter(s => s.elapsed > 0).length;
-    const isDetailOpen = job['detail_open_' + phase.id] || false;
-
-    // Quick time buttons for the whole phase: 15m, 30m, 1h, 2h, 4h, 8h
-    const quickTimes = [{label:'15м', min:15},{label:'30м', min:30},{label:'1ч', min:60},{label:'2ч', min:120},{label:'4ч', min:240},{label:'8ч', min:480}];
-
-    html += `
-    <div class="phase-block" id="phase-${job.id}-${phase.id}">
-      <div class="phase-block-header" onclick="togglePhaseDetail('${job.id}','${phase.id}')">
-        <div class="phase-block-left">
-          <div class="phase-block-title">${phase.label}</div>
-          <div class="phase-block-meta">${doneCount}/${phaseSteps.length} этапов${phaseElapsed > 0 ? ' · ' + fmtMs(phaseElapsed) : ''}</div>
-        </div>
-        <div class="phase-block-right">
-          ${phaseElapsed > 0 ? `<span class="phase-total">${fmtMs(phaseElapsed)}</span>` : ''}
-          <span class="phase-chevron ${isDetailOpen ? 'open' : ''}">▼</span>
-        </div>
-      </div>
-
-      <div class="phase-quick-times">
-        <div class="phase-qt-label">Быстро записать время на весь этап</div>
-        <div class="phase-qt-row">
-          ${quickTimes.map(t => `<button class="phase-qt-btn" onclick="addPhaseTime('${job.id}','${phase.id}',${t.min})">${t.label}</button>`).join('')}
-          <button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime('${job.id}','${phase.id}')">✎</button>
-        </div>
-      </div>
-
-      <div class="phase-steps-detail ${isDetailOpen ? 'open' : ''}" id="detail-${job.id}-${phase.id}">
-        ${phaseSteps.map((step) => {
-          const globalIdx = job.steps.indexOf(step);
-          const isDone = step.elapsed > 0 && !step.running;
-          const isActive = step.running;
-          let cls = isActive ? 'step-active' : (isDone ? 'step-done' : '');
-          const elapsed = step.elapsed || 0;
-          return `
-          <div class="step-item ${cls}" style="margin:0 10px 8px;border-radius:6px;" id="step-${job.id}-${step.id}">
-            <div class="step-header">
-              <div class="step-num">${isDone ? '✓' : (isActive ? '●' : (globalIdx+1))}</div>
-              <div class="step-info">
-                <div class="step-name">${step.name}</div>
-                <div class="step-duration">${isDone ? fmtMs(elapsed) : (isActive ? 'В процессе...' : 'Не начат')}</div>
-              </div>
-              ${isActive ? `<div class="step-timer-display" id="timer-${job.id}-${step.id}">00:00</div>` : ''}
-              ${isDone ? `<div style="font-size:13px;color:var(--green);font-weight:600;">${fmtMs(elapsed)}</div>` : ''}
-            </div>
-            <div class="step-actions">
-              ${!isDone && !isActive ? `<button class="step-btn step-btn-start" onclick="startStep('${job.id}','${step.id}')">▶ Старт</button>` : ''}
-              ${isActive ? `<button class="step-btn step-btn-stop" onclick="stopStep('${job.id}','${step.id}')">■ Стоп</button>` : ''}
-              <button class="step-btn step-btn-note" onclick="openStepNote('${job.id}','${step.id}')">✎ Заметка</button>
-              ${isDone ? `<button class="step-btn step-btn-start" onclick="restartStep('${job.id}','${step.id}')">↺ Ещё</button>` : ''}
-            </div>
-            <div class="quick-time-row">
-              <span style="font-size:11px;color:var(--text-dim);align-self:center;">+ мин:</span>
-              ${[5,10,30,60].map(m => `<button class="qt-btn" onclick="addQuickTime('${job.id}','${step.id}',${m})">${m}м</button>`).join('')}
-              <button class="qt-btn qt-btn-custom" onclick="openCustomTime('${job.id}','${step.id}')">✎</button>
-            </div>
-            ${(step.notes || step.parts) ? `
-            <div class="step-notes">
-              ${step.notes ? `<div style="margin-bottom:4px;">${step.notes}</div>` : ''}
-              ${step.parts ? `<span class="note-tag">🔧 ${step.parts}</span>` : ''}
-            </div>` : ''}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
+    const isOpen = job['detail_open_'+phase.id] || false;
+    const quickTimes = [{label:'15м',min:15},{label:'30м',min:30},{label:'1ч',min:60},{label:'2ч',min:120},{label:'4ч',min:240},{label:'8ч',min:480}];
+    html += '<div class="phase-block" id="phase-'+job.id+'-'+phase.id+'">'
+      +'<div class="phase-block-header" onclick="togglePhaseDetail(\''+job.id+'\',\''+phase.id+'\')">'
+      +'<div><div class="phase-block-title">'+phase.label+'</div>'
+      +'<div class="phase-block-meta">'+doneCount+'/'+phaseSteps.length+' этапов'+(phaseElapsed>0?' · '+fmtMs(phaseElapsed):'')+'</div></div>'
+      +'<div class="phase-block-right">'+(phaseElapsed>0?'<span class="phase-total">'+fmtMs(phaseElapsed)+'</span>':'')
+      +'<span class="phase-chevron '+(isOpen?'open':'')+'">▼</span></div></div>'
+      +'<div class="phase-quick-times">'
+      +'<div class="phase-qt-label">Быстро записать время на весь блок</div>'
+      +'<div class="phase-qt-row">'
+      +quickTimes.map(t => '<button class="phase-qt-btn" onclick="addPhaseTime(\''+job.id+'\',\''+phase.id+'\','+t.min+')">'+t.label+'</button>').join('')
+      +'<button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime(\''+job.id+'\',\''+phase.id+'\')">✎</button>'
+      +'</div></div>'
+      +'<div class="phase-steps-detail '+(isOpen?'open':'')+'" id="detail-'+job.id+'-'+phase.id+'">';
+    phaseSteps.forEach(step => {
+      const gIdx = job.steps.indexOf(step);
+      const isDone = step.elapsed > 0 && !step.running;
+      const isActive = step.running;
+      const cls = isActive ? 'step-active' : (isDone ? 'step-done' : '');
+      html += '<div class="step-item '+cls+'" id="step-'+job.id+'-'+step.id+'">'
+        +'<div class="step-header">'
+        +'<div class="step-num">'+(isDone?'✓':(isActive?'●':(gIdx+1)))+'</div>'
+        +'<div class="step-info"><div class="step-name">'+step.name+'</div>'
+        +'<div class="step-duration">'+(isDone?fmtMs(step.elapsed):(isActive?'В процессе...':'Не начат'))+'</div></div>'
+        +(isActive?'<div class="step-timer-display" id="timer-'+job.id+'-'+step.id+'">00:00</div>':'')
+        +(isDone?'<div style="font-size:14px;color:var(--green);font-weight:700;">'+fmtMs(step.elapsed)+'</div>':'')
+        +'</div>'
+        +'<div class="step-actions">'
+        +(!isDone&&!isActive?'<button class="step-btn step-btn-start" onclick="startStep(\''+job.id+'\',\''+step.id+'\')">▶ Старт</button>':'')
+        +(isActive?'<button class="step-btn step-btn-stop" onclick="stopStep(\''+job.id+'\',\''+step.id+'\')">■ Стоп</button>':'')
+        +'<button class="step-btn step-btn-note" onclick="openStepNote(\''+job.id+'\',\''+step.id+'\')">✎ Заметка</button>'
+        +(isDone?'<button class="step-btn step-btn-start" onclick="restartStep(\''+job.id+'\',\''+step.id+'\')">↺ Ещё</button>':'')
+        +'</div>'
+        +'<div class="quick-time-row">'
+        +'<span style="font-size:11px;color:var(--text-dim);align-self:center;">+ мин:</span>'
+        +[5,10,30,60].map(m => '<button class="qt-btn" onclick="addQuickTime(\''+job.id+'\',\''+step.id+'\','+m+')">'+m+'м</button>').join('')
+        +'<button class="qt-btn qt-btn-custom" onclick="openCustomTime(\''+job.id+'\',\''+step.id+'\')">✎</button>'
+        +'</div>'
+        +((step.notes||step.parts)?'<div class="step-notes">'+(step.notes?'<div style="margin-bottom:4px;">'+step.notes+'</div>':'')+(step.parts?'<span class="note-tag">🔧 '+step.parts+'</span>':'')+'</div>':'')
+        +'</div>';
+    });
+    html += '</div></div>';
   });
-
   container.innerHTML = html;
-
-  // Resume any running timers
   job.steps.forEach(step => {
-    if (step.running && step.startTime) {
-      startTimerDisplay(job.id, step.id, step.startTime, step.elapsed || 0);
-    }
+    if (step.running && step.startTime) startTimerDisplay(job.id, step.id, step.startTime, step.elapsed||0);
   });
 }
 
-// ─── STEP CONTROLS ──────────────────────────────────────────────────────────
-
+// ── STEP CONTROLS ─────────────────────────────────────────────────────────────
 function startStep(jobId, stepId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
   if (!job) return;
   const step = job.steps.find(s => s.id === stepId);
   if (!step) return;
-
-  step.running = true;
-  step.startTime = Date.now();
-  save(d);
-
-  openJob(jobId);
-  showToast('Этап начат');
+  step.running = true; step.startTime = Date.now();
+  save(d); openJob(jobId); showToast('Этап начат');
 }
-
 function stopStep(jobId, stepId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
   if (!job) return;
   const step = job.steps.find(s => s.id === stepId);
   if (!step) return;
-
-  const now = Date.now();
-  step.elapsed = (step.elapsed || 0) + (now - step.startTime);
-  step.running = false;
-  step.startTime = null;
+  step.elapsed = (step.elapsed||0) + (Date.now() - step.startTime);
+  step.running = false; step.startTime = null;
   save(d);
-
-  clearInterval(timers[jobId + '_' + stepId]);
-  delete timers[jobId + '_' + stepId];
-
-  openJob(jobId);
-  showToast('Этап завершён: ' + fmtMs(step.elapsed));
+  clearInterval(timers[jobId+'_'+stepId]); delete timers[jobId+'_'+stepId];
+  openJob(jobId); showToast('Этап завершён: '+fmtMs(step.elapsed));
 }
-
 function restartStep(jobId, stepId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
-  const step = job?.steps.find(s => s.id === stepId);
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  const step = job && job.steps.find(s => s.id === stepId);
   if (!step) return;
-  step.running = true;
-  step.startTime = Date.now();
-  save(d);
-  openJob(jobId);
+  step.running = true; step.startTime = Date.now();
+  save(d); openJob(jobId);
 }
-
 function startTimerDisplay(jobId, stepId, startTime, prevElapsed) {
-  const key = jobId + '_' + stepId;
+  const key = jobId+'_'+stepId;
   clearInterval(timers[key]);
   timers[key] = setInterval(() => {
-    const el = document.getElementById(`timer-${jobId}-${stepId}`);
+    const el = document.getElementById('timer-'+jobId+'-'+stepId);
     if (!el) { clearInterval(timers[key]); return; }
-    const total = prevElapsed + (Date.now() - startTime);
-    el.textContent = fmtMsLive(total);
+    el.textContent = fmtMsLive(prevElapsed + (Date.now() - startTime));
   }, 500);
 }
 
-// ─── STEP NOTES ─────────────────────────────────────────────────────────────
-
+// ── STEP NOTES ────────────────────────────────────────────────────────────────
 function openStepNote(jobId, stepId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
-  const step = job?.steps.find(s => s.id === stepId);
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  const step = job && job.steps.find(s => s.id === stepId);
   if (!step) return;
-
   noteTargetStep = {jobId, stepId};
   document.getElementById('note-modal-title').textContent = step.name;
-  document.getElementById('note-problems').value = step.notes || '';
-  document.getElementById('note-parts').value = step.parts || '';
+  document.getElementById('note-problems').value = step.notes||'';
+  document.getElementById('note-parts').value = step.parts||'';
   openModal('modal-note');
 }
-
 function saveStepNote() {
   if (!noteTargetStep) return;
   const {jobId, stepId} = noteTargetStep;
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
-  const step = job?.steps.find(s => s.id === stepId);
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  const step = job && job.steps.find(s => s.id === stepId);
   if (!step) return;
-
   step.notes = document.getElementById('note-problems').value.trim();
   step.parts = document.getElementById('note-parts').value.trim();
-  save(d);
-
-  closeModal('modal-note');
-  openJob(jobId);
-  showToast('Заметка сохранена');
+  save(d); closeModal('modal-note'); openJob(jobId); showToast('Заметка сохранена');
 }
 
-// ─── COMPLETE / DELETE JOB ──────────────────────────────────────────────────
+// ── PHASE TIME ────────────────────────────────────────────────────────────────
+function addPhaseTime(jobId, phaseId, minutes) {
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  const phaseSteps = job.steps.filter(s => s.phase === phaseId);
+  if (phaseSteps.length === 0) return;
+  phaseSteps[0].elapsed = (phaseSteps[0].elapsed||0) + minutes*60000;
+  save(d); openJob(jobId);
+  showToast('+'+(minutes<60?minutes+'м':(minutes/60)+'ч')+' → '+(phaseId==='service'?'Full Service':'Сборка'));
+}
+function openPhaseCustomTime(jobId, phaseId) {
+  phaseCustomTarget = {jobId, phaseId};
+  document.getElementById('inp-custom-min').value = '';
+  openModal('modal-custom-time');
+}
+function togglePhaseDetail(jobId, phaseId) {
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  job['detail_open_'+phaseId] = !job['detail_open_'+phaseId];
+  save(d);
+  const detail = document.getElementById('detail-'+jobId+'-'+phaseId);
+  const chevron = document.querySelector('#phase-'+jobId+'-'+phaseId+' .phase-chevron');
+  if (detail) detail.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open');
+}
 
+// ── QUICK TIME ────────────────────────────────────────────────────────────────
+function addQuickTime(jobId, stepId, minutes) {
+  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  const step = job.steps.find(s => s.id === stepId);
+  if (!step) return;
+  step.elapsed = (step.elapsed||0) + minutes*60000;
+  save(d); openJob(jobId); showToast('+'+minutes+'м добавлено');
+}
+function openCustomTime(jobId, stepId) {
+  customTimeTarget = {jobId, stepId};
+  document.getElementById('inp-custom-min').value = '';
+  openModal('modal-custom-time');
+}
+function applyCustomTime() {
+  const val = parseInt(document.getElementById('inp-custom-min').value);
+  if (!val || val <= 0) { showToast('Введите число минут'); return; }
+  closeModal('modal-custom-time');
+  if (phaseCustomTarget) {
+    addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val);
+    phaseCustomTarget = null;
+  } else if (customTimeTarget) {
+    addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
+    customTimeTarget = null;
+  }
+}
+
+// ── COMPLETE / DELETE ─────────────────────────────────────────────────────────
 function completeJob() {
   if (!currentJobId) return;
-  const d = load();
-  const idx = d.jobs.findIndex(j => j.id === currentJobId);
+  const d = load(), idx = d.jobs.findIndex(j => j.id === currentJobId);
   if (idx === -1) return;
-
   const job = d.jobs[idx];
-
-  // Stop any running steps
   job.steps.forEach(step => {
     if (step.running) {
-      step.elapsed = (step.elapsed||0) + (Date.now() - step.startTime);
-      step.running = false;
-      step.startTime = null;
+      step.elapsed = (step.elapsed||0) + (Date.now()-step.startTime);
+      step.running = false; step.startTime = null;
     }
   });
-
-  job.done = true;
-  job.completedAt = Date.now();
-
+  job.done = true; job.completedAt = Date.now();
   d.jobs.splice(idx, 1);
   if (!d.done) d.done = [];
-  d.done.push(job);
-  save(d);
-
-  showToast('Работа завершена ✓');
-  navigate('home');
+  d.done.push(job); save(d);
+  showToast('Работа завершена ✓'); navigate('home');
 }
-
 function deleteJob() {
   if (!currentJobId) return;
   if (!confirm('Удалить эту запись?')) return;
   const d = load();
   d.jobs = d.jobs.filter(j => j.id !== currentJobId);
-  save(d);
-  showToast('Удалено');
-  navigate('home');
+  save(d); showToast('Удалено'); navigate('home');
 }
 
-// ─── HISTORY ────────────────────────────────────────────────────────────────
+// ── NEW JOB ───────────────────────────────────────────────────────────────────
+function openNewJobModal() {
+  ['inp-serial','inp-ref','inp-model','inp-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  openModal('modal-new');
+}
+function createJob() {
+  const ref = document.getElementById('inp-ref').value.trim();
+  const serial = document.getElementById('inp-serial').value.trim();
+  if (!ref && !serial) { showToast('Введите Ref или серийный номер'); return; }
+  const type = document.getElementById('inp-type').value;
+  const model = document.getElementById('inp-model').value.trim();
+  const note = document.getElementById('inp-note').value.trim();
+  const steps = getStepsFor(type).map(s => ({...s, startTime:null, elapsed:0, running:false, notes:'', parts:''}));
+  const job = {id: Date.now().toString(), ref, model, serial, type, note, createdAt: Date.now(), steps, returns:[], done: false, completedAt: null};
+  const d = load();
+  d.jobs.push(job); save(d);
+  closeModal('modal-new'); showToast('Часы добавлены');
+  renderHome(); setTimeout(() => openJob(job.id), 300);
+}
 
+// ── HISTORY ───────────────────────────────────────────────────────────────────
 function historyCard(j, compact) {
   const total = totalTime(j);
-  const fsTime = j.steps.filter(s => s.phase === 'service').reduce((a,s) => a+(s.elapsed||0), 0);
-  const asTime = j.steps.filter(s => s.phase === 'assembly').reduce((a,s) => a+(s.elapsed||0), 0);
-
-  const hasReturn = j.returns && j.returns.length > 0;
-  return `
-  <div class="history-item ${hasReturn ? 'card-return' : ''}" onclick="openHistoryDetail('${j.id}')">
-    <div class="history-header">
-      <div class="history-ref">${j.serial || j.ref}</div>
-      <div class="history-date">${fmtDate(j.completedAt || j.createdAt)}</div>
-    </div>
-    <div class="history-model">${j.ref ? 'Ref ' + j.ref : ''}${j.ref && j.model ? ' · ' : ''}${j.model || ''}</div>
-    <div class="history-times">
-      <div class="history-time">Итого: <span>${fmtMs(total)}</span></div>
-      ${j.type === 'full' ? `<div class="history-time">Service: <span>${fmtMs(fsTime)}</span></div>` : ''}
-      <div class="history-time">Сборка: <span>${fmtMs(asTime)}</span></div>
-      ${speedBadge(total/3600000, j.type)}
-      ${hasReturn ? `<span class="badge badge-return">🔴 ×${j.returns.length}</span>` : ''}
-    </div>
-  </div>`;
+  const fsTime = j.steps.filter(s => s.phase==='service').reduce((a,s) => a+(s.elapsed||0), 0);
+  const asTime = j.steps.filter(s => s.phase==='assembly').reduce((a,s) => a+(s.elapsed||0), 0);
+  return '<div class="history-item" onclick="openHistoryDetail(\''+j.id+'\')">'
+    +'<div class="history-header"><div class="history-ref">'+(j.serial||j.ref)+'</div>'
+    +'<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div></div>'
+    +'<div class="history-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' · ':'')+( j.model||'')+'</div>'
+    +'<div class="history-times">'
+    +'<div class="history-time">Итого: <span>'+fmtMs(total)+'</span></div>'
+    +(j.type==='full'?'<div class="history-time">Service: <span>'+fmtMs(fsTime)+'</span></div>':'')
+    +'<div class="history-time">Сборка: <span>'+fmtMs(asTime)+'</span></div>'
+    +speedBadge(total/3600000, j.type)
+    +'</div></div>';
 }
-
 function renderHistory() {
-  const d = load();
-  const done = (d.done || []).slice().reverse();
-  document.getElementById('history-count').textContent = done.length + ' часов';
+  const d = load(), done = (d.done||[]).slice().reverse();
+  document.getElementById('history-count').textContent = done.length+' часов';
   const list = document.getElementById('history-list');
-  if (done.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">История пуста</div><div class="empty-text">Завершённые работы появятся здесь</div></div>`;
-  } else {
-    list.innerHTML = done.map(j => historyCard(j, false)).join('');
-  }
+  list.innerHTML = done.length === 0
+    ? '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">История пуста</div><div class="empty-text">Завершённые работы появятся здесь</div></div>'
+    : done.map(j => historyCard(j, false)).join('');
 }
-
-
 function openHistoryDetail(id) {
-  const d = load();
-  const job = (d.done || []).find(j => j.id === id);
+  const d = load(), job = (d.done||[]).find(j => j.id === id);
   if (!job) return;
-
-  document.getElementById('hd-ref').textContent = (job.serial || job.ref) + (job.model ? ' · ' + job.model : '');
-
-  const totalMs = totalTime(job);
-  const totalHours = totalMs / 3600000;
-
-  let html = `<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">
-    ${speedBadge(totalHours, job.type)}
-    <span style="font-size:13px;color:var(--text-dim);align-self:center;">Итого: <strong style="color:var(--gold)">${fmtMs(totalMs)}</strong></span>
-  </div>`;
-
-  const phases = job.type === 'full'
-    ? [{id:'service', label:'Full Service'}, {id:'assembly', label:'Сборка'}]
-    : [{id:'assembly', label:'Сборка'}];
-
+  currentJobId = id;
+  document.getElementById('hd-ref').textContent = (job.serial||job.ref)+(job.model?' · '+job.model:'');
+  const totalMs = totalTime(job), totalHours = totalMs/3600000;
+  let html = '<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">'
+    +speedBadge(totalHours, job.type)
+    +'<span style="font-size:13px;color:var(--text-dim);align-self:center;">Итого: <strong style="color:var(--gold)">'+fmtMs(totalMs)+'</strong></span></div>';
+  const phases = job.type==='full'
+    ? [{id:'service',label:'Full Service'},{id:'assembly',label:'Сборка'}]
+    : [{id:'assembly',label:'Сборка'}];
   phases.forEach(phase => {
-    html += `<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin:12px 0 8px;">${phase.label}</div>`;
-    job.steps.filter(s => s.phase === phase.id).forEach(step => {
-      html += `
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div>
-          <div style="font-size:14px;color:var(--text);">${step.name}</div>
-          ${step.notes ? `<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">${step.notes}</div>` : ''}
-          ${step.parts ? `<span class="note-tag" style="margin-top:4px;">🔧 ${step.parts}</span>` : ''}
-        </div>
-        <div style="font-size:14px;color:var(--gold);flex-shrink:0;margin-left:12px;font-weight:600;">${fmtMs(step.elapsed)}</div>
-      </div>`;
+    html += '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin:12px 0 8px;">'+phase.label+'</div>';
+    job.steps.filter(s => s.phase===phase.id).forEach(step => {
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">'
+        +'<div><div style="font-size:14px;color:var(--text);">'+step.name+'</div>'
+        +(step.notes?'<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">'+step.notes+'</div>':'')
+        +(step.parts?'<span class="note-tag" style="margin-top:4px;">🔧 '+step.parts+'</span>':'')
+        +'</div><div style="font-size:14px;color:var(--gold);flex-shrink:0;margin-left:12px;font-weight:700;">'+fmtMs(step.elapsed)+'</div></div>';
     });
   });
-
-  if (job.note) {
-    html += `<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text-dim);">${job.note}</div>`;
-  }
-
-  // Returns section
-  if (job.returns && job.returns.length > 0) {
-    const totalRet = job.returns.reduce((a,r) => a+(r.elapsed||0), 0);
-    html += `<div style="margin-top:14px;background:rgba(201,76,76,0.06);border:1px solid rgba(201,76,76,0.25);border-radius:8px;overflow:hidden;">
-      <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:14px;font-weight:600;color:#e05555;">🔴 Возвраты (${job.returns.length})</div>
-        <div style="font-size:13px;color:#e05555;font-weight:600;">${fmtMs(totalRet)}</div>
-      </div>`;
-    job.returns.forEach(r => {
-      html += `<div style="padding:10px 14px;border-top:1px solid rgba(201,76,76,0.2);display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div style="font-size:14px;color:var(--text);">${r.desc}</div>
-          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${fmtDate(r.date)}</div>
-        </div>
-        <div style="font-size:14px;color:#e05555;font-weight:600;margin-left:12px;">${r.elapsed ? fmtMs(r.elapsed) : '—'}</div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  html += `
-    <button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob('${id}')">✎ Редактировать</button>
-    <button class="btn" style="background:rgba(201,76,76,0.12);color:#e05555;border:1px solid rgba(201,76,76,0.3);margin-top:8px;" onclick="closeModal('modal-history-detail');currentJobId='${id}';openReturnModal()">🔴 Добавить возврат</button>
-    <button class="btn btn-outline" onclick="closeModal('modal-history-detail')">Закрыть</button>`;
-
+  if (job.note) html += '<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text-dim);">'+job.note+'</div>';
+  html += '<button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob(\''+id+'\')">✎ Редактировать</button>'
+    +'<button class="btn btn-outline" onclick="closeModal(\'modal-history-detail\')">Закрыть</button>';
   document.getElementById('hd-body').innerHTML = html;
   openModal('modal-history-detail');
 }
 
-// ─── RETURNS ─────────────────────────────────────────────────────────────────
-
-function openReturnModal() {
-  document.getElementById('inp-return-desc').value = '';
-  document.getElementById('inp-return-time').value = '';
-  openModal('modal-return');
-}
-
-function saveReturn() {
-  const desc = document.getElementById('inp-return-desc').value.trim();
-  if (!desc) { showToast('Опишите проблему'); return; }
-  const mins = parseInt(document.getElementById('inp-return-time').value) || 0;
-
-  const d = load();
-  // Works for both active and done jobs
-  let job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-  if (!job) return;
-
-  if (!job.returns) job.returns = [];
-  job.returns.push({
-    id: Date.now().toString(),
-    desc,
-    elapsed: mins * 60000,
-    date: Date.now()
-  });
-
-  save(d);
-  closeModal('modal-return');
-  showToast('Возврат добавлен');
-
-  // Re-render whichever view is open
-  const isDone = !!(d.done||[]).find(j => j.id === currentJobId);
-  if (isDone) { renderHistory(); openHistoryDetail(currentJobId); }
-  else openJob(currentJobId);
-}
-
-function renderReturns(job) {
-  const container = document.getElementById('work-returns-container');
-  if (!container) return;
-  if (!job.returns || job.returns.length === 0) { container.innerHTML = ''; return; }
-
-  const totalReturnTime = job.returns.reduce((a, r) => a + (r.elapsed || 0), 0);
-  let html = `
-  <div class="return-block" style="margin:0 16px 12px;">
-    <div class="return-block-header">
-      <div class="return-block-title">🔴 Возвраты (${job.returns.length})</div>
-      <div style="font-size:13px;color:#e05555;font-weight:600;">${fmtMs(totalReturnTime)}</div>
-    </div>`;
-  job.returns.forEach(r => {
-    html += `
-    <div class="return-item">
-      <div>
-        <div class="return-item-desc">${r.desc}</div>
-        <div class="return-item-meta">${fmtDate(r.date)}</div>
-      </div>
-      <div class="return-item-time">${r.elapsed ? fmtMs(r.elapsed) : '—'}</div>
-    </div>`;
-  });
-  html += `</div>`;
-  container.innerHTML = html;
-}
-
-// ─── EDIT DONE JOB ───────────────────────────────────────────────────────────
-
+// ── EDIT JOB ──────────────────────────────────────────────────────────────────
 function openEditJob(id) {
-  const d = load();
-  const job = (d.done || []).find(j => j.id === id);
+  const d = load(), job = (d.done||[]).find(j => j.id === id);
   if (!job) return;
-
   closeModal('modal-history-detail');
+  let html = '<div class="form-group"><label class="form-label">Серийный номер</label><input class="form-input" id="edit-serial" value="'+(job.serial||'')+'" /></div>'
+    +'<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Модель</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'
+    +'<div class="form-group"><label class="form-label">Заметка</label><textarea class="form-textarea" id="edit-note">'+(job.note||'')+'</textarea></div>';
 
-  let html = `
-    <div class="form-group">
-      <label class="form-label">Серийный номер</label>
-      <input class="form-input" id="edit-serial" value="${job.serial||''}" />
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Ref</label>
-        <input class="form-input" id="edit-ref" value="${job.ref||''}" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Модель</label>
-        <input class="form-input" id="edit-model" value="${job.model||''}" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Заметка</label>
-      <textarea class="form-textarea" id="edit-note">${job.note||''}</textarea>
-
-```
-</div>`;
-```
-
-const phases = job.type === ‘full’
-? [{id:‘service’, label:‘Full Service’}, {id:‘assembly’, label:‘Сборка’}]
-: [{id:‘assembly’, label:‘Сборка’}];
-
+const phases = job.type===‘full’
+? [{id:‘service’,label:‘Full Service’},{id:‘assembly’,label:‘Сборка’}]
+: [{id:‘assembly’,label:‘Сборка’}];
 phases.forEach(phase => {
-html += `<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 8px;">${phase.label} — время этапов (мин)</div>`;
-job.steps.filter(s => s.phase === phase.id).forEach(step => {
-const mins = step.elapsed ? Math.round(step.elapsed / 60000) : 0;
-html += ` <div class="form-group" style="margin-bottom:10px;"> <label class="form-label">${step.name}</label> <input class="form-input edit-step-time" data-stepid="${step.id}" type="number" value="${mins}" min="0" placeholder="0" /> </div>`;
+html += ‘<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 8px;">’+phase.label+’ — время (мин)</div>’;
+job.steps.filter(s => s.phase===phase.id).forEach(step => {
+const mins = step.elapsed ? Math.round(step.elapsed/60000) : 0;
+html += ‘<div class="form-group" style="margin-bottom:10px;"><label class="form-label">’+step.name+’</label>’
++’<input class="form-input edit-step-time" data-stepid="'+step.id+'" type="number" value="'+mins+'" min="0" /></div>’;
 });
 });
-
-html += ` <button class="btn btn-gold" onclick="saveEditJob('${id}')">Сохранить</button> <button class="btn btn-outline" onclick="closeModal('modal-edit-job')">Отмена</button>`;
-
+html += ‘<button class="btn btn-gold" onclick="saveEditJob(\''+id+'\')">Сохранить</button>’
++’<button class="btn btn-outline" onclick="closeModal(\'modal-edit-job\')">Отмена</button>’;
 document.getElementById(‘edit-job-body’).innerHTML = html;
 openModal(‘modal-edit-job’);
 }
-
 function saveEditJob(id) {
-const d = load();
-const job = (d.done || []).find(j => j.id === id);
+const d = load(), job = (d.done||[]).find(j => j.id === id);
 if (!job) return;
-
 job.serial = document.getElementById(‘edit-serial’).value.trim();
 job.ref    = document.getElementById(‘edit-ref’).value.trim();
 job.model  = document.getElementById(‘edit-model’).value.trim();
 job.note   = document.getElementById(‘edit-note’).value.trim();
-
 document.querySelectorAll(’.edit-step-time’).forEach(inp => {
-const stepId = inp.dataset.stepid;
-const step = job.steps.find(s => s.id === stepId);
-if (step) {
-const mins = parseFloat(inp.value) || 0;
-step.elapsed = Math.round(mins * 60000);
-}
+const step = job.steps.find(s => s.id === inp.dataset.stepid);
+if (step) step.elapsed = Math.round((parseFloat(inp.value)||0)*60000);
 });
-
-save(d);
-closeModal(‘modal-edit-job’);
-showToast(‘Изменения сохранены’);
-renderHistory();
+save(d); closeModal(‘modal-edit-job’); showToast(‘Изменения сохранены’); renderHistory();
 }
 
-// ─── STATS ──────────────────────────────────────────────────────────────────
-
+// ── STATS ─────────────────────────────────────────────────────────────────────
 function renderStats() {
-const d = load();
-const done = d.done || [];
-
+const d = load(), done = d.done||[];
 const totalJobs = done.length;
-const fullJobs = done.filter(j => j.type === ‘full’).length;
-const assemblyOnly = done.filter(j => j.type === ‘assembly’).length;
-const avgTotal = totalJobs > 0 ? done.reduce((a,j) => a + totalTime(j), 0) / totalJobs : 0;
+const fullJobs = done.filter(j => j.type===‘full’).length;
+const assemblyOnly = done.filter(j => j.type===‘assembly’).length;
+const avgTotal = totalJobs > 0 ? done.reduce((a,j) => a+totalTime(j), 0)/totalJobs : 0;
+document.getElementById(‘stats-grid’).innerHTML =
+‘<div class="stat-card"><div class="stat-card-val">’+totalJobs+’</div><div class="stat-card-lbl">Завершено</div></div>’
++’<div class="stat-card"><div class="stat-card-val">’+fmtMs(avgTotal)+’</div><div class="stat-card-lbl">Среднее время</div></div>’
++’<div class="stat-card"><div class="stat-card-val">’+fullJobs+’</div><div class="stat-card-lbl">Full Service</div></div>’
++’<div class="stat-card"><div class="stat-card-val">’+assemblyOnly+’</div><div class="stat-card-lbl">Только Сборка</div></div>’;
 
-const returnCount = done.filter(j => j.returns && j.returns.length > 0).length;
-const returnPct = totalJobs > 0 ? Math.round(returnCount / totalJobs * 100) : 0;
-
-document.getElementById(‘stats-grid’).innerHTML = `<div class="stat-card"><div class="stat-card-val">${totalJobs}</div><div class="stat-card-lbl">Завершено</div></div> <div class="stat-card"><div class="stat-card-val">${fmtMs(avgTotal)}</div><div class="stat-card-lbl">Среднее время</div></div> <div class="stat-card"><div class="stat-card-val">${fullJobs}</div><div class="stat-card-lbl">Full Service</div></div> <div class="stat-card"><div class="stat-card-val">${assemblyOnly}</div><div class="stat-card-lbl">Только Сборка</div></div> <div class="stat-card" style="border-color:${returnCount>0?'rgba(201,76,76,0.35)':'var(--border)'}"> <div class="stat-card-val" style="color:${returnCount>0?'#e05555':'var(--gold)'};">${returnCount}</div> <div class="stat-card-lbl">🔴 Возвратов</div> </div> <div class="stat-card" style="border-color:${returnPct>20?'rgba(201,76,76,0.35)':returnPct>10?'rgba(255,193,7,0.35)':'var(--border)'}"> <div class="stat-card-val" style="color:${returnPct>20?'#e05555':returnPct>10?'#e6ac00':'var(--green)'};">${returnPct}%</div> <div class="stat-card-lbl">% возвратов</div> </div>`;
-
-// Speed breakdown
 if (done.length > 0) {
-const fullDone = done.filter(j => j.type === ‘full’);
-const asmDone  = done.filter(j => j.type === ‘assembly’);
-
-```
 const countSpeed = (jobs, type) => {
-  let fast=0, mid=0, slow=0;
-  jobs.forEach(j => {
-    const h = totalTime(j) / 3600000;
-    if (type === 'full') { if (h<=5) fast++; else if (h<=7) mid++; else slow++; }
-    else { if (h<3) fast++; else if (h<=4) mid++; else slow++; }
-  });
-  return {fast, mid, slow};
+let fast=0,mid=0,slow=0;
+jobs.forEach(j => {
+const h = totalTime(j)/3600000;
+if (type===‘full’) { if(h<=5)fast++; else if(h<=7)mid++; else slow++; }
+else { if(h<3)fast++; else if(h<=4)mid++; else slow++; }
+});
+return {fast,mid,slow};
 };
-
-let speedHtml = '';
+let speedHtml = ‘’;
+const fullDone = done.filter(j => j.type===‘full’);
+const asmDone  = done.filter(j => j.type===‘assembly’);
 if (fullDone.length > 0) {
-  const s = countSpeed(fullDone, 'full');
-  speedHtml += `
-  <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
-    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Full Service — скорость</div>
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:6px;">
-        <div style="font-size:22px;font-weight:700;color:#4caf82;">${s.fast}</div>
-        <div style="font-size:11px;color:var(--text-dim);">⚡ ≤5ч</div>
-      </div>
-      <div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:6px;">
-        <div style="font-size:22px;font-weight:700;color:#e6ac00;">${s.mid}</div>
-        <div style="font-size:11px;color:var(--text-dim);">⏱ 6–7ч</div>
-      </div>
-      <div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:6px;">
-        <div style="font-size:22px;font-weight:700;color:#c94c4c;">${s.slow}</div>
-        <div style="font-size:11px;color:var(--text-dim);">🐢 ≥8ч</div>
-      </div>
-    </div>
-  </div>`;
+const s = countSpeed(fullDone, ‘full’);
+speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’
++’<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Full Service — скорость</div>’
++’<div style="display:flex;gap:10px;">’
++’<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ ≤5ч</div></div>’
++’<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 6–7ч</div></div>’
++’<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥8ч</div></div>’
++’</div></div>’;
 }
 if (asmDone.length > 0) {
-  const s = countSpeed(asmDone, 'assembly');
-  speedHtml += `
-  <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
-    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Сборка — скорость</div>
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:6px;">
-        <div style="font-size:22px;font-weight:700;color:#4caf82;">${s.fast}</div>
-        <div style="font-size:11px;color:var(--text-dim);">⚡ &lt;3ч</div>
-      </div>
-      <div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:6px;">
-        <div style="font-size:22px;font-weight:700;color:#e6ac00;">${s.mid}</div>
-        <div style="font-size:11px;color:var(--text-dim);">⏱ 3–4ч</div>
-      </div>
-      <div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:6px;">
-        <div style="font-size:22px;font-weight:700;color:#c94c4c;">${s.slow}</div>
-        <div style="font-size:11px;color:var(--text-dim);">🐢 ≥5ч</div>
-      </div>
-    </div>
-  </div>`;
+const s = countSpeed(asmDone, ‘assembly’);
+speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’
++’<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Сборка — скорость</div>’
++’<div style="display:flex;gap:10px;">’
++’<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ <3ч</div></div>’
++’<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 3–4ч</div></div>’
++’<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥5ч</div></div>’
++’</div></div>’;
 }
-document.getElementById('stats-speed').innerHTML = speedHtml;
-```
-
+document.getElementById(‘stats-speed’).innerHTML = speedHtml;
 }
 
-// Stage avg chart
 const stageChart = document.getElementById(‘stage-chart’);
 if (done.length === 0) {
-stageChart.innerHTML = `<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">Нет данных</div>`;
+stageChart.innerHTML = ‘<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">Нет данных</div>’;
 } else {
 const stageMap = {};
-done.forEach(j => {
-j.steps.forEach(s => {
-if (!stageMap[s.id]) stageMap[s.id] = {name: s.name, total: 0, count: 0};
+done.forEach(j => j.steps.forEach(s => {
+if (!stageMap[s.id]) stageMap[s.id] = {name:s.name, total:0, count:0};
 if (s.elapsed > 0) { stageMap[s.id].total += s.elapsed; stageMap[s.id].count++; }
-});
-});
+}));
 const stages = Object.values(stageMap).filter(s => s.count > 0)
-.map(s => ({name: s.name, avg: s.total / s.count}))
-.sort((a,b) => b.avg - a.avg).slice(0, 8);
+.map(s => ({name:s.name, avg:s.total/s.count})).sort((a,b) => b.avg-a.avg).slice(0,8);
 const maxAvg = Math.max(…stages.map(s => s.avg), 1);
-stageChart.innerHTML = stages.map(s => ` <div class="bar-row"> <div class="bar-label" title="${s.name}">${s.name.split(' ')[0]}</div> <div class="bar-track"><div class="bar-fill" style="width:${(s.avg/maxAvg*100).toFixed(1)}%"></div></div> <div class="bar-val">${Math.round(s.avg/60000)}м</div> </div>`).join(’’);
+stageChart.innerHTML = stages.map(s =>
+‘<div class="bar-row"><div class="bar-label" title="'+s.name+'">’+s.name.split(’ ‘)[0]+’</div>’
++’<div class="bar-track"><div class="bar-fill" style="width:'+((s.avg/maxAvg*100).toFixed(1))+'%"></div></div>’
++’<div class="bar-val">’+Math.round(s.avg/60000)+‘м</div></div>’
+).join(’’);
 }
-
-// Type chart
-const typeChart = document.getElementById(‘type-chart’);
 const avgFull = fullJobs > 0 ? done.filter(j=>j.type===‘full’).reduce((a,j)=>a+totalTime(j),0)/fullJobs : 0;
-const avgAssembly = assemblyOnly > 0 ? done.filter(j=>j.type===‘assembly’).reduce((a,j)=>a+totalTime(j),0)/assemblyOnly : 0;
-const maxT = Math.max(avgFull, avgAssembly, 1);
-typeChart.innerHTML = ` <div class="bar-row"> <div class="bar-label">Full Service</div> <div class="bar-track"><div class="bar-fill" style="width:${(avgFull/maxT*100).toFixed(1)}%"></div></div> <div class="bar-val">${fmtMs(avgFull)}</div> </div> <div class="bar-row"> <div class="bar-label">Только Сборка</div> <div class="bar-track"><div class="bar-fill" style="width:${(avgAssembly/maxT*100).toFixed(1)}%;background:var(--blue)"></div></div> <div class="bar-val">${fmtMs(avgAssembly)}</div> </div>`;
+const avgAsm  = assemblyOnly > 0 ? done.filter(j=>j.type===‘assembly’).reduce((a,j)=>a+totalTime(j),0)/assemblyOnly : 0;
+const maxT = Math.max(avgFull, avgAsm, 1);
+document.getElementById(‘type-chart’).innerHTML =
+‘<div class="bar-row"><div class="bar-label">Full Service</div><div class="bar-track"><div class="bar-fill" style="width:'+((avgFull/maxT*100).toFixed(1))+'%"></div></div><div class="bar-val">’+fmtMs(avgFull)+’</div></div>’
++’<div class="bar-row"><div class="bar-label">Только Сборка</div><div class="bar-track"><div class="bar-fill" style="width:'+((avgAsm/maxT*100).toFixed(1))+'%;background:var(--blue)"></div></div><div class="bar-val">’+fmtMs(avgAsm)+’</div></div>’;
 }
 
-// ─── PHASE QUICK TIME ────────────────────────────────────────────────────────
-
-let phaseCustomTarget = null;
-
-function addPhaseTime(jobId, phaseId, minutes) {
-const d = load();
-const job = d.jobs.find(j => j.id === jobId);
-if (!job) return;
-// Distribute time evenly across all phase steps, or add to first step as a lump
-// Simplest: add to a virtual phase-level elapsed stored on first step of phase
-const phaseSteps = job.steps.filter(s => s.phase === phaseId);
-if (phaseSteps.length === 0) return;
-// Add all time to the first step of the phase (represents the phase total)
-phaseSteps[0].elapsed = (phaseSteps[0].elapsed || 0) + minutes * 60 * 1000;
-save(d);
-openJob(jobId);
-showToast(`+${minutes < 60 ? minutes + ' мин' : (minutes/60) + ' ч'} → ${phaseId === 'service' ? 'Full Service' : 'Сборка'}`);
-}
-
-function openPhaseCustomTime(jobId, phaseId) {
-phaseCustomTarget = {jobId, phaseId};
-document.getElementById(‘inp-custom-min’).value = ‘’;
-openModal(‘modal-custom-time’);
-}
-
-function togglePhaseDetail(jobId, phaseId) {
-const d = load();
-const job = d.jobs.find(j => j.id === jobId);
-if (!job) return;
-job[‘detail_open_’ + phaseId] = !job[‘detail_open_’ + phaseId];
-save(d);
-// Toggle without full re-render for smoothness
-const detail = document.getElementById(`detail-${jobId}-${phaseId}`);
-const chevron = document.querySelector(`#phase-${jobId}-${phaseId} .phase-chevron`);
-if (detail) detail.classList.toggle(‘open’);
-if (chevron) chevron.classList.toggle(‘open’);
-}
-
-// ─── QUICK TIME ─────────────────────────────────────────────────────────────
-
-let customTimeTarget = null;
-
-function addQuickTime(jobId, stepId, minutes) {
-const d = load();
-const job = d.jobs.find(j => j.id === jobId);
-if (!job) return;
-const step = job.steps.find(s => s.id === stepId);
-if (!step) return;
-
-step.elapsed = (step.elapsed || 0) + minutes * 60 * 1000;
-// If step wasn’t started yet, mark it as done
-if (!step.running) {
-step.running = false;
-step.startTime = null;
-}
-save(d);
-openJob(jobId);
-showToast(`+${minutes} мин добавлено`);
-}
-
-function openCustomTime(jobId, stepId) {
-customTimeTarget = {jobId, stepId};
-document.getElementById(‘inp-custom-min’).value = ‘’;
-openModal(‘modal-custom-time’);
-}
-
-function applyCustomTime() {
-const val = parseInt(document.getElementById(‘inp-custom-min’).value);
-if (!val || val <= 0) { showToast(‘Введите число минут’); return; }
-closeModal(‘modal-custom-time’);
-if (phaseCustomTarget) {
-addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val);
-phaseCustomTarget = null;
-} else if (customTimeTarget) {
-addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
-customTimeTarget = null;
-}
-}
-
-// ─── THEME ───────────────────────────────────────────────────────────────────
-
+// ── THEME ─────────────────────────────────────────────────────────────────────
 function toggleTheme() {
 const isLight = document.documentElement.classList.toggle(‘light’);
 localStorage.setItem(‘rst_theme’, isLight ? ‘light’ : ‘dark’);
 document.getElementById(‘theme-btn’).textContent = isLight ? ‘🌙 Тёмная’ : ‘☀️ Светлая’;
 }
-
 if (localStorage.getItem(‘rst_theme’) === ‘light’) {
 document.documentElement.classList.add(‘light’);
-document.addEventListener(‘DOMContentLoaded’, () => {
+window.addEventListener(‘load’, () => {
 const btn = document.getElementById(‘theme-btn’);
 if (btn) btn.textContent = ‘🌙 Тёмная’;
 });
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-
+// ── INIT ──────────────────────────────────────────────────────────────────────
 renderHome();
 </script>
 
