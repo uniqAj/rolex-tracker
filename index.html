@@ -237,6 +237,15 @@
     <div class="chart-title">Full Service vs Только Сборка</div>
     <div class="bar-chart" id="type-chart"></div>
   </div>
+  <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;">
+    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">&#x1F4BE; Данные</div>
+    <button class="btn btn-outline" style="margin-top:0;" onclick="exportData()">&#x2B07;&#xFE0F; Экспорт данных</button>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+      <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(this)" />
+      <button class="btn btn-outline" style="margin-top:0;flex:1;" onclick="document.getElementById('import-file').click()">&#x2B06;&#xFE0F; Импорт данных</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-dim);margin-top:10px;line-height:1.5;">Экспорт сохраняет все данные в файл. Импорт загружает данные из файла — используй для переноса между устройствами.</div>
+  </div>
 </div>
 
 <div class="page" id="page-history">
@@ -1119,6 +1128,39 @@ function renderDorabotki(job) {
   });
   html += '</div>';
   container.innerHTML = html;
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────────────────
+function exportData() {
+  const d = load();
+  const json = JSON.stringify(d, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'service-tracker-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('\u0414\u0430\u043d\u043d\u044b\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b \u0432 \u0444\u0430\u0439\u043b');
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.jobs || !data.done) throw new Error('bad format');
+      localStorage.setItem('rst_data', JSON.stringify(data));
+      showToast('\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e ' + (data.done||[]).length + ' \u0437\u0430\u043f\u0438\u0441\u0435\u0439');
+      setTimeout(() => { renderHome(); navigate('home'); }, 1000);
+    } catch(err) {
+      showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430 — \u043f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0444\u043e\u0440\u043c\u0430\u0442');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ── THEME ─────────────────────────────────────────────────────────────────────
