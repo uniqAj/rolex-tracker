@@ -787,8 +787,26 @@ function getStepsFor(type) {
 // ─── STORAGE ────────────────────────────────────────────────────────────────
 
 function load() {
-  try { return JSON.parse(localStorage.getItem('rst_data') || '{"jobs":[],"done":[]}'); }
-  catch(e) { return {jobs:[], done:[]}; }
+  try {
+    const raw = localStorage.getItem('rst_data');
+    if (!raw) return {jobs:[], done:[]};
+    const d = JSON.parse(raw);
+    if (!d.jobs) d.jobs = [];
+    if (!d.done) d.done = [];
+    // Migrate: ensure all jobs have returns array
+    [...d.jobs, ...d.done].forEach(j => {
+      if (!j.returns) j.returns = [];
+      if (!j.steps) j.steps = [];
+      j.steps.forEach(s => {
+        if (!s.elapsed) s.elapsed = 0;
+        if (s.running === undefined) s.running = false;
+      });
+    });
+    return d;
+  } catch(e) {
+    console.warn('Data load error, resetting:', e);
+    return {jobs:[], done:[]};
+  }
 }
 function save(d) { localStorage.setItem('rst_data', JSON.stringify(d)); }
 
