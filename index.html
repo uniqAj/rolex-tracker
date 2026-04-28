@@ -11,7 +11,7 @@
   <title>Service Tracker</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --gold: #c9a84c;
@@ -56,7 +56,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Mono', monospace;
+  font-family: 'Outfit', sans-serif;
   font-size: 18px;
   min-height: 100vh;
   overflow-x: hidden;
@@ -72,7 +72,7 @@ body {
   display: flex; align-items: center; justify-content: space-between;
 }
 .topbar-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 22px; font-weight: 500;
   letter-spacing: 0.12em;
   color: var(--gold);
@@ -91,7 +91,7 @@ body {
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
   background: none; border: none; color: var(--text-dim);
-  font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.1em;
+  font-family: 'Outfit', sans-serif; font-size: 12px; letter-spacing: 0.1em;
   cursor: pointer; padding: 4px 0; transition: color 0.2s;
 }
 .nav-btn.active { color: var(--gold); }
@@ -107,7 +107,7 @@ body {
   display: flex; align-items: baseline; justify-content: space-between;
 }
 .section-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 26px; font-weight: 400; color: var(--text);
   letter-spacing: 0.05em;
 }
@@ -129,7 +129,7 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .card-ref {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 22px; font-weight: 500; color: var(--gold);
   letter-spacing: 0.08em;
 }
@@ -186,7 +186,7 @@ body {
 }
 .active-step-info {}
 .active-step-label { font-size: 13px; color: var(--gold-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
-.active-step-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--text); }
+.active-step-name { font-family: 'Outfit', sans-serif; font-size: 20px; color: var(--text); }
 .active-step-timer { font-size: 26px; color: var(--gold); letter-spacing: 0.05em; font-weight: 300; }
 
 /* ── FAB ── */
@@ -225,7 +225,7 @@ body {
   border-radius: 2px; margin: 12px auto 0;
 }
 .modal-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 24px; font-weight: 400;
   padding: 16px 20px 0;
   color: var(--gold);
@@ -243,7 +243,7 @@ body {
   width: 100%; background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: 3px; color: var(--text);
-  font-family: 'DM Mono', monospace; font-size: 16px;
+  font-family: 'Outfit', sans-serif; font-size: 16px;
   padding: 10px 12px;
   outline: none; transition: border-color 0.2s;
   -webkit-appearance: none;
@@ -260,7 +260,7 @@ body {
 .btn {
   width: 100%; padding: 14px;
   border-radius: 3px; border: none;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Outfit', sans-serif;
   font-size: 14px; letter-spacing: 0.18em;
   text-transform: uppercase; cursor: pointer;
   transition: opacity 0.2s, transform 0.1s;
@@ -277,7 +277,7 @@ body {
 /* ── WORK PAGE ── */
 .steps-container { padding: 0 16px; }
 .steps-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 17px; color: var(--text-dim);
   letter-spacing: 0.12em; text-transform: uppercase;
   margin: 16px 0 8px;
@@ -324,7 +324,7 @@ body {
 }
 .step-btn {
   flex: 1; padding: 10px; border-radius: 3px; border: none;
-  font-family: 'DM Mono', monospace; font-size: 13px;
+  font-family: 'Outfit', sans-serif; font-size: 13px;
   letter-spacing: 0.12em; text-transform: uppercase;
   cursor: pointer; transition: opacity 0.15s;
 }
@@ -355,7 +355,7 @@ body {
   border-radius: 4px; padding: 14px;
 }
 .stat-card-val {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 32px; color: var(--gold); font-weight: 300;
 }
 .stat-card-lbl { font-size: 12px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
@@ -385,7 +385,7 @@ body {
 }
 .history-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
 .history-ref {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 20px; color: var(--gold); letter-spacing: 0.08em;
 }
 .history-date { font-size: 13px; color: var(--text-dim); }
@@ -401,7 +401,7 @@ body {
 }
 .empty-icon { font-size: 44px; margin-bottom: 16px; opacity: 0.3; }
 .empty-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 22px; color: var(--text-dim); margin-bottom: 8px;
 }
 .empty-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
@@ -421,6 +421,53 @@ body {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── PHASE BLOCK ── */
+.phase-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+}
+.phase-block-header {
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none;
+}
+.phase-block-header:active { opacity: 0.7; }
+.phase-block-left {}
+.phase-block-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.phase-block-meta { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.phase-block-right { display: flex; align-items: center; gap: 8px; }
+.phase-total { font-size: 16px; color: var(--gold); font-weight: 600; }
+.phase-chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.25s; display: inline-block; }
+.phase-chevron.open { transform: rotate(180deg); }
+
+.phase-quick-times {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.phase-qt-label {
+  font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em;
+  text-transform: uppercase; margin: 12px 0 8px;
+}
+.phase-qt-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.phase-qt-btn {
+  padding: 10px 0; border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg3); color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; flex: 1;
+  text-align: center;
+}
+.phase-qt-btn:active { background: var(--bg4); border-color: var(--gold-dim); color: var(--gold); }
+.phase-qt-btn-custom {
+  background: none; border-style: dashed; color: var(--text-dim); flex: 1;
+}
+
+.phase-steps-detail {
+  border-top: 1px solid var(--border);
+  display: none; padding: 8px 0;
+}
+.phase-steps-detail.open { display: block; }
+
 /* ── QUICK TIME ── */
 .quick-time-row {
   padding: 0 14px 12px;
@@ -429,9 +476,8 @@ body {
 .qt-btn {
   padding: 7px 12px; border-radius: 3px; border: 1px solid var(--border);
   background: var(--bg3); color: var(--text-dim);
-  font-family: 'DM Mono', monospace; font-size: 13px;
-  letter-spacing: 0.08em; cursor: pointer;
-  transition: all 0.15s;
+  font-family: 'Outfit', sans-serif; font-size: 13px;
+  cursor: pointer; transition: all 0.15s;
 }
 .qt-btn:active { background: var(--bg4); color: var(--gold); border-color: var(--gold-dim); }
 .qt-btn-custom {
@@ -457,7 +503,7 @@ body {
     <div class="topbar-subtitle">Workshop Log</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
-    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;">☀️ Светлая</button>
+    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:11px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;">☀️ Светлая</button>
     <div id="topbar-clock" style="font-size:12px;color:var(--text-dim);letter-spacing:0.08em;"></div>
   </div>
 </div>
@@ -487,7 +533,7 @@ body {
     <div style="display:flex;align-items:center;gap:10px;width:100%;">
       <button onclick="goBack()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;font-size:18px;">←</button>
       <div>
-        <div id="work-ref" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);"></div>
+        <div id="work-ref" style="font-family:'Outfit',sans-serif;font-size:20px;color:var(--gold);"></div>
         <div id="work-model" style="font-size:10px;color:var(--text-dim);margin-top:1px;"></div>
       </div>
       <div style="margin-left:auto;" id="work-badge"></div>
@@ -907,53 +953,78 @@ function renderWorkSteps(job) {
   const container = document.getElementById('work-steps-container');
   let html = '';
 
-  // Group by phase
   const phases = job.type === 'full'
     ? [{id:'service', label:'Full Service'}, {id:'assembly', label:'Сборка'}]
     : [{id:'assembly', label:'Сборка'}];
 
   phases.forEach(phase => {
-    html += `<div class="steps-title">${phase.label}</div>`;
-    job.steps.filter(s => s.phase === phase.id).forEach((step, idx) => {
-      const globalIdx = job.steps.indexOf(step);
-      const isDone = step.elapsed > 0 && !step.running;
-      const isActive = step.running;
+    const phaseSteps = job.steps.filter(s => s.phase === phase.id);
+    const phaseElapsed = phaseSteps.reduce((a, s) => a + (s.elapsed || 0), 0);
+    const doneCount = phaseSteps.filter(s => s.elapsed > 0).length;
+    const isDetailOpen = job['detail_open_' + phase.id] || false;
 
-      let cls = '';
-      if (isActive) cls = 'step-active';
-      else if (isDone) cls = 'step-done';
+    // Quick time buttons for the whole phase: 15m, 30m, 1h, 2h, 4h, 8h
+    const quickTimes = [{label:'15м', min:15},{label:'30м', min:30},{label:'1ч', min:60},{label:'2ч', min:120},{label:'4ч', min:240},{label:'8ч', min:480}];
 
-      const elapsed = step.elapsed || 0;
+    html += `
+    <div class="phase-block" id="phase-${job.id}-${phase.id}">
+      <div class="phase-block-header" onclick="togglePhaseDetail('${job.id}','${phase.id}')">
+        <div class="phase-block-left">
+          <div class="phase-block-title">${phase.label}</div>
+          <div class="phase-block-meta">${doneCount}/${phaseSteps.length} этапов${phaseElapsed > 0 ? ' · ' + fmtMs(phaseElapsed) : ''}</div>
+        </div>
+        <div class="phase-block-right">
+          ${phaseElapsed > 0 ? `<span class="phase-total">${fmtMs(phaseElapsed)}</span>` : ''}
+          <span class="phase-chevron ${isDetailOpen ? 'open' : ''}">▼</span>
+        </div>
+      </div>
 
-      html += `
-      <div class="step-item ${cls}" id="step-${job.id}-${step.id}">
-        <div class="step-header">
-          <div class="step-num">${isDone ? '✓' : (isActive ? '●' : (globalIdx+1))}</div>
-          <div class="step-info">
-            <div class="step-name">${step.name}</div>
-            <div class="step-duration">${isDone ? fmtMs(elapsed) : (isActive ? 'В процессе...' : 'Не начат')}</div>
-          </div>
-          ${isActive ? `<div class="step-timer-display" id="timer-${job.id}-${step.id}">00:00</div>` : ''}
-          ${isDone ? `<div style="font-size:12px;color:var(--green);">${fmtMs(elapsed)}</div>` : ''}
+      <div class="phase-quick-times">
+        <div class="phase-qt-label">Быстро записать время на весь этап</div>
+        <div class="phase-qt-row">
+          ${quickTimes.map(t => `<button class="phase-qt-btn" onclick="addPhaseTime('${job.id}','${phase.id}',${t.min})">${t.label}</button>`).join('')}
+          <button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime('${job.id}','${phase.id}')">✎</button>
         </div>
-        <div class="step-actions">
-          ${!isDone && !isActive ? `<button class="step-btn step-btn-start" onclick="startStep('${job.id}','${step.id}')">▶ Старт</button>` : ''}
-          ${isActive ? `<button class="step-btn step-btn-stop" onclick="stopStep('${job.id}','${step.id}')">■ Стоп</button>` : ''}
-          <button class="step-btn step-btn-note" onclick="openStepNote('${job.id}','${step.id}')">✎ Заметка</button>
-          ${isDone ? `<button class="step-btn step-btn-start" onclick="restartStep('${job.id}','${step.id}')">↺ Ещё</button>` : ''}
-        </div>
-        <div class="quick-time-row">
-          <span style="font-size:9px;color:var(--text-dim);letter-spacing:0.1em;align-self:center;">+ время:</span>
-          ${[5,10,30,60].map(m => `<button class="qt-btn" onclick="addQuickTime('${job.id}','${step.id}',${m})">${m}м</button>`).join('')}
-          <button class="qt-btn qt-btn-custom" onclick="openCustomTime('${job.id}','${step.id}')">✎ своё</button>
-        </div>
-        ${(step.notes || step.parts) ? `
-        <div class="step-notes">
-          ${step.notes ? `<div style="margin-bottom:4px;">${step.notes}</div>` : ''}
-          ${step.parts ? `<span class="note-tag">🔧 ${step.parts}</span>` : ''}
-        </div>` : ''}
-      </div>`;
-    });
+      </div>
+
+      <div class="phase-steps-detail ${isDetailOpen ? 'open' : ''}" id="detail-${job.id}-${phase.id}">
+        ${phaseSteps.map((step) => {
+          const globalIdx = job.steps.indexOf(step);
+          const isDone = step.elapsed > 0 && !step.running;
+          const isActive = step.running;
+          let cls = isActive ? 'step-active' : (isDone ? 'step-done' : '');
+          const elapsed = step.elapsed || 0;
+          return `
+          <div class="step-item ${cls}" style="margin:0 10px 8px;border-radius:6px;" id="step-${job.id}-${step.id}">
+            <div class="step-header">
+              <div class="step-num">${isDone ? '✓' : (isActive ? '●' : (globalIdx+1))}</div>
+              <div class="step-info">
+                <div class="step-name">${step.name}</div>
+                <div class="step-duration">${isDone ? fmtMs(elapsed) : (isActive ? 'В процессе...' : 'Не начат')}</div>
+              </div>
+              ${isActive ? `<div class="step-timer-display" id="timer-${job.id}-${step.id}">00:00</div>` : ''}
+              ${isDone ? `<div style="font-size:13px;color:var(--green);font-weight:600;">${fmtMs(elapsed)}</div>` : ''}
+            </div>
+            <div class="step-actions">
+              ${!isDone && !isActive ? `<button class="step-btn step-btn-start" onclick="startStep('${job.id}','${step.id}')">▶ Старт</button>` : ''}
+              ${isActive ? `<button class="step-btn step-btn-stop" onclick="stopStep('${job.id}','${step.id}')">■ Стоп</button>` : ''}
+              <button class="step-btn step-btn-note" onclick="openStepNote('${job.id}','${step.id}')">✎ Заметка</button>
+              ${isDone ? `<button class="step-btn step-btn-start" onclick="restartStep('${job.id}','${step.id}')">↺ Ещё</button>` : ''}
+            </div>
+            <div class="quick-time-row">
+              <span style="font-size:11px;color:var(--text-dim);align-self:center;">+ мин:</span>
+              ${[5,10,30,60].map(m => `<button class="qt-btn" onclick="addQuickTime('${job.id}','${step.id}',${m})">${m}м</button>`).join('')}
+              <button class="qt-btn qt-btn-custom" onclick="openCustomTime('${job.id}','${step.id}')">✎</button>
+            </div>
+            ${(step.notes || step.parts) ? `
+            <div class="step-notes">
+              ${step.notes ? `<div style="margin-bottom:4px;">${step.notes}</div>` : ''}
+              ${step.parts ? `<span class="note-tag">🔧 ${step.parts}</span>` : ''}
+            </div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
   });
 
   container.innerHTML = html;
@@ -1162,7 +1233,7 @@ function openHistoryDetail(id) {
   const total = totalTime(job);
   html += `<div style="display:flex;justify-content:space-between;padding:14px 0 0;margin-top:4px;">
     <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">Итого</div>
-    <div style="font-size:16px;color:var(--gold);font-family:'Cormorant Garamond',serif;">${fmtMs(total)}</div>
+    <div style="font-size:16px;color:var(--gold);font-family:'Outfit',sans-serif;">${fmtMs(total)}</div>
   </div>`;
 
   if (job.note) {
@@ -1246,6 +1317,44 @@ function renderStats() {
     </div>`;
 }
 
+// ─── PHASE QUICK TIME ────────────────────────────────────────────────────────
+
+let phaseCustomTarget = null;
+
+function addPhaseTime(jobId, phaseId, minutes) {
+  const d = load();
+  const job = d.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  // Distribute time evenly across all phase steps, or add to first step as a lump
+  // Simplest: add to a virtual phase-level elapsed stored on first step of phase
+  const phaseSteps = job.steps.filter(s => s.phase === phaseId);
+  if (phaseSteps.length === 0) return;
+  // Add all time to the first step of the phase (represents the phase total)
+  phaseSteps[0].elapsed = (phaseSteps[0].elapsed || 0) + minutes * 60 * 1000;
+  save(d);
+  openJob(jobId);
+  showToast(`+${minutes < 60 ? minutes + ' мин' : (minutes/60) + ' ч'} → ${phaseId === 'service' ? 'Full Service' : 'Сборка'}`);
+}
+
+function openPhaseCustomTime(jobId, phaseId) {
+  phaseCustomTarget = {jobId, phaseId};
+  document.getElementById('inp-custom-min').value = '';
+  openModal('modal-custom-time');
+}
+
+function togglePhaseDetail(jobId, phaseId) {
+  const d = load();
+  const job = d.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  job['detail_open_' + phaseId] = !job['detail_open_' + phaseId];
+  save(d);
+  // Toggle without full re-render for smoothness
+  const detail = document.getElementById(`detail-${jobId}-${phaseId}`);
+  const chevron = document.querySelector(`#phase-${jobId}-${phaseId} .phase-chevron`);
+  if (detail) detail.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open');
+}
+
 // ─── QUICK TIME ─────────────────────────────────────────────────────────────
 
 let customTimeTarget = null;
@@ -1275,12 +1384,16 @@ function openCustomTime(jobId, stepId) {
 }
 
 function applyCustomTime() {
-  if (!customTimeTarget) return;
   const val = parseInt(document.getElementById('inp-custom-min').value);
   if (!val || val <= 0) { showToast('Введите число минут'); return; }
   closeModal('modal-custom-time');
-  addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
-  customTimeTarget = null;
+  if (phaseCustomTarget) {
+    addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val);
+    phaseCustomTarget = null;
+  } else if (customTimeTarget) {
+    addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
+    customTimeTarget = null;
+  }
 }
 
 // ─── THEME ───────────────────────────────────────────────────────────────────
