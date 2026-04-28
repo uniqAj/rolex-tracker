@@ -485,6 +485,37 @@ body {
   border: 1px dashed var(--border);
 }
 
+/* ── RETURN (REWORK) ── */
+.badge-return { background: rgba(201,76,76,0.15); color: #e05555; border: 1px solid rgba(201,76,76,0.4); }
+.card-return { border-color: rgba(201,76,76,0.45) !important; }
+.return-block {
+  margin: 0 16px 12px;
+  background: rgba(201,76,76,0.06);
+  border: 1px solid rgba(201,76,76,0.3);
+  border-radius: 8px; overflow: hidden;
+}
+.return-block-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.return-block-title { font-size: 15px; font-weight: 600; color: #e05555; }
+.return-item {
+  padding: 10px 16px; border-top: 1px solid rgba(201,76,76,0.2);
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.return-item-desc { font-size: 13px; color: var(--text); flex: 1; }
+.return-item-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.return-item-time { font-size: 14px; color: #e05555; font-weight: 600; flex-shrink: 0; margin-left: 12px; }
+
+/* ── SPEED BADGE ── */
+.speed-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+}
+.speed-fast { background: rgba(76,175,130,0.15); color: #4caf82; border: 1px solid rgba(76,175,130,0.35); }
+.speed-mid  { background: rgba(255,193,7,0.15);  color: #e6ac00; border: 1px solid rgba(255,193,7,0.35); }
+.speed-slow { background: rgba(201,76,76,0.15);  color: #c94c4c; border: 1px solid rgba(201,76,76,0.35); }
+
 /* scrollbar */
 ::-webkit-scrollbar { width: 2px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -540,8 +571,10 @@ body {
     </div>
   </div>
   <div id="work-steps-container" class="steps-container"></div>
+  <div id="work-returns-container"></div>
   <div style="padding:16px;">
     <button class="btn btn-gold" onclick="completeJob()">Завершить работу</button>
+    <button class="btn" style="background:rgba(201,76,76,0.12);color:#e05555;border:1px solid rgba(201,76,76,0.3);margin-top:8px;" onclick="openReturnModal()">🔴 Добавить возврат</button>
     <button class="btn btn-danger" onclick="deleteJob()">Удалить запись</button>
   </div>
 </div>
@@ -554,6 +587,7 @@ body {
     <div class="section-meta" id="stats-period">Всё время</div>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
+  <div id="stats-speed"></div>
   <div class="chart-container">
     <div class="chart-title">Среднее время по этапам (мин)</div>
     <div class="bar-chart" id="stage-chart"></div>
@@ -680,6 +714,37 @@ body {
       <button class="btn btn-gold" onclick="applyCustomTime()">Применить</button>
       <button class="btn btn-outline" onclick="closeModal('modal-custom-time')">Отмена</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Return -->
+
+<div class="modal-overlay" id="modal-return">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:#e05555;">🔴 Возврат</div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Что нужно переделать</label>
+        <textarea class="form-textarea" id="inp-return-desc" placeholder="Опишите проблему..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Время на переделку (мин)</label>
+        <input class="form-input" id="inp-return-time" type="number" placeholder="напр. 45" min="0" />
+      </div>
+      <button class="btn" style="background:rgba(201,76,76,0.15);color:#e05555;border:1px solid rgba(201,76,76,0.3);" onclick="saveReturn()">Сохранить возврат</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-return')">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Done Job -->
+
+<div class="modal-overlay" id="modal-edit-job">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Редактировать</div>
+    <div class="modal-body" id="edit-job-body"></div>
   </div>
 </div>
 
@@ -894,6 +959,7 @@ function jobCard(j) {
     return `<div class="progress-dot ${cls}"></div>`;
   }).join('');
 
+  const hasReturn = j.returns && j.returns.length > 0;
   const typeBadge = j.type === 'full'
     ? `<span class="badge badge-full">Full Service</span>`
     : `<span class="badge badge-assembly">Сборка</span>`;
@@ -902,15 +968,17 @@ function jobCard(j) {
     ? `<span class="badge badge-active">● В работе</span>`
     : `<span class="badge">${done}/${total}</span>`;
 
+  const returnBadge = hasReturn ? `<span class="badge badge-return">🔴 Возврат ×${j.returns.length}</span>` : '';
+
   return `
-  <div class="card" onclick="openJob('${j.id}')">
+  <div class="card ${hasReturn ? 'card-return' : ''}" onclick="openJob('${j.id}')">
     <div class="card-header">
       <div>
         <div class="card-ref">${j.serial || j.ref}</div>
         <div class="card-model">${j.ref ? 'Ref ' + j.ref : ''}${j.ref && j.model ? ' · ' : ''}${j.model || ''}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-        ${typeBadge}${statusBadge}
+        ${typeBadge}${statusBadge}${returnBadge}
       </div>
     </div>
     <div class="card-body">
@@ -943,6 +1011,7 @@ function openJob(id) {
     : `<span class="badge badge-assembly">Только Сборка</span>`;
 
   renderWorkSteps(job);
+  renderReturns(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-work').classList.add('active');
@@ -1176,8 +1245,9 @@ function historyCard(j, compact) {
   const fsTime = j.steps.filter(s => s.phase === 'service').reduce((a,s) => a+(s.elapsed||0), 0);
   const asTime = j.steps.filter(s => s.phase === 'assembly').reduce((a,s) => a+(s.elapsed||0), 0);
 
+  const hasReturn = j.returns && j.returns.length > 0;
   return `
-  <div class="history-item" onclick="openHistoryDetail('${j.id}')">
+  <div class="history-item ${hasReturn ? 'card-return' : ''}" onclick="openHistoryDetail('${j.id}')">
     <div class="history-header">
       <div class="history-ref">${j.serial || j.ref}</div>
       <div class="history-date">${fmtDate(j.completedAt || j.createdAt)}</div>
@@ -1187,6 +1257,8 @@ function historyCard(j, compact) {
       <div class="history-time">Итого: <span>${fmtMs(total)}</span></div>
       ${j.type === 'full' ? `<div class="history-time">Service: <span>${fmtMs(fsTime)}</span></div>` : ''}
       <div class="history-time">Сборка: <span>${fmtMs(asTime)}</span></div>
+      ${speedBadge(total/3600000, j.type)}
+      ${hasReturn ? `<span class="badge badge-return">🔴 ×${j.returns.length}</span>` : ''}
     </div>
   </div>`;
 }
@@ -1203,6 +1275,18 @@ function renderHistory() {
   }
 }
 
+function speedBadge(hours, type) {
+  if (type === 'full') {
+    if (hours <= 5) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
+    if (hours <= 7) return `<span class="speed-badge speed-mid">⏱ Средне</span>`;
+    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
+  } else {
+    if (hours < 3) return `<span class="speed-badge speed-fast">⚡ Быстро</span>`;
+    if (hours <= 4) return `<span class="speed-badge speed-mid">⏱ Хорошо</span>`;
+    return `<span class="speed-badge speed-slow">🐢 Долго</span>`;
+  }
+}
+
 function openHistoryDetail(id) {
   const d = load();
   const job = (d.done || []).find(j => j.id === id);
@@ -1210,111 +1294,308 @@ function openHistoryDetail(id) {
 
   document.getElementById('hd-ref').textContent = (job.serial || job.ref) + (job.model ? ' · ' + job.model : '');
 
-  let html = '';
+  const totalMs = totalTime(job);
+  const totalHours = totalMs / 3600000;
+
+  let html = `<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">
+    ${speedBadge(totalHours, job.type)}
+    <span style="font-size:13px;color:var(--text-dim);align-self:center;">Итого: <strong style="color:var(--gold)">${fmtMs(totalMs)}</strong></span>
+  </div>`;
+
   const phases = job.type === 'full'
     ? [{id:'service', label:'Full Service'}, {id:'assembly', label:'Сборка'}]
     : [{id:'assembly', label:'Сборка'}];
 
   phases.forEach(phase => {
-    html += `<div style="font-size:9px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin:12px 0 8px;">${phase.label}</div>`;
+    html += `<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin:12px 0 8px;">${phase.label}</div>`;
     job.steps.filter(s => s.phase === phase.id).forEach(step => {
       html += `
       <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
         <div>
-          <div style="font-size:12px;color:var(--text);">${step.name}</div>
-          ${step.notes ? `<div style="font-size:10px;color:var(--text-dim);margin-top:3px;">${step.notes}</div>` : ''}
+          <div style="font-size:14px;color:var(--text);">${step.name}</div>
+          ${step.notes ? `<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">${step.notes}</div>` : ''}
           ${step.parts ? `<span class="note-tag" style="margin-top:4px;">🔧 ${step.parts}</span>` : ''}
         </div>
-        <div style="font-size:12px;color:var(--gold);flex-shrink:0;margin-left:12px;">${fmtMs(step.elapsed)}</div>
+        <div style="font-size:14px;color:var(--gold);flex-shrink:0;margin-left:12px;font-weight:600;">${fmtMs(step.elapsed)}</div>
       </div>`;
     });
   });
 
-  const total = totalTime(job);
-  html += `<div style="display:flex;justify-content:space-between;padding:14px 0 0;margin-top:4px;">
-    <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">Итого</div>
-    <div style="font-size:16px;color:var(--gold);font-family:'Outfit',sans-serif;">${fmtMs(total)}</div>
-  </div>`;
-
   if (job.note) {
-    html += `<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:3px;font-size:11px;color:var(--text-dim);">${job.note}</div>`;
+    html += `<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text-dim);">${job.note}</div>`;
   }
 
-  html += `<button class="btn btn-outline" style="margin-top:16px;" onclick="closeModal('modal-history-detail')">Закрыть</button>`;
+  // Returns section
+  if (job.returns && job.returns.length > 0) {
+    const totalRet = job.returns.reduce((a,r) => a+(r.elapsed||0), 0);
+    html += `<div style="margin-top:14px;background:rgba(201,76,76,0.06);border:1px solid rgba(201,76,76,0.25);border-radius:8px;overflow:hidden;">
+      <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:14px;font-weight:600;color:#e05555;">🔴 Возвраты (${job.returns.length})</div>
+        <div style="font-size:13px;color:#e05555;font-weight:600;">${fmtMs(totalRet)}</div>
+      </div>`;
+    job.returns.forEach(r => {
+      html += `<div style="padding:10px 14px;border-top:1px solid rgba(201,76,76,0.2);display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:14px;color:var(--text);">${r.desc}</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${fmtDate(r.date)}</div>
+        </div>
+        <div style="font-size:14px;color:#e05555;font-weight:600;margin-left:12px;">${r.elapsed ? fmtMs(r.elapsed) : '—'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `
+    <button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob('${id}')">✎ Редактировать</button>
+    <button class="btn" style="background:rgba(201,76,76,0.12);color:#e05555;border:1px solid rgba(201,76,76,0.3);margin-top:8px;" onclick="closeModal('modal-history-detail');currentJobId='${id}';openReturnModal()">🔴 Добавить возврат</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-history-detail')">Закрыть</button>`;
 
   document.getElementById('hd-body').innerHTML = html;
   openModal('modal-history-detail');
 }
 
+// ─── RETURNS ─────────────────────────────────────────────────────────────────
+
+function openReturnModal() {
+  document.getElementById('inp-return-desc').value = '';
+  document.getElementById('inp-return-time').value = '';
+  openModal('modal-return');
+}
+
+function saveReturn() {
+  const desc = document.getElementById('inp-return-desc').value.trim();
+  if (!desc) { showToast('Опишите проблему'); return; }
+  const mins = parseInt(document.getElementById('inp-return-time').value) || 0;
+
+  const d = load();
+  // Works for both active and done jobs
+  let job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
+  if (!job) return;
+
+  if (!job.returns) job.returns = [];
+  job.returns.push({
+    id: Date.now().toString(),
+    desc,
+    elapsed: mins * 60000,
+    date: Date.now()
+  });
+
+  save(d);
+  closeModal('modal-return');
+  showToast('Возврат добавлен');
+
+  // Re-render whichever view is open
+  const isDone = !!(d.done||[]).find(j => j.id === currentJobId);
+  if (isDone) { renderHistory(); openHistoryDetail(currentJobId); }
+  else openJob(currentJobId);
+}
+
+function renderReturns(job) {
+  const container = document.getElementById('work-returns-container');
+  if (!container) return;
+  if (!job.returns || job.returns.length === 0) { container.innerHTML = ''; return; }
+
+  const totalReturnTime = job.returns.reduce((a, r) => a + (r.elapsed || 0), 0);
+  let html = `
+  <div class="return-block" style="margin:0 16px 12px;">
+    <div class="return-block-header">
+      <div class="return-block-title">🔴 Возвраты (${job.returns.length})</div>
+      <div style="font-size:13px;color:#e05555;font-weight:600;">${fmtMs(totalReturnTime)}</div>
+    </div>`;
+  job.returns.forEach(r => {
+    html += `
+    <div class="return-item">
+      <div>
+        <div class="return-item-desc">${r.desc}</div>
+        <div class="return-item-meta">${fmtDate(r.date)}</div>
+      </div>
+      <div class="return-item-time">${r.elapsed ? fmtMs(r.elapsed) : '—'}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+// ─── EDIT DONE JOB ───────────────────────────────────────────────────────────
+
+function openEditJob(id) {
+  const d = load();
+  const job = (d.done || []).find(j => j.id === id);
+  if (!job) return;
+
+  closeModal('modal-history-detail');
+
+  let html = `
+    <div class="form-group">
+      <label class="form-label">Серийный номер</label>
+      <input class="form-input" id="edit-serial" value="${job.serial||''}" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Ref</label>
+        <input class="form-input" id="edit-ref" value="${job.ref||''}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Модель</label>
+        <input class="form-input" id="edit-model" value="${job.model||''}" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Заметка</label>
+      <textarea class="form-textarea" id="edit-note">${job.note||''}</textarea>
+
+```
+</div>`;
+```
+
+const phases = job.type === ‘full’
+? [{id:‘service’, label:‘Full Service’}, {id:‘assembly’, label:‘Сборка’}]
+: [{id:‘assembly’, label:‘Сборка’}];
+
+phases.forEach(phase => {
+html += `<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 8px;">${phase.label} — время этапов (мин)</div>`;
+job.steps.filter(s => s.phase === phase.id).forEach(step => {
+const mins = step.elapsed ? Math.round(step.elapsed / 60000) : 0;
+html += ` <div class="form-group" style="margin-bottom:10px;"> <label class="form-label">${step.name}</label> <input class="form-input edit-step-time" data-stepid="${step.id}" type="number" value="${mins}" min="0" placeholder="0" /> </div>`;
+});
+});
+
+html += ` <button class="btn btn-gold" onclick="saveEditJob('${id}')">Сохранить</button> <button class="btn btn-outline" onclick="closeModal('modal-edit-job')">Отмена</button>`;
+
+document.getElementById(‘edit-job-body’).innerHTML = html;
+openModal(‘modal-edit-job’);
+}
+
+function saveEditJob(id) {
+const d = load();
+const job = (d.done || []).find(j => j.id === id);
+if (!job) return;
+
+job.serial = document.getElementById(‘edit-serial’).value.trim();
+job.ref    = document.getElementById(‘edit-ref’).value.trim();
+job.model  = document.getElementById(‘edit-model’).value.trim();
+job.note   = document.getElementById(‘edit-note’).value.trim();
+
+document.querySelectorAll(’.edit-step-time’).forEach(inp => {
+const stepId = inp.dataset.stepid;
+const step = job.steps.find(s => s.id === stepId);
+if (step) {
+const mins = parseFloat(inp.value) || 0;
+step.elapsed = Math.round(mins * 60000);
+}
+});
+
+save(d);
+closeModal(‘modal-edit-job’);
+showToast(‘Изменения сохранены’);
+renderHistory();
+}
+
 // ─── STATS ──────────────────────────────────────────────────────────────────
 
 function renderStats() {
-  const d = load();
-  const all = [...(d.jobs||[]), ...(d.done||[])];
-  const done = d.done || [];
+const d = load();
+const done = d.done || [];
 
-  const totalJobs = done.length;
-  const fullJobs = done.filter(j => j.type === 'full').length;
-  const assemblyOnly = done.filter(j => j.type === 'assembly').length;
+const totalJobs = done.length;
+const fullJobs = done.filter(j => j.type === ‘full’).length;
+const assemblyOnly = done.filter(j => j.type === ‘assembly’).length;
+const avgTotal = totalJobs > 0 ? done.reduce((a,j) => a + totalTime(j), 0) / totalJobs : 0;
 
-  const avgTotal = totalJobs > 0
-    ? done.reduce((a,j) => a + totalTime(j), 0) / totalJobs
-    : 0;
+const returnCount = done.filter(j => j.returns && j.returns.length > 0).length;
+const returnPct = totalJobs > 0 ? Math.round(returnCount / totalJobs * 100) : 0;
 
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-card-val">${totalJobs}</div><div class="stat-card-lbl">Завершено</div></div>
-    <div class="stat-card"><div class="stat-card-val">${fmtMs(avgTotal)}</div><div class="stat-card-lbl">Среднее время</div></div>
-    <div class="stat-card"><div class="stat-card-val">${fullJobs}</div><div class="stat-card-lbl">Full Service</div></div>
-    <div class="stat-card"><div class="stat-card-val">${assemblyOnly}</div><div class="stat-card-lbl">Только Сборка</div></div>
-  `;
+document.getElementById(‘stats-grid’).innerHTML = `<div class="stat-card"><div class="stat-card-val">${totalJobs}</div><div class="stat-card-lbl">Завершено</div></div> <div class="stat-card"><div class="stat-card-val">${fmtMs(avgTotal)}</div><div class="stat-card-lbl">Среднее время</div></div> <div class="stat-card"><div class="stat-card-val">${fullJobs}</div><div class="stat-card-lbl">Full Service</div></div> <div class="stat-card"><div class="stat-card-val">${assemblyOnly}</div><div class="stat-card-lbl">Только Сборка</div></div> <div class="stat-card" style="border-color:${returnCount>0?'rgba(201,76,76,0.35)':'var(--border)'}"> <div class="stat-card-val" style="color:${returnCount>0?'#e05555':'var(--gold)'};">${returnCount}</div> <div class="stat-card-lbl">🔴 Возвратов</div> </div> <div class="stat-card" style="border-color:${returnPct>20?'rgba(201,76,76,0.35)':returnPct>10?'rgba(255,193,7,0.35)':'var(--border)'}"> <div class="stat-card-val" style="color:${returnPct>20?'#e05555':returnPct>10?'#e6ac00':'var(--green)'};">${returnPct}%</div> <div class="stat-card-lbl">% возвратов</div> </div>`;
 
-  // Stage avg chart
-  const stageChart = document.getElementById('stage-chart');
-  if (done.length === 0) {
-    stageChart.innerHTML = `<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:12px;">Нет данных</div>`;
-  } else {
-    const stageMap = {};
-    done.forEach(j => {
-      j.steps.forEach(s => {
-        if (!stageMap[s.id]) stageMap[s.id] = {name: s.name, total: 0, count: 0};
-        if (s.elapsed > 0) {
-          stageMap[s.id].total += s.elapsed;
-          stageMap[s.id].count++;
-        }
-      });
-    });
+// Speed breakdown
+if (done.length > 0) {
+const fullDone = done.filter(j => j.type === ‘full’);
+const asmDone  = done.filter(j => j.type === ‘assembly’);
 
-    const stages = Object.values(stageMap).filter(s => s.count > 0)
-      .map(s => ({name: s.name, avg: s.total / s.count}))
-      .sort((a,b) => b.avg - a.avg)
-      .slice(0, 8);
+```
+const countSpeed = (jobs, type) => {
+  let fast=0, mid=0, slow=0;
+  jobs.forEach(j => {
+    const h = totalTime(j) / 3600000;
+    if (type === 'full') { if (h<=5) fast++; else if (h<=7) mid++; else slow++; }
+    else { if (h<3) fast++; else if (h<=4) mid++; else slow++; }
+  });
+  return {fast, mid, slow};
+};
 
-    const maxAvg = Math.max(...stages.map(s => s.avg), 1);
-    stageChart.innerHTML = stages.map(s => `
-      <div class="bar-row">
-        <div class="bar-label" title="${s.name}">${s.name.split(' ')[0]}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${(s.avg/maxAvg*100).toFixed(1)}%"></div></div>
-        <div class="bar-val">${Math.round(s.avg/60000)}м</div>
-      </div>`).join('');
-  }
-
-  // Type chart
-  const typeChart = document.getElementById('type-chart');
-  const avgFull = fullJobs > 0 ? done.filter(j=>j.type==='full').reduce((a,j)=>a+totalTime(j),0)/fullJobs : 0;
-  const avgAssembly = assemblyOnly > 0 ? done.filter(j=>j.type==='assembly').reduce((a,j)=>a+totalTime(j),0)/assemblyOnly : 0;
-  const maxT = Math.max(avgFull, avgAssembly, 1);
-
-  typeChart.innerHTML = `
-    <div class="bar-row">
-      <div class="bar-label">Full Service</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(avgFull/maxT*100).toFixed(1)}%"></div></div>
-      <div class="bar-val">${fmtMs(avgFull)}</div>
+let speedHtml = '';
+if (fullDone.length > 0) {
+  const s = countSpeed(fullDone, 'full');
+  speedHtml += `
+  <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Full Service — скорость</div>
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:6px;">
+        <div style="font-size:22px;font-weight:700;color:#4caf82;">${s.fast}</div>
+        <div style="font-size:11px;color:var(--text-dim);">⚡ ≤5ч</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:6px;">
+        <div style="font-size:22px;font-weight:700;color:#e6ac00;">${s.mid}</div>
+        <div style="font-size:11px;color:var(--text-dim);">⏱ 6–7ч</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:6px;">
+        <div style="font-size:22px;font-weight:700;color:#c94c4c;">${s.slow}</div>
+        <div style="font-size:11px;color:var(--text-dim);">🐢 ≥8ч</div>
+      </div>
     </div>
-    <div class="bar-row">
-      <div class="bar-label">Только Сборка</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(avgAssembly/maxT*100).toFixed(1)}%;background:var(--blue)"></div></div>
-      <div class="bar-val">${fmtMs(avgAssembly)}</div>
-    </div>`;
+  </div>`;
+}
+if (asmDone.length > 0) {
+  const s = countSpeed(asmDone, 'assembly');
+  speedHtml += `
+  <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Сборка — скорость</div>
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:6px;">
+        <div style="font-size:22px;font-weight:700;color:#4caf82;">${s.fast}</div>
+        <div style="font-size:11px;color:var(--text-dim);">⚡ &lt;3ч</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:6px;">
+        <div style="font-size:22px;font-weight:700;color:#e6ac00;">${s.mid}</div>
+        <div style="font-size:11px;color:var(--text-dim);">⏱ 3–4ч</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:6px;">
+        <div style="font-size:22px;font-weight:700;color:#c94c4c;">${s.slow}</div>
+        <div style="font-size:11px;color:var(--text-dim);">🐢 ≥5ч</div>
+      </div>
+    </div>
+  </div>`;
+}
+document.getElementById('stats-speed').innerHTML = speedHtml;
+```
+
+}
+
+// Stage avg chart
+const stageChart = document.getElementById(‘stage-chart’);
+if (done.length === 0) {
+stageChart.innerHTML = `<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">Нет данных</div>`;
+} else {
+const stageMap = {};
+done.forEach(j => {
+j.steps.forEach(s => {
+if (!stageMap[s.id]) stageMap[s.id] = {name: s.name, total: 0, count: 0};
+if (s.elapsed > 0) { stageMap[s.id].total += s.elapsed; stageMap[s.id].count++; }
+});
+});
+const stages = Object.values(stageMap).filter(s => s.count > 0)
+.map(s => ({name: s.name, avg: s.total / s.count}))
+.sort((a,b) => b.avg - a.avg).slice(0, 8);
+const maxAvg = Math.max(…stages.map(s => s.avg), 1);
+stageChart.innerHTML = stages.map(s => ` <div class="bar-row"> <div class="bar-label" title="${s.name}">${s.name.split(' ')[0]}</div> <div class="bar-track"><div class="bar-fill" style="width:${(s.avg/maxAvg*100).toFixed(1)}%"></div></div> <div class="bar-val">${Math.round(s.avg/60000)}м</div> </div>`).join(’’);
+}
+
+// Type chart
+const typeChart = document.getElementById(‘type-chart’);
+const avgFull = fullJobs > 0 ? done.filter(j=>j.type===‘full’).reduce((a,j)=>a+totalTime(j),0)/fullJobs : 0;
+const avgAssembly = assemblyOnly > 0 ? done.filter(j=>j.type===‘assembly’).reduce((a,j)=>a+totalTime(j),0)/assemblyOnly : 0;
+const maxT = Math.max(avgFull, avgAssembly, 1);
+typeChart.innerHTML = ` <div class="bar-row"> <div class="bar-label">Full Service</div> <div class="bar-track"><div class="bar-fill" style="width:${(avgFull/maxT*100).toFixed(1)}%"></div></div> <div class="bar-val">${fmtMs(avgFull)}</div> </div> <div class="bar-row"> <div class="bar-label">Только Сборка</div> <div class="bar-track"><div class="bar-fill" style="width:${(avgAssembly/maxT*100).toFixed(1)}%;background:var(--blue)"></div></div> <div class="bar-val">${fmtMs(avgAssembly)}</div> </div>`;
 }
 
 // ─── PHASE QUICK TIME ────────────────────────────────────────────────────────
@@ -1322,37 +1603,37 @@ function renderStats() {
 let phaseCustomTarget = null;
 
 function addPhaseTime(jobId, phaseId, minutes) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  // Distribute time evenly across all phase steps, or add to first step as a lump
-  // Simplest: add to a virtual phase-level elapsed stored on first step of phase
-  const phaseSteps = job.steps.filter(s => s.phase === phaseId);
-  if (phaseSteps.length === 0) return;
-  // Add all time to the first step of the phase (represents the phase total)
-  phaseSteps[0].elapsed = (phaseSteps[0].elapsed || 0) + minutes * 60 * 1000;
-  save(d);
-  openJob(jobId);
-  showToast(`+${minutes < 60 ? minutes + ' мин' : (minutes/60) + ' ч'} → ${phaseId === 'service' ? 'Full Service' : 'Сборка'}`);
+const d = load();
+const job = d.jobs.find(j => j.id === jobId);
+if (!job) return;
+// Distribute time evenly across all phase steps, or add to first step as a lump
+// Simplest: add to a virtual phase-level elapsed stored on first step of phase
+const phaseSteps = job.steps.filter(s => s.phase === phaseId);
+if (phaseSteps.length === 0) return;
+// Add all time to the first step of the phase (represents the phase total)
+phaseSteps[0].elapsed = (phaseSteps[0].elapsed || 0) + minutes * 60 * 1000;
+save(d);
+openJob(jobId);
+showToast(`+${minutes < 60 ? minutes + ' мин' : (minutes/60) + ' ч'} → ${phaseId === 'service' ? 'Full Service' : 'Сборка'}`);
 }
 
 function openPhaseCustomTime(jobId, phaseId) {
-  phaseCustomTarget = {jobId, phaseId};
-  document.getElementById('inp-custom-min').value = '';
-  openModal('modal-custom-time');
+phaseCustomTarget = {jobId, phaseId};
+document.getElementById(‘inp-custom-min’).value = ‘’;
+openModal(‘modal-custom-time’);
 }
 
 function togglePhaseDetail(jobId, phaseId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  job['detail_open_' + phaseId] = !job['detail_open_' + phaseId];
-  save(d);
-  // Toggle without full re-render for smoothness
-  const detail = document.getElementById(`detail-${jobId}-${phaseId}`);
-  const chevron = document.querySelector(`#phase-${jobId}-${phaseId} .phase-chevron`);
-  if (detail) detail.classList.toggle('open');
-  if (chevron) chevron.classList.toggle('open');
+const d = load();
+const job = d.jobs.find(j => j.id === jobId);
+if (!job) return;
+job[‘detail_open_’ + phaseId] = !job[‘detail_open_’ + phaseId];
+save(d);
+// Toggle without full re-render for smoothness
+const detail = document.getElementById(`detail-${jobId}-${phaseId}`);
+const chevron = document.querySelector(`#phase-${jobId}-${phaseId} .phase-chevron`);
+if (detail) detail.classList.toggle(‘open’);
+if (chevron) chevron.classList.toggle(‘open’);
 }
 
 // ─── QUICK TIME ─────────────────────────────────────────────────────────────
@@ -1360,56 +1641,56 @@ function togglePhaseDetail(jobId, phaseId) {
 let customTimeTarget = null;
 
 function addQuickTime(jobId, stepId, minutes) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  const step = job.steps.find(s => s.id === stepId);
-  if (!step) return;
+const d = load();
+const job = d.jobs.find(j => j.id === jobId);
+if (!job) return;
+const step = job.steps.find(s => s.id === stepId);
+if (!step) return;
 
-  step.elapsed = (step.elapsed || 0) + minutes * 60 * 1000;
-  // If step wasn't started yet, mark it as done
-  if (!step.running) {
-    step.running = false;
-    step.startTime = null;
-  }
-  save(d);
-  openJob(jobId);
-  showToast(`+${minutes} мин добавлено`);
+step.elapsed = (step.elapsed || 0) + minutes * 60 * 1000;
+// If step wasn’t started yet, mark it as done
+if (!step.running) {
+step.running = false;
+step.startTime = null;
+}
+save(d);
+openJob(jobId);
+showToast(`+${minutes} мин добавлено`);
 }
 
 function openCustomTime(jobId, stepId) {
-  customTimeTarget = {jobId, stepId};
-  document.getElementById('inp-custom-min').value = '';
-  openModal('modal-custom-time');
+customTimeTarget = {jobId, stepId};
+document.getElementById(‘inp-custom-min’).value = ‘’;
+openModal(‘modal-custom-time’);
 }
 
 function applyCustomTime() {
-  const val = parseInt(document.getElementById('inp-custom-min').value);
-  if (!val || val <= 0) { showToast('Введите число минут'); return; }
-  closeModal('modal-custom-time');
-  if (phaseCustomTarget) {
-    addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val);
-    phaseCustomTarget = null;
-  } else if (customTimeTarget) {
-    addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
-    customTimeTarget = null;
-  }
+const val = parseInt(document.getElementById(‘inp-custom-min’).value);
+if (!val || val <= 0) { showToast(‘Введите число минут’); return; }
+closeModal(‘modal-custom-time’);
+if (phaseCustomTarget) {
+addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val);
+phaseCustomTarget = null;
+} else if (customTimeTarget) {
+addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
+customTimeTarget = null;
+}
 }
 
 // ─── THEME ───────────────────────────────────────────────────────────────────
 
 function toggleTheme() {
-  const isLight = document.documentElement.classList.toggle('light');
-  localStorage.setItem('rst_theme', isLight ? 'light' : 'dark');
-  document.getElementById('theme-btn').textContent = isLight ? '🌙 Тёмная' : '☀️ Светлая';
+const isLight = document.documentElement.classList.toggle(‘light’);
+localStorage.setItem(‘rst_theme’, isLight ? ‘light’ : ‘dark’);
+document.getElementById(‘theme-btn’).textContent = isLight ? ‘🌙 Тёмная’ : ‘☀️ Светлая’;
 }
 
-if (localStorage.getItem('rst_theme') === 'light') {
-  document.documentElement.classList.add('light');
-  document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('theme-btn');
-    if (btn) btn.textContent = '🌙 Тёмная';
-  });
+if (localStorage.getItem(‘rst_theme’) === ‘light’) {
+document.documentElement.classList.add(‘light’);
+document.addEventListener(‘DOMContentLoaded’, () => {
+const btn = document.getElementById(‘theme-btn’);
+if (btn) btn.textContent = ‘🌙 Тёмная’;
+});
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
