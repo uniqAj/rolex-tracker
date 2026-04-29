@@ -540,7 +540,7 @@ function renderHome() {
   document.getElementById('home-count').textContent = active.length + ' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445';
   const al = document.getElementById('active-jobs-list');
   al.innerHTML = active.length === 0
-    ? '<div class="empty-state"><div class="empty-icon">&#9202;</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u041d\u0435\u0442 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0440\u0430\u0431\u043e\u0442')+'</div><div class="empty-text">'+(q?'':'\u041d\u0430\u0436\u043c\u0438\u0442\u0435 + \u0447\u0442\u043e\u0431\u044b \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0430\u0441\u044b')+'</div></div>'
+    ? '<div class="empty-state"><div class="empty-icon">⏲</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u041d\u0435\u0442 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0440\u0430\u0431\u043e\u0442')+'</div><div class="empty-text">'+(q?'':'\u041d\u0430\u0436\u043c\u0438\u0442\u0435 + \u0447\u0442\u043e\u0431\u044b \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0430\u0441\u044b')+'</div></div>'
     : active.map(jobCard).join('');
   const rl = document.getElementById('recent-jobs-list');
   document.getElementById('recent-count').textContent = recent.length > 0 ? recent.length+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445' : '';
@@ -558,9 +558,9 @@ function jobCard(j) {
   const hasDorab = j.dorabotki && j.dorabotki.length > 0;
   const hasVozvrat = j.vozvrat && j.vozvrat.length > 0;
   const typeBadge = j.type==='full'?'<span class="badge badge-full">Full Service</span>':'<span class="badge badge-assembly">\u0421\u0431\u043e\u0440\u043a\u0430</span>';
-  const statusBadge = activeStep?'<span class="badge badge-active">&#9679; \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>':'<span class="badge">'+done+'/'+total+'</span>';
-  const dorabBadge = hasDorab?'<span class="badge badge-dorabotka">&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>':'  ';
-  const vozvratBadge = hasVozvrat?'<span class="badge badge-vozvrat">&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442 \xd7'+j.vozvrat.length+'</span>':'  ';
+  const statusBadge = activeStep?'<span class="badge badge-active">● \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>':'<span class="badge">'+done+'/'+total+'</span>';
+  const dorabBadge = hasDorab?'<span class="badge badge-dorabotka">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>':'  ';
+  const vozvratBadge = hasVozvrat?'<span class="badge badge-vozvrat">↩ \u0412\u043e\u0437\u0432\u0440\u0430\u0442 \xd7'+j.vozvrat.length+'</span>':'  ';
   const borderCls = hasVozvrat?'card-vozvrat':(hasDorab?'card-dorabotka':'');
   return '<div class="card '+borderCls+'" onclick="openJob(\''+ j.id+'\')">'+
     '<div class="card-header"><div>'+
@@ -572,9 +572,9 @@ function jobCard(j) {
     '<div class="card-stats">'+
     '<div class="stat"><div class="stat-val">'+(fmtMs(elapsed)||'\u2014')+'</div><div class="stat-lbl">\u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e</div></div>'+
     '<div class="stat"><div class="stat-val">'+done+'/'+total+'</div><div class="stat-lbl">\u042d\u0442\u0430\u043f\u043e\u0432</div></div>'+
-    (activeStep?'<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'&#8230;</div><div class="stat-lbl">\u0421\u0435\u0439\u0447\u0430\u0441</div></div>':'')+
+    (activeStep?'<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'…</div><div class="stat-lbl">\u0421\u0435\u0439\u0447\u0430\u0441</div></div>':'')+
     '</div></div>'+
-    '<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">\u041e\u0442\u043a\u0440\u044b\u0442\u044c &#8594;</div></div>'+
+    '<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">\u041e\u0442\u043a\u0440\u044b\u0442\u044c →</div></div>'+
     '</div>';
 }
 
@@ -613,12 +613,12 @@ function renderWorkSteps(job) {
       '<div><div class="phase-block-title">'+phase.label+'</div>'+
       '<div class="phase-block-meta">'+doneCount+'/'+phaseSteps.length+' \u044d\u0442\u0430\u043f\u043e\u0432'+(phaseElapsed>0?' \xb7 '+fmtMs(phaseElapsed):'')+'</div></div>'+
       '<div class="phase-block-right">'+(phaseElapsed>0?'<span class="phase-total">'+fmtMs(phaseElapsed)+'</span>':'')+
-      '<span class="phase-chevron '+(isOpen?'open':'')+'">&#9660;</span></div></div>'+
+      '<span class="phase-chevron '+(isOpen?'open':'')+'">▼</span></div></div>'+
       '<div class="phase-quick-times">'+
       '<div class="phase-qt-label">\u0411\u044b\u0441\u0442\u0440\u043e \u0437\u0430\u043f\u0438\u0441\u0430\u0442\u044c \u0432\u0440\u0435\u043c\u044f</div>'+
       '<div class="phase-qt-row">'+
       qts.map(t => '<button class="phase-qt-btn" onclick="addPhaseTime(\''+ job.id+'\',\''+ phase.id+'\','+t.min+')">'+ t.label+'</button>').join('')+
-      '<button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime(\''+ job.id+'\',\''+ phase.id+'\')">&#9998;</button>'+
+      '<button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime(\''+ job.id+'\',\''+ phase.id+'\')">✎</button>'+
       '</div></div>'+
       '<div class="phase-steps-detail '+(isOpen?'open':'')+'" id="detail-'+job.id+'-'+phase.id+'">';
     phaseSteps.forEach(step => {
@@ -628,24 +628,24 @@ function renderWorkSteps(job) {
       const cls = isActive?'step-active':(isDone?'step-done':'');
       html += '<div class="step-item '+cls+'" id="step-'+job.id+'-'+step.id+'">'+
         '<div class="step-header">'+
-        '<div class="step-num">'+(isDone?'&#10003;':(isActive?'&#9679;':(gIdx+1)))+'</div>'+
+        '<div class="step-num">'+(isDone?'✓':(isActive?'●':(gIdx+1)))+'</div>'+
         '<div class="step-info"><div class="step-name">'+step.name+'</div>'+
         '<div class="step-duration">'+(isDone?fmtMs(step.elapsed):(isActive?'\u0412 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u0435...':'\u041d\u0435 \u043d\u0430\u0447\u0430\u0442'))+'</div></div>'+
         (isActive?'<div class="step-timer-display" id="timer-'+job.id+'-'+step.id+'">00:00</div>':'')+
         (isDone?'<div style="font-size:14px;color:var(--green);font-weight:700;">'+fmtMs(step.elapsed)+'</div>':'')+
         '</div>'+
         '<div class="step-actions">'+
-        (!isDone&&!isActive?'<button class="step-btn step-btn-start" onclick="startStep(\''+ job.id+'\',\''+ step.id+'\')">&#9654; \u0421\u0442\u0430\u0440\u0442</button>':'')+
-        (isActive?'<button class="step-btn step-btn-stop" onclick="stopStep(\''+ job.id+'\',\''+ step.id+'\')">&#9632; \u0421\u0442\u043e\u043f</button>':'')+
-        '<button class="step-btn step-btn-note" onclick="openStepNote(\''+ job.id+'\',\''+ step.id+'\')">&#9998; \u0417\u0430\u043c\u0435\u0442\u043a\u0430</button>'+
-        (isDone?'<button class="step-btn step-btn-start" onclick="restartStep(\''+ job.id+'\',\''+ step.id+'\')">&#8635; \u0415\u0449\u0451</button>':'')+
+        (!isDone&&!isActive?'<button class="step-btn step-btn-start" onclick="startStep(\''+ job.id+'\',\''+ step.id+'\')">▶ \u0421\u0442\u0430\u0440\u0442</button>':'')+
+        (isActive?'<button class="step-btn step-btn-stop" onclick="stopStep(\''+ job.id+'\',\''+ step.id+'\')">■ \u0421\u0442\u043e\u043f</button>':'')+
+        '<button class="step-btn step-btn-note" onclick="openStepNote(\''+ job.id+'\',\''+ step.id+'\')">✎ \u0417\u0430\u043c\u0435\u0442\u043a\u0430</button>'+
+        (isDone?'<button class="step-btn step-btn-start" onclick="restartStep(\''+ job.id+'\',\''+ step.id+'\')">↻ \u0415\u0449\u0451</button>':'')+
         '</div>'+
         '<div class="quick-time-row">'+
         '<span style="font-size:11px;color:var(--text-dim);align-self:center;">+ \u043c\u0438\u043d:</span>'+
         [5,10,30,60].map(m => '<button class="qt-btn" onclick="addQuickTime(\''+ job.id+'\',\''+ step.id+'\','+m+')">'+ m+'\u043c</button>').join('')+
-        '<button class="qt-btn qt-btn-custom" onclick="openCustomTime(\''+ job.id+'\',\''+ step.id+'\')">&#9998;</button>'+
+        '<button class="qt-btn qt-btn-custom" onclick="openCustomTime(\''+ job.id+'\',\''+ step.id+'\')">✎</button>'+
         '</div>'+
-        ((step.notes||step.parts)?'<div class="step-notes">'+(step.notes?'<div style="margin-bottom:4px;">'+step.notes+'</div>':'')+( step.parts?'<span class="note-tag">&#128295; '+step.parts+'</span>':'')+'</div>':'')+
+        ((step.notes||step.parts)?'<div class="step-notes">'+(step.notes?'<div style="margin-bottom:4px;">'+step.notes+'</div>':'')+( step.parts?'<span class="note-tag">🔧 '+step.parts+'</span>':'')+'</div>':'')+
         '</div>';
     });
     html += '</div></div>';
@@ -668,7 +668,7 @@ function renderJobEvents(job) {
     const totalV = vozvrat.reduce((a,r) => a+(r.elapsed||0), 0);
     html += '<div style="margin:0 16px 12px;background:rgba(230,130,30,0.06);border:1px solid rgba(230,130,30,0.3);border-radius:10px;overflow:hidden;">'+
       '<div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">'+
-      '<div style="font-size:15px;font-weight:700;color:#e6821e;">&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442\u044b ('+vozvrat.length+')</div>'+
+      '<div style="font-size:15px;font-weight:700;color:#e6821e;">↩ \u0412\u043e\u0437\u0432\u0440\u0430\u0442\u044b ('+vozvrat.length+')</div>'+
       '<div style="font-size:13px;color:#e6821e;font-weight:700;">'+(totalV>0?fmtMs(totalV):'')+'</div></div>';
     vozvrat.forEach(r => {
       html += '<div style="padding:10px 16px;border-top:1px solid rgba(230,130,30,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
@@ -676,7 +676,7 @@ function renderJobEvents(job) {
         '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
         '<div style="font-size:14px;color:#e6821e;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
-        '<button onclick="openEventModal(\'vozvrat\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,130,30,0.3);border-radius:4px;color:#e6821e;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
+        '<button onclick="openEventModal(\'vozvrat\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,130,30,0.3);border-radius:4px;color:#e6821e;font-size:12px;padding:4px 8px;cursor:pointer;">✎</button>'+
         '</div></div>';
     });
     html += '</div>';
@@ -686,7 +686,7 @@ function renderJobEvents(job) {
     const totalD = dorabotki.reduce((a,r) => a+(r.elapsed||0), 0);
     html += '<div style="margin:0 16px 12px;background:rgba(230,200,50,0.06);border:1px solid rgba(230,200,50,0.3);border-radius:10px;overflow:hidden;">'+
       '<div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">'+
-      '<div style="font-size:15px;font-weight:700;color:#e6c832;">&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 ('+dorabotki.length+')</div>'+
+      '<div style="font-size:15px;font-weight:700;color:#e6c832;">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 ('+dorabotki.length+')</div>'+
       '<div style="font-size:13px;color:#e6c832;font-weight:700;">'+(totalD>0?fmtMs(totalD):'')+'</div></div>';
     dorabotki.forEach(r => {
       html += '<div style="padding:10px 16px;border-top:1px solid rgba(230,200,50,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
@@ -694,7 +694,7 @@ function renderJobEvents(job) {
         '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
         '<div style="font-size:14px;color:#e6c832;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
-        '<button onclick="openEventModal(\'dorabotka\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:4px;color:#e6c832;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
+        '<button onclick="openEventModal(\'dorabotka\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:4px;color:#e6c832;font-size:12px;padding:4px 8px;cursor:pointer;">✎</button>'+
         '</div></div>';
     });
     html += '</div>';
@@ -813,7 +813,7 @@ function completeJob() {
   });
   job.done = true; job.completedAt = Date.now();
   d.jobs.splice(idx, 1); if (!d.done) d.done = []; d.done.push(job); save(d);
-  showToast('\u0420\u0430\u0431\u043e\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0430 &#10003;'); navigate('home');
+  showToast('\u0420\u0430\u0431\u043e\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0430 ✓'); navigate('home');
 }
 function deleteJob() {
   if (!currentJobId) return;
@@ -845,7 +845,7 @@ function openEventModal(type, eventId) {
   editingEventId = eventId || null;
   const isVozvrat = type === 'vozvrat';
   const color = isVozvrat ? '#e6821e' : '#e6c832';
-  const title = isVozvrat ? '&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442' : '&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430';
+  const title = isVozvrat ? '↩ \u0412\u043e\u0437\u0432\u0440\u0430\u0442' : '↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430';
   document.getElementById('event-modal-title').innerHTML = title;
   document.getElementById('event-modal-title').style.color = color;
   const saveBtn = document.getElementById('event-save-btn');
@@ -929,8 +929,8 @@ function historyCard(j, compact) {
     (j.type==='full'?'<div class="history-time">Service: <span>'+fmtMs(fsTime)+'</span></div>':'')+
     '<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>'+
     speedBadges(j)+
-    (hasDorab?'<span class="badge badge-dorabotka">&#8635; \xd7'+j.dorabotki.length+'</span>':'')+
-    (hasVozvrat?'<span class="badge badge-vozvrat">&#8617; \xd7'+j.vozvrat.length+'</span>':'')+
+    (hasDorab?'<span class="badge badge-dorabotka">↻ \xd7'+j.dorabotki.length+'</span>':'')+
+    (hasVozvrat?'<span class="badge badge-vozvrat">↩ \xd7'+j.vozvrat.length+'</span>':'')+
     '</div></div>';
 }
 
@@ -947,7 +947,7 @@ function renderHistory() {
   document.getElementById('history-count').textContent = done.length+'\u00a0\u0447\u0430\u0441\u043e\u0432'+(q?' (\u043d\u0430\u0439\u0434\u0435\u043d\u043e)':'  ');
   const list = document.getElementById('history-list');
   list.innerHTML = done.length===0
-    ? '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u0443\u0441\u0442\u0430')+'</div></div>'
+    ? '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u0443\u0441\u0442\u0430')+'</div></div>'
     : done.map(j => historyCard(j, false)).join('');
 }
 
@@ -966,7 +966,7 @@ function openHistoryDetail(id) {
       html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">'+
         '<div><div style="font-size:14px;color:var(--text);">'+step.name+'</div>'+
         (step.notes?'<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">'+step.notes+'</div>':'')+
-        (step.parts?'<span class="note-tag" style="margin-top:4px;">&#128295; '+step.parts+'</span>':'')+
+        (step.parts?'<span class="note-tag" style="margin-top:4px;">🔧 '+step.parts+'</span>':'')+
         '</div><div style="font-size:14px;color:var(--gold);flex-shrink:0;margin-left:12px;font-weight:700;">'+fmtMs(step.elapsed)+'</div></div>';
     });
   });
@@ -977,7 +977,7 @@ function openHistoryDetail(id) {
     const totalV = vozvrat.reduce((a,r) => a+(r.elapsed||0), 0);
     html += '<div style="margin-top:14px;background:rgba(230,130,30,0.06);border:1px solid rgba(230,130,30,0.3);border-radius:8px;overflow:hidden;">'+
       '<div style="padding:12px 14px;display:flex;justify-content:space-between;">'+
-      '<div style="font-size:14px;font-weight:700;color:#e6821e;">&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442\u044b ('+vozvrat.length+')</div>'+
+      '<div style="font-size:14px;font-weight:700;color:#e6821e;">↩ \u0412\u043e\u0437\u0432\u0440\u0430\u0442\u044b ('+vozvrat.length+')</div>'+
       '<div style="font-size:13px;color:#e6821e;font-weight:700;">'+(totalV>0?fmtMs(totalV):'')+'</div></div>';
     vozvrat.forEach(r => {
       html += '<div style="padding:10px 14px;border-top:1px solid rgba(230,130,30,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
@@ -985,8 +985,8 @@ function openHistoryDetail(id) {
         '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
         '<div style="font-size:14px;color:#e6821e;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
-        '<button onclick="closeModal(\'modal-history-detail\');openEventModal(\'vozvrat\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,130,30,0.3);border-radius:4px;color:#e6821e;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
-        '<button onclick="deleteEvent(\''+ id+'\',\''+ r.id+'\',\'vozvrat\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">&#10005;</button>'+
+        '<button onclick="closeModal(\'modal-history-detail\');openEventModal(\'vozvrat\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,130,30,0.3);border-radius:4px;color:#e6821e;font-size:12px;padding:4px 8px;cursor:pointer;">✎</button>'+
+        '<button onclick="deleteEvent(\''+ id+'\',\''+ r.id+'\',\'vozvrat\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">✕</button>'+
         '</div></div>';
     });
     html += '</div>';
@@ -997,7 +997,7 @@ function openHistoryDetail(id) {
     const totalD = dorabotki.reduce((a,r) => a+(r.elapsed||0), 0);
     html += '<div style="margin-top:14px;background:rgba(230,200,50,0.06);border:1px solid rgba(230,200,50,0.3);border-radius:8px;overflow:hidden;">'+
       '<div style="padding:12px 14px;display:flex;justify-content:space-between;">'+
-      '<div style="font-size:14px;font-weight:700;color:#e6c832;">&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 ('+dorabotki.length+')</div>'+
+      '<div style="font-size:14px;font-weight:700;color:#e6c832;">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 ('+dorabotki.length+')</div>'+
       '<div style="font-size:13px;color:#e6c832;font-weight:700;">'+(totalD>0?fmtMs(totalD):'')+'</div></div>';
     dorabotki.forEach(r => {
       html += '<div style="padding:10px 14px;border-top:1px solid rgba(230,200,50,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
@@ -1005,16 +1005,16 @@ function openHistoryDetail(id) {
         '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
         '<div style="font-size:14px;color:#e6c832;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
-        '<button onclick="closeModal(\'modal-history-detail\');openEventModal(\'dorabotka\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:4px;color:#e6c832;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
-        '<button onclick="deleteEvent(\''+ id+'\',\''+ r.id+'\',\'dorabotka\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">&#10005;</button>'+
+        '<button onclick="closeModal(\'modal-history-detail\');openEventModal(\'dorabotka\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:4px;color:#e6c832;font-size:12px;padding:4px 8px;cursor:pointer;">✎</button>'+
+        '<button onclick="deleteEvent(\''+ id+'\',\''+ r.id+'\',\'dorabotka\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">✕</button>'+
         '</div></div>';
     });
     html += '</div>';
   }
 
-  html += '<button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob(\''+ id+'\')">&#9998; \u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c</button>'+
-    '<button class="btn" style="background:rgba(230,200,50,0.1);color:#e6c832;border:1px solid rgba(230,200,50,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openEventModal(\'dorabotka\')">&#8635; \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443</button>'+
-    '<button class="btn" style="background:rgba(230,130,30,0.1);color:#e6821e;border:1px solid rgba(230,130,30,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openEventModal(\'vozvrat\')">&#8617; \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0432\u043e\u0437\u0432\u0440\u0430\u0442</button>'+
+  html += '<button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob(\''+ id+'\')">✎ \u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c</button>'+
+    '<button class="btn" style="background:rgba(230,200,50,0.1);color:#e6c832;border:1px solid rgba(230,200,50,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openEventModal(\'dorabotka\')">↻ \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443</button>'+
+    '<button class="btn" style="background:rgba(230,130,30,0.1);color:#e6821e;border:1px solid rgba(230,130,30,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openEventModal(\'vozvrat\')">↩ \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0432\u043e\u0437\u0432\u0440\u0430\u0442</button>'+
     '<button class="btn btn-danger" onclick="deleteFromHistory(\''+ id+'\')" style="margin-top:8px;">\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0438\u0437 \u0438\u0441\u0442\u043e\u0440\u0438\u0438</button>'+
     '<button class="btn btn-outline" onclick="closeModal(\'modal-history-detail\')">\u0417\u0430\u043a\u0440\u044b\u0442\u044c</button>';
   document.getElementById('hd-body').innerHTML = html;
@@ -1170,13 +1170,13 @@ reader.readAsText(file);
 function toggleTheme() {
 const isLight = document.documentElement.classList.toggle(‘light’);
 localStorage.setItem(‘rst_theme’, isLight?‘light’:‘dark’);
-document.getElementById(‘theme-btn’).textContent = isLight?’🌙 \u0422\u0451\u043c\u043d\u0430\u044f’:’☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f’;
+document.getElementById(‘theme-btn’).textContent = isLight?‘🌙 \u0422\u0451\u043c\u043d\u0430\u044f’:‘☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f’;
 }
 if (localStorage.getItem(‘rst_theme’)===‘light’) {
 document.documentElement.classList.add(‘light’);
 window.addEventListener(‘load’, () => {
 const btn=document.getElementById(‘theme-btn’);
-if(btn) btn.textContent=’🌙 \u0422\u0451\u043c\u043d\u0430\u044f’;
+if(btn) btn.textContent=‘🌙 \u0422\u0451\u043c\u043d\u0430\u044f’;
 });
 }
 
