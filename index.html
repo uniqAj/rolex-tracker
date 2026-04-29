@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -282,7 +281,6 @@
 </button>
 
 <!-- MODAL: New Job -->
-
 <div class="modal-overlay" id="modal-new">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -320,7 +318,6 @@
 </div>
 
 <!-- MODAL: Step Note -->
-
 <div class="modal-overlay" id="modal-note">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -341,7 +338,6 @@
 </div>
 
 <!-- MODAL: History Detail -->
-
 <div class="modal-overlay" id="modal-history-detail">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -351,7 +347,6 @@
 </div>
 
 <!-- MODAL: Custom Time -->
-
 <div class="modal-overlay" id="modal-custom-time">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -368,7 +363,6 @@
 </div>
 
 <!-- MODAL: Event (Dorabotka / Vozvrat) -->
-
 <div class="modal-overlay" id="modal-event">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -390,7 +384,6 @@
 </div>
 
 <!-- MODAL: Edit Job -->
-
 <div class="modal-overlay" id="modal-edit-job">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1030,158 +1023,156 @@ function openEditJob(id) {
     '<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'+
     '<div class="form-group"><label class="form-label">\u041c\u043e\u0434\u0435\u043b\u044c</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'+
     '<div class="form-group"><label class="form-label">\u0417\u0430\u043c\u0435\u0442\u043a\u0430</label><textarea class="form-textarea" id="edit-note">'+(job.note||'')+'</textarea></div>';
-
-phases.forEach(phase => {
-const ps = job.steps.filter(s => s.phase===phase.id);
-const pt = ps.reduce((a,s) => a+(s.elapsed||0), 0);
-const pm = Math.round(pt/60000);
-const hasDet = ps.some(s => s.elapsed>0);
-html += ‘<div style="margin:14px 0 8px;">’+
-‘<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">’+
-‘<label class="form-label" style="margin:0;">’+phase.label+’ (\u043c\u0438\u043d)</label>’+
-(hasDet?’<span style="font-size:12px;color:var(--text-dim);cursor:pointer;" onclick="toggleEditDetails(\'details-'+ phase.id+'\')">≡ \u043f\u043e\u044d\u0442\u0430\u043f\u043d\u043e</span>’:’’)+
-‘</div><input class="form-input edit-phase-time" data-phase="'+phase.id+'" type="number" value="'+pm+'" min="0" /></div>’;
-html += ‘<div id="details-'+phase.id+'" style="display:none;margin-bottom:8px;padding:10px;background:var(--bg3);border-radius:6px;">’;
-ps.forEach(step => {
-const m = step.elapsed ? Math.round(step.elapsed/60000) : 0;
-html += ‘<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">’+
-‘<div style="font-size:13px;color:var(--text-dim);flex:1;">’+step.name+’</div>’+
-‘<input class="form-input edit-step-time" data-stepid="'+step.id+'" type="number" value="'+m+'" min="0" style="width:80px;padding:6px;font-size:14px;" /></div>’;
-});
-html += ‘</div>’;
-});
-html += ‘<button class="btn btn-gold" style="margin-top:8px;" onclick="saveEditJob(\''+ id+'\')">\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c</button>’+
-‘<button class="btn btn-outline" onclick="closeModal(\'modal-edit-job\')">\u041e\u0442\u043c\u0435\u043d\u0430</button>’;
-document.getElementById(‘edit-job-body’).innerHTML = html;
-openModal(‘modal-edit-job’);
+  phases.forEach(phase => {
+    const ps = job.steps.filter(s => s.phase===phase.id);
+    const pt = ps.reduce((a,s) => a+(s.elapsed||0), 0);
+    const pm = Math.round(pt/60000);
+    const hasDet = ps.some(s => s.elapsed>0);
+    html += '<div style="margin:14px 0 8px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'+
+      '<label class="form-label" style="margin:0;">'+phase.label+' (\u043c\u0438\u043d)</label>'+
+      (hasDet?'<span style="font-size:12px;color:var(--text-dim);cursor:pointer;" onclick="toggleEditDetails(\'details-'+ phase.id+'\')">≡ \u043f\u043e\u044d\u0442\u0430\u043f\u043d\u043e</span>':'')+
+      '</div><input class="form-input edit-phase-time" data-phase="'+phase.id+'" type="number" value="'+pm+'" min="0" /></div>';
+    html += '<div id="details-'+phase.id+'" style="display:none;margin-bottom:8px;padding:10px;background:var(--bg3);border-radius:6px;">';
+    ps.forEach(step => {
+      const m = step.elapsed ? Math.round(step.elapsed/60000) : 0;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'+
+        '<div style="font-size:13px;color:var(--text-dim);flex:1;">'+step.name+'</div>'+
+        '<input class="form-input edit-step-time" data-stepid="'+step.id+'" type="number" value="'+m+'" min="0" style="width:80px;padding:6px;font-size:14px;" /></div>';
+    });
+    html += '</div>';
+  });
+  html += '<button class="btn btn-gold" style="margin-top:8px;" onclick="saveEditJob(\''+ id+'\')">\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c</button>'+
+    '<button class="btn btn-outline" onclick="closeModal(\'modal-edit-job\')">\u041e\u0442\u043c\u0435\u043d\u0430</button>';
+  document.getElementById('edit-job-body').innerHTML = html;
+  openModal('modal-edit-job');
 }
-function toggleEditDetails(id) { const el=document.getElementById(id); if(el) el.style.display=el.style.display===‘none’?‘block’:‘none’; }
+function toggleEditDetails(id) { const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
 function saveEditJob(id) {
-const d = load(), job = (d.done||[]).find(j => j.id===id);
-if (!job) return;
-job.serial = document.getElementById(‘edit-serial’).value.trim();
-job.ref    = document.getElementById(‘edit-ref’).value.trim();
-job.model  = document.getElementById(‘edit-model’).value.trim();
-job.note   = document.getElementById(‘edit-note’).value.trim();
-const stepInputs = document.querySelectorAll(’.edit-step-time’);
-if (stepInputs.length > 0) {
-stepInputs.forEach(inp => { const step=job.steps.find(s => s.id===inp.dataset.stepid); if(step) step.elapsed=Math.round((parseFloat(inp.value)||0)*60000); });
-} else {
-document.querySelectorAll(’.edit-phase-time’).forEach(inp => {
-const ps=job.steps.filter(s => s.phase===inp.dataset.phase);
-if(ps.length>0) ps[0].elapsed=Math.round((parseFloat(inp.value)||0)*60000);
-});
-}
-save(d); closeModal(‘modal-edit-job’); showToast(’\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b’); renderHistory();
+  const d = load(), job = (d.done||[]).find(j => j.id===id);
+  if (!job) return;
+  job.serial = document.getElementById('edit-serial').value.trim();
+  job.ref    = document.getElementById('edit-ref').value.trim();
+  job.model  = document.getElementById('edit-model').value.trim();
+  job.note   = document.getElementById('edit-note').value.trim();
+  const stepInputs = document.querySelectorAll('.edit-step-time');
+  if (stepInputs.length > 0) {
+    stepInputs.forEach(inp => { const step=job.steps.find(s => s.id===inp.dataset.stepid); if(step) step.elapsed=Math.round((parseFloat(inp.value)||0)*60000); });
+  } else {
+    document.querySelectorAll('.edit-phase-time').forEach(inp => {
+      const ps=job.steps.filter(s => s.phase===inp.dataset.phase);
+      if(ps.length>0) ps[0].elapsed=Math.round((parseFloat(inp.value)||0)*60000);
+    });
+  }
+  save(d); closeModal('modal-edit-job'); showToast('\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b'); renderHistory();
 }
 
 function renderStats() {
-const d = load(), done = d.done||[];
-const totalJobs = done.length;
-const fullJobs = done.filter(j => j.type===‘full’).length;
-const assemblyOnly = done.filter(j => j.type===‘assembly’).length;
-const avgTotal = totalJobs>0 ? done.reduce((a,j) => a+totalTime(j),0)/totalJobs : 0;
-const dorabCount = done.filter(j => j.dorabotki && j.dorabotki.length>0).length;
-const vozvratCount = done.filter(j => j.vozvrat && j.vozvrat.length>0).length;
-const vozvratPct = totalJobs>0 ? Math.round(vozvratCount/totalJobs*100) : 0;
-document.getElementById(‘stats-grid’).innerHTML =
-‘<div class="stat-card"><div class="stat-card-val">’+totalJobs+’</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>’+
-‘<div class="stat-card"><div class="stat-card-val">’+fmtMs(avgTotal)+’</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>’+
-‘<div class="stat-card"><div class="stat-card-val">’+fullJobs+’</div><div class="stat-card-lbl">Full Service</div></div>’+
-‘<div class="stat-card"><div class="stat-card-val">’+assemblyOnly+’</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>’+
-‘<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">’+dorabCount+’</div><div class="stat-card-lbl">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>’+
-‘<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">’+vozvratPct+’%</div><div class="stat-card-lbl">↩ % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>’;
-if (done.length > 0) {
-const countSpeed = (jobs, type) => { let f=0,m=0,s=0; jobs.forEach(j => { const h=totalTime(j)/3600000; if(type===‘full’){if(h<=5)f++;else if(h<=7)m++;else s++;}else{if(h<3)f++;else if(h<=4)m++;else s++;} }); return {fast:f,mid:m,slow:s}; };
-let speedHtml = ‘’;
-const fullDone = done.filter(j => j.type===‘full’);
-const asmDone = done.filter(j => j.type===‘assembly’);
-if (fullDone.length > 0) {
-const s = countSpeed(fullDone, ‘full’);
-speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’+
-‘<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Full Service \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>’+
-‘<div style="display:flex;gap:10px;">’+
-‘<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ ≤5\u0447</div></div>’+
-‘<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 6\u20137\u0447</div></div>’+
-‘<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥8\u0447</div></div>’+
-‘</div></div>’;
-}
-if (asmDone.length > 0) {
-const s = countSpeed(asmDone, ‘assembly’);
-speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’+
-‘<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">\u0421\u0431\u043e\u0440\u043a\u0430 \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>’+
-‘<div style="display:flex;gap:10px;">’+
-‘<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ <3\u0447</div></div>’+
-‘<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 3\u20134\u0447</div></div>’+
-‘<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥5\u0447</div></div>’+
-‘</div></div>’;
-}
-document.getElementById(‘stats-speed’).innerHTML = speedHtml;
-}
-const stageChart = document.getElementById(‘stage-chart’);
-if (done.length===0) { stageChart.innerHTML=’<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445</div>’; }
-else {
-const sm = {};
-done.forEach(j => j.steps.forEach(s => {
-if (!sm[s.id]) sm[s.id]={name:s.name,total:0,count:0};
-if (s.elapsed>0) { sm[s.id].total+=s.elapsed; sm[s.id].count++; }
-}));
-const stages = Object.values(sm).filter(s => s.count>0).map(s => ({name:s.name,avg:s.total/s.count})).sort((a,b) => b.avg-a.avg).slice(0,8);
-const maxA = Math.max(…stages.map(s => s.avg),1);
-stageChart.innerHTML = stages.map(s =>
-‘<div class="bar-row"><div class="bar-label" title="'+s.name+'">’+s.name.split(’ ‘)[0]+’</div>’+
-‘<div class="bar-track"><div class="bar-fill" style="width:'+(s.avg/maxA*100).toFixed(1)+'%"></div></div>’+
-‘<div class="bar-val">’+fmtMs(s.avg)+’</div></div>’
-).join(’’);
-}
-const aF = fullJobs>0?done.filter(j=>j.type===‘full’).reduce((a,j)=>a+totalTime(j),0)/fullJobs:0;
-const aA = assemblyOnly>0?done.filter(j=>j.type===‘assembly’).reduce((a,j)=>a+totalTime(j),0)/assemblyOnly:0;
-const mT = Math.max(aF,aA,1);
-document.getElementById(‘type-chart’).innerHTML =
-‘<div class="bar-row"><div class="bar-label">Full Service</div><div class="bar-track"><div class="bar-fill" style="width:'+(aF/mT*100).toFixed(1)+'%"></div></div><div class="bar-val">’+fmtMs(aF)+’</div></div>’+
-‘<div class="bar-row"><div class="bar-label">\u0421\u0431\u043e\u0440\u043a\u0430</div><div class="bar-track"><div class="bar-fill" style="width:'+(aA/mT*100).toFixed(1)+'%;background:var(--blue)"></div></div><div class="bar-val">’+fmtMs(aA)+’</div></div>’;
+  const d = load(), done = d.done||[];
+  const totalJobs = done.length;
+  const fullJobs = done.filter(j => j.type==='full').length;
+  const assemblyOnly = done.filter(j => j.type==='assembly').length;
+  const avgTotal = totalJobs>0 ? done.reduce((a,j) => a+totalTime(j),0)/totalJobs : 0;
+  const dorabCount = done.filter(j => j.dorabotki && j.dorabotki.length>0).length;
+  const vozvratCount = done.filter(j => j.vozvrat && j.vozvrat.length>0).length;
+  const vozvratPct = totalJobs>0 ? Math.round(vozvratCount/totalJobs*100) : 0;
+  document.getElementById('stats-grid').innerHTML =
+    '<div class="stat-card"><div class="stat-card-val">'+totalJobs+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
+    '<div class="stat-card"><div class="stat-card-val">'+fmtMs(avgTotal)+'</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>'+
+    '<div class="stat-card"><div class="stat-card-val">'+fullJobs+'</div><div class="stat-card-lbl">Full Service</div></div>'+
+    '<div class="stat-card"><div class="stat-card-val">'+assemblyOnly+'</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>'+
+    '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+dorabCount+'</div><div class="stat-card-lbl">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>'+
+    '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+vozvratPct+'%</div><div class="stat-card-lbl">↩ % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>';
+  if (done.length > 0) {
+    const countSpeed = (jobs, type) => { let f=0,m=0,s=0; jobs.forEach(j => { const h=totalTime(j)/3600000; if(type==='full'){if(h<=5)f++;else if(h<=7)m++;else s++;}else{if(h<3)f++;else if(h<=4)m++;else s++;} }); return {fast:f,mid:m,slow:s}; };
+    let speedHtml = '';
+    const fullDone = done.filter(j => j.type==='full');
+    const asmDone = done.filter(j => j.type==='assembly');
+    if (fullDone.length > 0) {
+      const s = countSpeed(fullDone, 'full');
+      speedHtml += '<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">'+
+        '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Full Service \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>'+
+        '<div style="display:flex;gap:10px;">'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">'+s.fast+'</div><div style="font-size:11px;color:var(--text-dim);">⚡ ≤5\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">'+s.mid+'</div><div style="font-size:11px;color:var(--text-dim);">⏱ 6\u20137\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">'+s.slow+'</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥8\u0447</div></div>'+
+        '</div></div>';
+    }
+    if (asmDone.length > 0) {
+      const s = countSpeed(asmDone, 'assembly');
+      speedHtml += '<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">'+
+        '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">\u0421\u0431\u043e\u0440\u043a\u0430 \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>'+
+        '<div style="display:flex;gap:10px;">'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">'+s.fast+'</div><div style="font-size:11px;color:var(--text-dim);">⚡ <3\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">'+s.mid+'</div><div style="font-size:11px;color:var(--text-dim);">⏱ 3\u20134\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">'+s.slow+'</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥5\u0447</div></div>'+
+        '</div></div>';
+    }
+    document.getElementById('stats-speed').innerHTML = speedHtml;
+  }
+  const stageChart = document.getElementById('stage-chart');
+  if (done.length===0) { stageChart.innerHTML='<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445</div>'; }
+  else {
+    const sm = {};
+    done.forEach(j => j.steps.forEach(s => {
+      if (!sm[s.id]) sm[s.id]={name:s.name,total:0,count:0};
+      if (s.elapsed>0) { sm[s.id].total+=s.elapsed; sm[s.id].count++; }
+    }));
+    const stages = Object.values(sm).filter(s => s.count>0).map(s => ({name:s.name,avg:s.total/s.count})).sort((a,b) => b.avg-a.avg).slice(0,8);
+    const maxA = Math.max(...stages.map(s => s.avg),1);
+    stageChart.innerHTML = stages.map(s =>
+      '<div class="bar-row"><div class="bar-label" title="'+s.name+'">'+s.name.split(' ')[0]+'</div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(s.avg/maxA*100).toFixed(1)+'%"></div></div>'+
+      '<div class="bar-val">'+fmtMs(s.avg)+'</div></div>'
+    ).join('');
+  }
+  const aF = fullJobs>0?done.filter(j=>j.type==='full').reduce((a,j)=>a+totalTime(j),0)/fullJobs:0;
+  const aA = assemblyOnly>0?done.filter(j=>j.type==='assembly').reduce((a,j)=>a+totalTime(j),0)/assemblyOnly:0;
+  const mT = Math.max(aF,aA,1);
+  document.getElementById('type-chart').innerHTML =
+    '<div class="bar-row"><div class="bar-label">Full Service</div><div class="bar-track"><div class="bar-fill" style="width:'+(aF/mT*100).toFixed(1)+'%"></div></div><div class="bar-val">'+fmtMs(aF)+'</div></div>'+
+    '<div class="bar-row"><div class="bar-label">\u0421\u0431\u043e\u0440\u043a\u0430</div><div class="bar-track"><div class="bar-fill" style="width:'+(aA/mT*100).toFixed(1)+'%;background:var(--blue)"></div></div><div class="bar-val">'+fmtMs(aA)+'</div></div>';
 }
 
 function exportData() {
-const d = load();
-const blob = new Blob([JSON.stringify(d,null,2)],{type:‘application/json’});
-const url = URL.createObjectURL(blob);
-const a = document.createElement(‘a’);
-a.href=url; a.download=‘service-tracker-backup-’+new Date().toISOString().slice(0,10)+’.json’;
-a.click(); URL.revokeObjectURL(url);
-showToast(’\u0414\u0430\u043d\u043d\u044b\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b \u0432 \u0444\u0430\u0439\u043b’);
+  const d = load();
+  const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='service-tracker-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('\u0414\u0430\u043d\u043d\u044b\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b \u0432 \u0444\u0430\u0439\u043b');
 }
 function importData(input) {
-const file = input.files[0]; if (!file) return;
-const reader = new FileReader();
-reader.onload = function(e) {
-try {
-const data = JSON.parse(e.target.result);
-if (!data.jobs||!data.done) throw new Error(‘bad’);
-localStorage.setItem(‘rst_data’,JSON.stringify(data));
-showToast(’\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e ‘+( data.done||[]).length+’ \u0437\u0430\u043f\u0438\u0441\u0435\u0439’);
-setTimeout(()=>{renderHome();navigate(‘home’);},1000);
-} catch(err) { showToast(’\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430’); }
-input.value=’’;
-};
-reader.readAsText(file);
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.jobs||!data.done) throw new Error('bad');
+      localStorage.setItem('rst_data',JSON.stringify(data));
+      showToast('\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e '+( data.done||[]).length+' \u0437\u0430\u043f\u0438\u0441\u0435\u0439');
+      setTimeout(()=>{renderHome();navigate('home');},1000);
+    } catch(err) { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430'); }
+    input.value='';
+  };
+  reader.readAsText(file);
 }
 
 function toggleTheme() {
-const isLight = document.documentElement.classList.toggle(‘light’);
-localStorage.setItem(‘rst_theme’, isLight?‘light’:‘dark’);
-document.getElementById(‘theme-btn’).textContent = isLight?‘🌙 \u0422\u0451\u043c\u043d\u0430\u044f’:‘☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f’;
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('rst_theme', isLight?'light':'dark');
+  document.getElementById('theme-btn').textContent = isLight?'🌙 \u0422\u0451\u043c\u043d\u0430\u044f':'☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f';
 }
-if (localStorage.getItem(‘rst_theme’)===‘light’) {
-document.documentElement.classList.add(‘light’);
-window.addEventListener(‘load’, () => {
-const btn=document.getElementById(‘theme-btn’);
-if(btn) btn.textContent=‘🌙 \u0422\u0451\u043c\u043d\u0430\u044f’;
-});
+if (localStorage.getItem('rst_theme')==='light') {
+  document.documentElement.classList.add('light');
+  window.addEventListener('load', () => {
+    const btn=document.getElementById('theme-btn');
+    if(btn) btn.textContent='🌙 \u0422\u0451\u043c\u043d\u0430\u044f';
+  });
 }
 
 renderHome();
 </script>
-
 </body>
 </html>
