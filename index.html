@@ -52,6 +52,10 @@
     .badge-full { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border-gold); }
     .badge-assembly { background: rgba(76,130,201,0.12); color: var(--blue); border: 1px solid rgba(76,130,201,0.25); }
     .badge-active { background: rgba(76,175,130,0.12); color: var(--green); border: 1px solid rgba(76,175,130,0.25); }
+    .badge-dorabotka { background: rgba(230,200,50,0.15); color: #e6c832; border: 1px solid rgba(230,200,50,0.4); }
+    .badge-vozvrat { background: rgba(230,130,30,0.15); color: #e6821e; border: 1px solid rgba(230,130,30,0.4); }
+    .card-dorabotka { border-color: rgba(230,200,50,0.4) !important; }
+    .card-vozvrat { border-color: rgba(230,130,30,0.4) !important; }
     .card-body { padding: 12px 16px; }
     .card-progress { display: flex; gap: 3px; margin-bottom: 10px; }
     .progress-dot { flex: 1; height: 3px; border-radius: 1px; background: var(--border); transition: background 0.3s; }
@@ -159,15 +163,12 @@
     .divider { height: 1px; background: var(--border); margin: 4px 16px 16px; }
     .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom,0px) + 90px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); border: 1px solid var(--border-gold); color: var(--text-mid); font-size: 13px; padding: 10px 18px; border-radius: 6px; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 300; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .badge-dorabotka { background: rgba(230,160,30,0.15); color: #e6a01e; border: 1px solid rgba(230,160,30,0.4); }
-    .card-dorabotka { border-color: rgba(230,160,30,0.45) !important; }
-    .dorabotka-block { margin: 0 16px 12px; background: rgba(230,160,30,0.06); border: 1px solid rgba(230,160,30,0.3); border-radius: 10px; overflow: hidden; }
-    .dorabotka-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
-    .dorabotka-title { font-size: 15px; font-weight: 700; color: #e6a01e; }
-    .dorabotka-item { padding: 10px 16px; border-top: 1px solid rgba(230,160,30,0.2); display: flex; justify-content: space-between; align-items: flex-start; }
-    .dorabotka-item-desc { font-size: 13px; color: var(--text); flex: 1; }
-    .dorabotka-item-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-    .dorabotka-item-time { font-size: 14px; color: #e6a01e; font-weight: 700; flex-shrink: 0; margin-left: 12px; }
+    .badge-vozvrat { background: rgba(230,130,20,0.15); color: #e67e1e; border: 1px solid rgba(230,130,20,0.4); }
+    .card-vozvrat { border-color: rgba(230,130,20,0.5) !important; }
+    .vozvrat-block { margin: 0 16px 12px; background: rgba(230,130,20,0.06); border: 1px solid rgba(230,130,20,0.3); border-radius: 10px; overflow: hidden; }
+    .vozvrat-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .vozvrat-title { font-size: 15px; font-weight: 700; color: #e67e1e; }
+    .vozvrat-item { padding: 10px 16px; border-top: 1px solid rgba(230,130,20,0.2); display: flex; justify-content: space-between; align-items: flex-start; }
     ::-webkit-scrollbar { width: 2px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 1px; }
@@ -177,27 +178,27 @@
 
 <div class="topbar">
   <div>
-    <div class="topbar-title">⌚ Service Tracker</div>
+    <div class="topbar-title">&#x231a; Service Tracker</div>
     <div class="topbar-subtitle">Workshop Log</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
-    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 10px;cursor:pointer;">☀️ Светлая</button>
+    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 10px;cursor:pointer;">&#x2600;&#xFE0F; &#1057;&#1074;&#1077;&#1090;&#1083;&#1072;&#1103;</button>
     <div id="topbar-clock" style="font-size:13px;color:var(--text-dim);"></div>
   </div>
 </div>
 
 <div class="page active" id="page-home">
   <div class="section-header">
-    <div class="section-title">Активные</div>
+    <div class="section-title">&#1040;&#1082;&#1090;&#1080;&#1074;&#1085;&#1099;&#1077;</div>
     <div class="section-meta" id="home-count"></div>
   </div>
   <div style="padding:0 16px 12px;">
-    <input class="form-input" id="home-search" placeholder="🔍 Поиск..." oninput="renderHome()" autocomplete="off" style="font-size:15px;" />
+    <input class="form-input" id="home-search" placeholder="&#128269; &#1055;&#1086;&#1080;&#1089;&#1082;..." oninput="renderHome()" autocomplete="off" style="font-size:15px;" />
   </div>
   <div id="active-jobs-list"></div>
   <div class="divider"></div>
   <div class="section-header">
-    <div class="section-title">Последние</div>
+    <div class="section-title">&#1055;&#1086;&#1089;&#1083;&#1077;&#1076;&#1085;&#1080;&#1077;</div>
     <div class="section-meta" id="recent-count"></div>
   </div>
   <div id="recent-jobs-list"></div>
@@ -206,7 +207,7 @@
 <div class="page" id="page-work">
   <div class="section-header" style="flex-direction:column;align-items:flex-start;gap:4px;">
     <div style="display:flex;align-items:center;gap:10px;width:100%;">
-      <button onclick="goBack()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;font-size:20px;">←</button>
+      <button onclick="goBack()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;font-size:20px;">&#8592;</button>
       <div>
         <div id="work-ref" style="font-size:20px;font-weight:700;color:var(--gold);"></div>
         <div id="work-model" style="font-size:13px;color:var(--text-dim);margin-top:2px;"></div>
@@ -215,47 +216,48 @@
     </div>
   </div>
   <div id="work-steps-container" class="steps-container"></div>
-  <div id="work-dorabotka-container"></div>
+  <div id="work-events-container"></div>
   <div style="padding:16px;">
-    <button class="btn btn-gold" onclick="completeJob()">Завершить работу</button>
-    <button class="btn" style="background:rgba(230,160,30,0.1);color:#e6a01e;border:1px solid rgba(230,160,30,0.35);margin-top:8px;" onclick="openDorabotkaModal()">↺ Доработка</button>
-    <button class="btn btn-danger" onclick="deleteJob()">Удалить запись</button>
+    <button class="btn btn-gold" onclick="completeJob()">&#1047;&#1072;&#1074;&#1077;&#1088;&#1096;&#1080;&#1090;&#1100; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</button>
+    <button class="btn" style="background:rgba(230,200,50,0.1);color:#e6c832;border:1px solid rgba(230,200,50,0.35);margin-top:8px;" onclick="openEventModal('dorabotka')">&#8635; &#1044;&#1086;&#1088;&#1072;&#1073;&#1086;&#1090;&#1082;&#1072;</button>
+    <button class="btn" style="background:rgba(230,130,30,0.1);color:#e6821e;border:1px solid rgba(230,130,30,0.35);margin-top:8px;" onclick="openEventModal('vozvrat')">&#8617; &#1042;&#1086;&#1079;&#1074;&#1088;&#1072;&#1090;</button>
+    <button class="btn btn-danger" onclick="deleteJob()">&#1059;&#1076;&#1072;&#1083;&#1080;&#1090;&#1100; &#1079;&#1072;&#1087;&#1080;&#1089;&#1100;</button>
   </div>
 </div>
 
 <div class="page" id="page-stats">
   <div class="section-header">
-    <div class="section-title">Статистика</div>
-    <div class="section-meta">Всё время</div>
+    <div class="section-title">&#1057;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1072;</div>
+    <div class="section-meta">&#1042;&#1089;&#1105; &#1074;&#1088;&#1077;&#1084;&#1103;</div>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
   <div id="stats-speed"></div>
   <div class="chart-container">
-    <div class="chart-title">Среднее время по этапам</div>
+    <div class="chart-title">&#1057;&#1088;&#1077;&#1076;&#1085;&#1077;&#1077; &#1074;&#1088;&#1077;&#1084;&#1103; &#1087;&#1086; &#1101;&#1090;&#1072;&#1087;&#1072;&#1084;</div>
     <div class="bar-chart" id="stage-chart"></div>
   </div>
   <div class="chart-container">
-    <div class="chart-title">Full Service vs Только Сборка</div>
+    <div class="chart-title">Full Service vs &#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</div>
     <div class="bar-chart" id="type-chart"></div>
   </div>
   <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;">
-    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">&#x1F4BE; Данные</div>
-    <button class="btn btn-outline" style="margin-top:0;" onclick="exportData()">&#x2B07;&#xFE0F; Экспорт данных</button>
-    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+    <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">&#128190; &#1044;&#1072;&#1085;&#1085;&#1099;&#1077;</div>
+    <button class="btn btn-outline" style="margin-top:0;" onclick="exportData()">&#8681; &#1069;&#1082;&#1089;&#1087;&#1086;&#1088;&#1090; &#1076;&#1072;&#1085;&#1085;&#1099;&#1093;</button>
+    <div style="margin-top:10px;">
       <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(this)" />
-      <button class="btn btn-outline" style="margin-top:0;flex:1;" onclick="document.getElementById('import-file').click()">&#x2B06;&#xFE0F; Импорт данных</button>
+      <button class="btn btn-outline" style="margin-top:0;" onclick="document.getElementById('import-file').click()">&#8679; &#1048;&#1084;&#1087;&#1086;&#1088;&#1090; &#1076;&#1072;&#1085;&#1085;&#1099;&#1093;</button>
     </div>
-    <div style="font-size:12px;color:var(--text-dim);margin-top:10px;line-height:1.5;">Экспорт сохраняет все данные в файл. Импорт загружает данные из файла — используй для переноса между устройствами.</div>
+    <div style="font-size:12px;color:var(--text-dim);margin-top:10px;line-height:1.5;">&#1069;&#1082;&#1089;&#1087;&#1086;&#1088;&#1090; &#1089;&#1086;&#1093;&#1088;&#1072;&#1085;&#1103;&#1077;&#1090; &#1074;&#1089;&#1077; &#1076;&#1072;&#1085;&#1085;&#1099;&#1077; &#1074; &#1092;&#1072;&#1081;&#1083;. &#1048;&#1084;&#1087;&#1086;&#1088;&#1090; &#1079;&#1072;&#1075;&#1088;&#1091;&#1078;&#1072;&#1077;&#1090; &#1076;&#1072;&#1085;&#1085;&#1099;&#1077; &#8212; &#1076;&#1083;&#1103; &#1087;&#1077;&#1088;&#1077;&#1085;&#1086;&#1089;&#1072; &#1084;&#1077;&#1078;&#1076;&#1091; &#1091;&#1089;&#1090;&#1088;&#1086;&#1081;&#1089;&#1090;&#1074;&#1072;&#1084;&#1080;.</div>
   </div>
 </div>
 
 <div class="page" id="page-history">
   <div class="section-header">
-    <div class="section-title">История</div>
+    <div class="section-title">&#1048;&#1089;&#1090;&#1086;&#1088;&#1080;&#1103;</div>
     <div class="section-meta" id="history-count"></div>
   </div>
   <div style="padding:0 16px 12px;">
-    <input class="form-input" id="history-search" placeholder="🔍 Поиск..." oninput="renderHistory()" autocomplete="off" style="font-size:15px;" />
+    <input class="form-input" id="history-search" placeholder="&#128269; &#1055;&#1086;&#1080;&#1089;&#1082;..." oninput="renderHistory()" autocomplete="off" style="font-size:15px;" />
   </div>
   <div id="history-list"></div>
 </div>
@@ -263,15 +265,15 @@
 <div class="bottomnav">
   <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12L12 3l9 9"/><path d="M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
-    Главная
+    &#1043;&#1083;&#1072;&#1074;&#1085;&#1072;&#1103;
   </button>
   <button class="nav-btn" id="nav-stats" onclick="navigate('stats')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="6" width="4" height="15"/><rect x="17" y="9" width="4" height="12"/></svg>
-    Статистика
+    &#1057;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1072;
   </button>
   <button class="nav-btn" id="nav-history" onclick="navigate('history')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-    История
+    &#1048;&#1089;&#1090;&#1086;&#1088;&#1080;&#1103;
   </button>
 </div>
 
@@ -279,60 +281,66 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
 
+<!-- MODAL: New Job -->
+
 <div class="modal-overlay" id="modal-new">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Новые часы</div>
+    <div class="modal-title">&#1053;&#1086;&#1074;&#1099;&#1077; &#1095;&#1072;&#1089;&#1099;</div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Серийный / идентификационный номер</label>
-        <input class="form-input" id="inp-serial" placeholder="напр. 3D28F419" autocomplete="off" />
+        <label class="form-label">&#1057;&#1077;&#1088;&#1080;&#1081;&#1085;&#1099;&#1081; / &#1080;&#1076;&#1077;&#1085;&#1090;&#1080;&#1092;&#1080;&#1082;&#1072;&#1094;&#1080;&#1086;&#1085;&#1085;&#1099;&#1081; &#1085;&#1086;&#1084;&#1077;&#1088;</label>
+        <input class="form-input" id="inp-serial" placeholder="&#1085;&#1072;&#1087;&#1088;. 3D28F419" autocomplete="off" />
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Ref номер</label>
+          <label class="form-label">Ref &#1085;&#1086;&#1084;&#1077;&#1088;</label>
           <input class="form-input" id="inp-ref" placeholder="126610LN" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label class="form-label">Модель</label>
+          <label class="form-label">&#1052;&#1086;&#1076;&#1077;&#1083;&#1100;</label>
           <input class="form-input" id="inp-model" placeholder="Submariner" autocomplete="off" />
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Тип работы</label>
+        <label class="form-label">&#1058;&#1080;&#1087; &#1088;&#1072;&#1073;&#1086;&#1090;&#1099;</label>
         <select class="form-select" id="inp-type">
-          <option value="full">Full Service + Сборка</option>
-          <option value="assembly">Только Сборка</option>
+          <option value="full">Full Service + &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</option>
+          <option value="assembly">&#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Заметка (опционально)</label>
-        <textarea class="form-textarea" id="inp-note" placeholder="Состояние часов, особенности..."></textarea>
+        <label class="form-label">&#1047;&#1072;&#1084;&#1077;&#1090;&#1082;&#1072; (&#1086;&#1087;&#1094;&#1080;&#1086;&#1085;&#1072;&#1083;&#1100;&#1085;&#1086;)</label>
+        <textarea class="form-textarea" id="inp-note" placeholder="&#1057;&#1086;&#1089;&#1090;&#1086;&#1103;&#1085;&#1080;&#1077; &#1095;&#1072;&#1089;&#1086;&#1074;, &#1086;&#1089;&#1086;&#1073;&#1077;&#1085;&#1085;&#1086;&#1089;&#1090;&#1080;..."></textarea>
       </div>
-      <button class="btn btn-gold" onclick="createJob()">Начать работу</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-new')">Отмена</button>
+      <button class="btn btn-gold" onclick="createJob()">&#1053;&#1072;&#1095;&#1072;&#1090;&#1100; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-new')">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
     </div>
   </div>
 </div>
 
+<!-- MODAL: Step Note -->
+
 <div class="modal-overlay" id="modal-note">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="note-modal-title">Заметка к этапу</div>
+    <div class="modal-title" id="note-modal-title">&#1047;&#1072;&#1084;&#1077;&#1090;&#1082;&#1072; &#1082; &#1101;&#1090;&#1072;&#1087;&#1091;</div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Проблемы / наблюдения</label>
-        <textarea class="form-textarea" id="note-problems" placeholder="Что обнаружили, какие сложности..."></textarea>
+        <label class="form-label">&#1055;&#1088;&#1086;&#1073;&#1083;&#1077;&#1084;&#1099; / &#1085;&#1072;&#1073;&#1083;&#1102;&#1076;&#1077;&#1085;&#1080;&#1103;</label>
+        <textarea class="form-textarea" id="note-problems" placeholder="&#1063;&#1090;&#1086; &#1086;&#1073;&#1085;&#1072;&#1088;&#1091;&#1078;&#1080;&#1083;&#1080;..."></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Использованные детали</label>
-        <input class="form-input" id="note-parts" placeholder="напр. новый баланс, mainspring..." autocomplete="off" />
+        <label class="form-label">&#1048;&#1089;&#1087;&#1086;&#1083;&#1100;&#1079;&#1086;&#1074;&#1072;&#1085;&#1085;&#1099;&#1077; &#1076;&#1077;&#1090;&#1072;&#1083;&#1080;</label>
+        <input class="form-input" id="note-parts" placeholder="&#1085;&#1072;&#1087;&#1088;. &#1085;&#1086;&#1074;&#1099;&#1081; &#1073;&#1072;&#1083;&#1072;&#1085;&#1089;..." autocomplete="off" />
       </div>
-      <button class="btn btn-gold" onclick="saveStepNote()">Сохранить</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-note')">Отмена</button>
+      <button class="btn btn-gold" onclick="saveStepNote()">&#1057;&#1086;&#1093;&#1088;&#1072;&#1085;&#1080;&#1090;&#1100;</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-note')">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
     </div>
   </div>
 </div>
+
+<!-- MODAL: History Detail -->
 
 <div class="modal-overlay" id="modal-history-detail">
   <div class="modal">
@@ -342,44 +350,51 @@
   </div>
 </div>
 
+<!-- MODAL: Custom Time -->
+
 <div class="modal-overlay" id="modal-custom-time">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Своё время</div>
+    <div class="modal-title">&#1057;&#1074;&#1086;&#1105; &#1074;&#1088;&#1077;&#1084;&#1103;</div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Минуты</label>
-        <input class="form-input" id="inp-custom-min" type="number" placeholder="напр. 23" min="1" max="999" />
+        <label class="form-label">&#1052;&#1080;&#1085;&#1091;&#1090;&#1099;</label>
+        <input class="form-input" id="inp-custom-min" type="number" placeholder="&#1085;&#1072;&#1087;&#1088;. 23" min="1" max="999" />
       </div>
-      <button class="btn btn-gold" onclick="applyCustomTime()">Применить</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-custom-time')">Отмена</button>
+      <button class="btn btn-gold" onclick="applyCustomTime()">&#1055;&#1088;&#1080;&#1084;&#1077;&#1085;&#1080;&#1090;&#1100;</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-custom-time')">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-dorabotka">
+<!-- MODAL: Event (Dorabotka / Vozvrat) -->
+
+<div class="modal-overlay" id="modal-event">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" style="color:#e6a01e;">↺ Доработка</div>
+    <div class="modal-title" id="event-modal-title"></div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Что нужно доработать</label>
-        <textarea class="form-textarea" id="inp-dorabotka-desc" placeholder="Опишите что нужно исправить..."></textarea>
+        <label class="form-label" id="event-desc-label">&#1054;&#1087;&#1080;&#1089;&#1072;&#1085;&#1080;&#1077;</label>
+        <textarea class="form-textarea" id="inp-event-desc" placeholder="&#1054;&#1087;&#1080;&#1096;&#1080;&#1090;&#1077;..."></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Время на доработку (мин)</label>
-        <input class="form-input" id="inp-dorabotka-time" type="number" placeholder="напр. 30" min="0" />
+        <label class="form-label">&#1042;&#1088;&#1077;&#1084;&#1103; (&#1084;&#1080;&#1085;)</label>
+        <input class="form-input" id="inp-event-time" type="number" placeholder="&#1085;&#1072;&#1087;&#1088;. 30" min="0" />
       </div>
-      <button class="btn" style="background:rgba(230,160,30,0.15);color:#e6a01e;border:1px solid rgba(230,160,30,0.35);" onclick="saveDorabotka()">Сохранить</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-dorabotka')">Отмена</button>
+      <div id="event-edit-hint" style="display:none;font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:6px;"></div>
+      <button class="btn" id="event-save-btn" onclick="saveEvent()">&#1057;&#1086;&#1093;&#1088;&#1072;&#1085;&#1080;&#1090;&#1100;</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-event')">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
     </div>
   </div>
 </div>
+
+<!-- MODAL: Edit Job -->
 
 <div class="modal-overlay" id="modal-edit-job">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Редактировать</div>
+    <div class="modal-title">&#1056;&#1077;&#1076;&#1072;&#1082;&#1090;&#1080;&#1088;&#1086;&#1074;&#1072;&#1090;&#1100;</div>
     <div class="modal-body" id="edit-job-body"></div>
   </div>
 </div>
@@ -387,7 +402,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────────────────────
 const FULL_STEPS = [
   {id:'measure',    name:'\u0417\u0430\u043c\u0435\u0440 \u043f\u043e\u043a\u0430\u0437\u0430\u043d\u0438\u0439 / \u043e\u0441\u043c\u043e\u0442\u0440'},
   {id:'disassem',   name:'\u0420\u0430\u0437\u0431\u043e\u0440\u043a\u0430'},
@@ -417,7 +431,6 @@ function getStepsFor(type) {
   return ASSEMBLY_STEPS.map(s => ({...s, phase:'assembly'}));
 }
 
-// ── STORAGE ───────────────────────────────────────────────────────────────────
 function load() {
   try {
     const raw = localStorage.getItem('rst_data');
@@ -428,6 +441,7 @@ function load() {
     [...d.jobs, ...d.done].forEach(j => {
       if (!j.returns) j.returns = [];
       if (!j.dorabotki) j.dorabotki = [];
+      if (!j.vozvrat) j.vozvrat = [];
       if (!j.steps) j.steps = [];
       j.steps.forEach(s => {
         if (!s.elapsed) s.elapsed = 0;
@@ -439,14 +453,14 @@ function load() {
 }
 function save(d) { localStorage.setItem('rst_data', JSON.stringify(d)); }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
 let currentJobId = null;
 let noteTargetStep = null;
 let customTimeTarget = null;
 let phaseCustomTarget = null;
+let currentEventType = null;
+let editingEventId = null;
 let timers = {};
 
-// ── CLOCK ─────────────────────────────────────────────────────────────────────
 function updateClock() {
   const el = document.getElementById('topbar-clock');
   if (el) el.textContent = new Date().toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
@@ -454,9 +468,8 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── FORMAT ────────────────────────────────────────────────────────────────────
 function fmtMs(ms) {
-  if (!ms || ms <= 0) return '—';
+  if (!ms || ms <= 0) return '\u2014';
   const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
   if (h > 0) return h+'\u0447 '+(m%60)+'\u043c';
   if (m > 0) return m+'\u043c '+(s%60)+'\u0441';
@@ -469,34 +482,16 @@ function fmtMsLive(ms) {
 function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
 }
-function totalTime(job) {
-  return job.steps.reduce((a, s) => a + (s.elapsed||0), 0);
-}
+function totalTime(job) { return job.steps.reduce((a, s) => a + (s.elapsed||0), 0); }
+
 function speedLevel(hours, type) {
-  if (type === 'service') {
-    if (hours <= 5) return 'fast';
-    if (hours <= 7) return 'mid';
-    return 'slow';
-  } else {
-    if (hours < 3) return 'fast';
-    if (hours <= 4) return 'mid';
-    return 'slow';
-  }
+  if (type === 'service') { if (hours <= 5) return 'fast'; if (hours <= 7) return 'mid'; return 'slow'; }
+  else { if (hours < 3) return 'fast'; if (hours <= 4) return 'mid'; return 'slow'; }
 }
 function speedLabel(level) {
   if (level === 'fast') return '\u26a1 \u0411\u044b\u0441\u0442\u0440\u043e';
   if (level === 'mid') return '\u23f1 \u0425\u043e\u0440\u043e\u0448\u043e';
   return '\ud83d\udc22 \u0414\u043e\u043b\u0433\u043e';
-}
-function speedBadge(hours, type) {
-  if (type === 'full') {
-    // show nothing - use speedBadges instead for full+assembly
-    const level = speedLevel(hours, 'service');
-    return '<span class="speed-badge speed-'+level+'">FS: '+speedLabel(level)+'</span>';
-  } else {
-    const level = speedLevel(hours, 'assembly');
-    return '<span class="speed-badge speed-'+level+'">'+speedLabel(level)+'</span>';
-  }
 }
 function speedBadges(job) {
   const fsTime = job.steps.filter(s => s.phase==='service').reduce((a,s) => a+(s.elapsed||0), 0);
@@ -504,15 +499,13 @@ function speedBadges(job) {
   if (job.type === 'full') {
     const fsLevel = speedLevel(fsTime/3600000, 'service');
     const asLevel = speedLevel(asTime/3600000, 'assembly');
-    return '<span class="speed-badge speed-'+fsLevel+'">FS: '+speedLabel(fsLevel)+'</span>'
-      +' <span class="speed-badge speed-'+asLevel+'">\u0421\u0431: '+speedLabel(asLevel)+'</span>';
+    return '<span class="speed-badge speed-'+fsLevel+'">FS: '+speedLabel(fsLevel)+'</span> <span class="speed-badge speed-'+asLevel+'">'+'\u0421\u0431: '+speedLabel(asLevel)+'</span>';
   } else {
     const asLevel = speedLevel(asTime/3600000, 'assembly');
     return '<span class="speed-badge speed-'+asLevel+'">'+speedLabel(asLevel)+'</span>';
   }
 }
 
-// ── NAV ───────────────────────────────────────────────────────────────────────
 function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -525,39 +518,29 @@ function navigate(page) {
   if (page === 'home') renderHome();
 }
 function goBack() { navigate('home'); }
-
-// ── MODAL ─────────────────────────────────────────────────────────────────────
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
-
-// ── TOAST ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ── HOME ──────────────────────────────────────────────────────────────────────
 function renderHome() {
   const d = load();
   const q = (document.getElementById('home-search')?.value || '').toLowerCase().trim();
   let active = d.jobs.filter(j => !j.done);
-  if (q) {
-    active = active.filter(j =>
-      (j.serial||'').toLowerCase().includes(q) ||
-      (j.ref||'').toLowerCase().includes(q) ||
-      (j.model||'').toLowerCase().includes(q) ||
-      (j.note||'').toLowerCase().includes(q)
-    );
-  }
+  if (q) active = active.filter(j =>
+    (j.serial||''). toLowerCase().includes(q)||(j.ref||''). toLowerCase().includes(q)||
+    (j.model||''). toLowerCase().includes(q)||(j.note||''). toLowerCase().includes(q));
   const recent = (d.done||[]).slice(-5).reverse();
   document.getElementById('home-count').textContent = active.length + ' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445';
   const al = document.getElementById('active-jobs-list');
   al.innerHTML = active.length === 0
-    ? '<div class="empty-state"><div class="empty-icon">⌚</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u041d\u0435\u0442 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0440\u0430\u0431\u043e\u0442')+'</div><div class="empty-text">'+(q?'':'\u041d\u0430\u0436\u043c\u0438\u0442\u0435 + \u0447\u0442\u043e\u0431\u044b \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0430\u0441\u044b')+'</div></div>'
+    ? '<div class="empty-state"><div class="empty-icon">&#9202;</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u041d\u0435\u0442 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0440\u0430\u0431\u043e\u0442')+'</div><div class="empty-text">'+(q?'':'\u041d\u0430\u0436\u043c\u0438\u0442\u0435 + \u0447\u0442\u043e\u0431\u044b \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0430\u0441\u044b')+'</div></div>'
     : active.map(jobCard).join('');
   const rl = document.getElementById('recent-jobs-list');
   document.getElementById('recent-count').textContent = recent.length > 0 ? recent.length+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445' : '';
@@ -565,52 +548,48 @@ function renderHome() {
     ? '<div style="padding:12px 16px 0;font-size:13px;color:var(--text-dim);">\u0417\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0435 \u0440\u0430\u0431\u043e\u0442\u044b \u043f\u043e\u044f\u0432\u044f\u0442\u0441\u044f \u0437\u0434\u0435\u0441\u044c</div>'
     : recent.map(j => historyCard(j, true)).join('');
 }
+
 function jobCard(j) {
   const steps = j.steps, total = steps.length;
   const done = steps.filter(s => s.elapsed > 0 && !s.running).length;
   const activeStep = steps.find(s => s.running);
   const elapsed = totalTime(j);
-  const dots = steps.map(s => {
-    let cls = s.running ? 'active' : (s.elapsed > 0 ? 'done' : '');
-    return '<div class="progress-dot '+cls+'"></div>';
-  }).join('');
+  const dots = steps.map(s => '<div class="progress-dot '+(s.running?'active':(s.elapsed>0?'done':''))+'"></div>').join('');
   const hasDorab = j.dorabotki && j.dorabotki.length > 0;
-  const typeBadge = j.type === 'full'
-    ? '<span class="badge badge-full">Full Service</span>'
-    : '<span class="badge badge-assembly">\u0421\u0431\u043e\u0440\u043a\u0430</span>';
-  const statusBadge = activeStep
-    ? '<span class="badge badge-active">● \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>'
-    : '<span class="badge">'+done+'/'+total+'</span>';
-  const dorabBadge = hasDorab ? '<span class="badge badge-dorabotka">\u21ba \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>' : '';
-  return '<div class="card '+(hasDorab?'card-dorabotka':'')+'" onclick="openJob(\''+j.id+'\')">'
-    +'<div class="card-header"><div>'
-    +'<div class="card-ref">'+(j.serial||j.ref)+'</div>'
-    +'<div class="card-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' · ':'')+( j.model||'')+'</div>'
-    +'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'
-    +typeBadge+statusBadge+dorabBadge+'</div></div>'
-    +'<div class="card-body"><div class="card-progress">'+dots+'</div>'
-    +'<div class="card-stats">'
-    +'<div class="stat"><div class="stat-val">'+(fmtMs(elapsed)||'—')+'</div><div class="stat-lbl">\u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e</div></div>'
-    +'<div class="stat"><div class="stat-val">'+done+'/'+total+'</div><div class="stat-lbl">\u042d\u0442\u0430\u043f\u043e\u0432</div></div>'
-    +(activeStep ? '<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'…</div><div class="stat-lbl">\u0421\u0435\u0439\u0447\u0430\u0441</div></div>' : '')
-    +'</div></div>'
-    +'<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">\u041e\u0442\u043a\u0440\u044b\u0442\u044c →</div></div>'
-    +'</div>';
+  const hasVozvrat = j.vozvrat && j.vozvrat.length > 0;
+  const typeBadge = j.type==='full'?'<span class="badge badge-full">Full Service</span>':'<span class="badge badge-assembly">\u0421\u0431\u043e\u0440\u043a\u0430</span>';
+  const statusBadge = activeStep?'<span class="badge badge-active">&#9679; \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>':'<span class="badge">'+done+'/'+total+'</span>';
+  const dorabBadge = hasDorab?'<span class="badge badge-dorabotka">&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>':'  ';
+  const vozvratBadge = hasVozvrat?'<span class="badge badge-vozvrat">&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442 \xd7'+j.vozvrat.length+'</span>':'  ';
+  const borderCls = hasVozvrat?'card-vozvrat':(hasDorab?'card-dorabotka':'');
+  return '<div class="card '+borderCls+'" onclick="openJob(\''+ j.id+'\')">'+
+    '<div class="card-header"><div>'+
+    '<div class="card-ref">'+(j.serial||j.ref)+'</div>'+
+    '<div class="card-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' \xb7 ':'')+( j.model||'')+'</div>'+
+    '</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+
+    typeBadge+statusBadge+dorabBadge+vozvratBadge+'</div></div>'+
+    '<div class="card-body"><div class="card-progress">'+dots+'</div>'+
+    '<div class="card-stats">'+
+    '<div class="stat"><div class="stat-val">'+(fmtMs(elapsed)||'\u2014')+'</div><div class="stat-lbl">\u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e</div></div>'+
+    '<div class="stat"><div class="stat-val">'+done+'/'+total+'</div><div class="stat-lbl">\u042d\u0442\u0430\u043f\u043e\u0432</div></div>'+
+    (activeStep?'<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'&#8230;</div><div class="stat-lbl">\u0421\u0435\u0439\u0447\u0430\u0441</div></div>':'')+
+    '</div></div>'+
+    '<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">\u041e\u0442\u043a\u0440\u044b\u0442\u044c &#8594;</div></div>'+
+    '</div>';
 }
 
-// ── OPEN JOB ──────────────────────────────────────────────────────────────────
 function openJob(id) {
   const d = load();
   const job = d.jobs.find(j => j.id === id) || (d.done||[]).find(j => j.id === id);
   if (!job) return;
   currentJobId = id;
   document.getElementById('work-ref').textContent = job.serial || job.ref;
-  document.getElementById('work-model').textContent = (job.ref?'Ref '+job.ref:'')+(job.ref&&job.model?' · ':'')+( job.model||'');
-  document.getElementById('work-badge').innerHTML = job.type === 'full'
-    ? '<span class="badge badge-full">Full Service + \u0421\u0431\u043e\u0440\u043a\u0430</span>'
-    : '<span class="badge badge-assembly">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</span>';
+  document.getElementById('work-model').textContent = (job.ref?'Ref '+job.ref:'')+(job.ref&&job.model?' \xb7 ':'')+( job.model||'')+'';
+  document.getElementById('work-badge').innerHTML = job.type==='full'
+    ?'<span class="badge badge-full">Full Service + \u0421\u0431\u043e\u0440\u043a\u0430</span>'
+    :'<span class="badge badge-assembly">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</span>';
   renderWorkSteps(job);
-  renderDorabotki(job);
+  renderJobEvents(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-work').classList.add('active');
@@ -619,8 +598,8 @@ function openJob(id) {
 
 function renderWorkSteps(job) {
   const container = document.getElementById('work-steps-container');
-  const phases = job.type === 'full'
-    ? [{id:'service', label:'Full Service'}, {id:'assembly', label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]
+  const phases = job.type==='full'
+    ? [{id:'service', label:'Full Service'},{id:'assembly', label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]
     : [{id:'assembly', label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
   let html = '';
   phases.forEach(phase => {
@@ -628,46 +607,46 @@ function renderWorkSteps(job) {
     const phaseElapsed = phaseSteps.reduce((a,s) => a+(s.elapsed||0), 0);
     const doneCount = phaseSteps.filter(s => s.elapsed > 0).length;
     const isOpen = job['detail_open_'+phase.id] || false;
-    const quickTimes = [{label:'15\u043c',min:15},{label:'30\u043c',min:30},{label:'1\u0447',min:60},{label:'2\u0447',min:120},{label:'4\u0447',min:240},{label:'8\u0447',min:480}];
-    html += '<div class="phase-block" id="phase-'+job.id+'-'+phase.id+'">'
-      +'<div class="phase-block-header" onclick="togglePhaseDetail(\''+job.id+'\',\''+phase.id+'\')">'
-      +'<div><div class="phase-block-title">'+phase.label+'</div>'
-      +'<div class="phase-block-meta">'+doneCount+'/'+phaseSteps.length+' \u044d\u0442\u0430\u043f\u043e\u0432'+(phaseElapsed>0?' · '+fmtMs(phaseElapsed):'')+'</div></div>'
-      +'<div class="phase-block-right">'+(phaseElapsed>0?'<span class="phase-total">'+fmtMs(phaseElapsed)+'</span>':'')
-      +'<span class="phase-chevron '+(isOpen?'open':'')+'">▼</span></div></div>'
-      +'<div class="phase-quick-times">'
-      +'<div class="phase-qt-label">\u0411\u044b\u0441\u0442\u0440\u043e \u0437\u0430\u043f\u0438\u0441\u0430\u0442\u044c \u0432\u0440\u0435\u043c\u044f \u043d\u0430 \u0432\u0435\u0441\u044c \u0431\u043b\u043e\u043a</div>'
-      +'<div class="phase-qt-row">'
-      +quickTimes.map(t => '<button class="phase-qt-btn" onclick="addPhaseTime(\''+job.id+'\',\''+phase.id+'\','+t.min+')">'+t.label+'</button>').join('')
-      +'<button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime(\''+job.id+'\',\''+phase.id+'\')">✎</button>'
-      +'</div></div>'
-      +'<div class="phase-steps-detail '+(isOpen?'open':'')+'" id="detail-'+job.id+'-'+phase.id+'">';
+    const qts = [{label:'15\u043c',min:15},{label:'30\u043c',min:30},{label:'1\u0447',min:60},{label:'2\u0447',min:120},{label:'4\u0447',min:240},{label:'8\u0447',min:480}];
+    html += '<div class="phase-block" id="phase-'+job.id+'-'+phase.id+'">'+
+      '<div class="phase-block-header" onclick="togglePhaseDetail(\''+ job.id+'\',\''+ phase.id+'\')">'+
+      '<div><div class="phase-block-title">'+phase.label+'</div>'+
+      '<div class="phase-block-meta">'+doneCount+'/'+phaseSteps.length+' \u044d\u0442\u0430\u043f\u043e\u0432'+(phaseElapsed>0?' \xb7 '+fmtMs(phaseElapsed):'')+'</div></div>'+
+      '<div class="phase-block-right">'+(phaseElapsed>0?'<span class="phase-total">'+fmtMs(phaseElapsed)+'</span>':'')+
+      '<span class="phase-chevron '+(isOpen?'open':'')+'">&#9660;</span></div></div>'+
+      '<div class="phase-quick-times">'+
+      '<div class="phase-qt-label">\u0411\u044b\u0441\u0442\u0440\u043e \u0437\u0430\u043f\u0438\u0441\u0430\u0442\u044c \u0432\u0440\u0435\u043c\u044f</div>'+
+      '<div class="phase-qt-row">'+
+      qts.map(t => '<button class="phase-qt-btn" onclick="addPhaseTime(\''+ job.id+'\',\''+ phase.id+'\','+t.min+')">'+ t.label+'</button>').join('')+
+      '<button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime(\''+ job.id+'\',\''+ phase.id+'\')">&#9998;</button>'+
+      '</div></div>'+
+      '<div class="phase-steps-detail '+(isOpen?'open':'')+'" id="detail-'+job.id+'-'+phase.id+'">';
     phaseSteps.forEach(step => {
       const gIdx = job.steps.indexOf(step);
       const isDone = step.elapsed > 0 && !step.running;
       const isActive = step.running;
-      const cls = isActive ? 'step-active' : (isDone ? 'step-done' : '');
-      html += '<div class="step-item '+cls+'" id="step-'+job.id+'-'+step.id+'">'
-        +'<div class="step-header">'
-        +'<div class="step-num">'+(isDone?'✓':(isActive?'●':(gIdx+1)))+'</div>'
-        +'<div class="step-info"><div class="step-name">'+step.name+'</div>'
-        +'<div class="step-duration">'+(isDone?fmtMs(step.elapsed):(isActive?'\u0412 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u0435...':'\u041d\u0435 \u043d\u0430\u0447\u0430\u0442'))+'</div></div>'
-        +(isActive?'<div class="step-timer-display" id="timer-'+job.id+'-'+step.id+'">00:00</div>':'')
-        +(isDone?'<div style="font-size:14px;color:var(--green);font-weight:700;">'+fmtMs(step.elapsed)+'</div>':'')
-        +'</div>'
-        +'<div class="step-actions">'
-        +(!isDone&&!isActive?'<button class="step-btn step-btn-start" onclick="startStep(\''+job.id+'\',\''+step.id+'\')">▶ \u0421\u0442\u0430\u0440\u0442</button>':'')
-        +(isActive?'<button class="step-btn step-btn-stop" onclick="stopStep(\''+job.id+'\',\''+step.id+'\')">■ \u0421\u0442\u043e\u043f</button>':'')
-        +'<button class="step-btn step-btn-note" onclick="openStepNote(\''+job.id+'\',\''+step.id+'\')">✎ \u0417\u0430\u043c\u0435\u0442\u043a\u0430</button>'
-        +(isDone?'<button class="step-btn step-btn-start" onclick="restartStep(\''+job.id+'\',\''+step.id+'\')">↺ \u0415\u0449\u0451</button>':'')
-        +'</div>'
-        +'<div class="quick-time-row">'
-        +'<span style="font-size:11px;color:var(--text-dim);align-self:center;">+ \u043c\u0438\u043d:</span>'
-        +[5,10,30,60].map(m => '<button class="qt-btn" onclick="addQuickTime(\''+job.id+'\',\''+step.id+'\','+m+')">'+m+'\u043c</button>').join('')
-        +'<button class="qt-btn qt-btn-custom" onclick="openCustomTime(\''+job.id+'\',\''+step.id+'\')">✎</button>'
-        +'</div>'
-        +((step.notes||step.parts)?'<div class="step-notes">'+(step.notes?'<div style="margin-bottom:4px;">'+step.notes+'</div>':'')+(step.parts?'<span class="note-tag">🔧 '+step.parts+'</span>':'')+'</div>':'')
-        +'</div>';
+      const cls = isActive?'step-active':(isDone?'step-done':'');
+      html += '<div class="step-item '+cls+'" id="step-'+job.id+'-'+step.id+'">'+
+        '<div class="step-header">'+
+        '<div class="step-num">'+(isDone?'&#10003;':(isActive?'&#9679;':(gIdx+1)))+'</div>'+
+        '<div class="step-info"><div class="step-name">'+step.name+'</div>'+
+        '<div class="step-duration">'+(isDone?fmtMs(step.elapsed):(isActive?'\u0412 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u0435...':'\u041d\u0435 \u043d\u0430\u0447\u0430\u0442'))+'</div></div>'+
+        (isActive?'<div class="step-timer-display" id="timer-'+job.id+'-'+step.id+'">00:00</div>':'')+
+        (isDone?'<div style="font-size:14px;color:var(--green);font-weight:700;">'+fmtMs(step.elapsed)+'</div>':'')+
+        '</div>'+
+        '<div class="step-actions">'+
+        (!isDone&&!isActive?'<button class="step-btn step-btn-start" onclick="startStep(\''+ job.id+'\',\''+ step.id+'\')">&#9654; \u0421\u0442\u0430\u0440\u0442</button>':'')+
+        (isActive?'<button class="step-btn step-btn-stop" onclick="stopStep(\''+ job.id+'\',\''+ step.id+'\')">&#9632; \u0421\u0442\u043e\u043f</button>':'')+
+        '<button class="step-btn step-btn-note" onclick="openStepNote(\''+ job.id+'\',\''+ step.id+'\')">&#9998; \u0417\u0430\u043c\u0435\u0442\u043a\u0430</button>'+
+        (isDone?'<button class="step-btn step-btn-start" onclick="restartStep(\''+ job.id+'\',\''+ step.id+'\')">&#8635; \u0415\u0449\u0451</button>':'')+
+        '</div>'+
+        '<div class="quick-time-row">'+
+        '<span style="font-size:11px;color:var(--text-dim);align-self:center;">+ \u043c\u0438\u043d:</span>'+
+        [5,10,30,60].map(m => '<button class="qt-btn" onclick="addQuickTime(\''+ job.id+'\',\''+ step.id+'\','+m+')">'+ m+'\u043c</button>').join('')+
+        '<button class="qt-btn qt-btn-custom" onclick="openCustomTime(\''+ job.id+'\',\''+ step.id+'\')">&#9998;</button>'+
+        '</div>'+
+        ((step.notes||step.parts)?'<div class="step-notes">'+(step.notes?'<div style="margin-bottom:4px;">'+step.notes+'</div>':'')+( step.parts?'<span class="note-tag">&#128295; '+step.parts+'</span>':'')+'</div>':'')+
+        '</div>';
     });
     html += '</div></div>';
   });
@@ -677,7 +656,52 @@ function renderWorkSteps(job) {
   });
 }
 
-// ── STEP CONTROLS ─────────────────────────────────────────────────────────────
+function renderJobEvents(job) {
+  const container = document.getElementById('work-events-container');
+  if (!container) return;
+  let html = '';
+  const dorabotki = job.dorabotki || [];
+  const vozvrat = job.vozvrat || [];
+  if (dorabotki.length === 0 && vozvrat.length === 0) { container.innerHTML = ''; return; }
+
+  if (vozvrat.length > 0) {
+    const totalV = vozvrat.reduce((a,r) => a+(r.elapsed||0), 0);
+    html += '<div style="margin:0 16px 12px;background:rgba(230,130,30,0.06);border:1px solid rgba(230,130,30,0.3);border-radius:10px;overflow:hidden;">'+
+      '<div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<div style="font-size:15px;font-weight:700;color:#e6821e;">&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442\u044b ('+vozvrat.length+')</div>'+
+      '<div style="font-size:13px;color:#e6821e;font-weight:700;">'+(totalV>0?fmtMs(totalV):'')+'</div></div>';
+    vozvrat.forEach(r => {
+      html += '<div style="padding:10px 16px;border-top:1px solid rgba(230,130,30,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div style="flex:1;"><div style="font-size:13px;color:var(--text);">'+r.desc+'</div>'+
+        '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
+        '<div style="font-size:14px;color:#e6821e;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
+        '<button onclick="openEventModal(\'vozvrat\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,130,30,0.3);border-radius:4px;color:#e6821e;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
+        '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  if (dorabotki.length > 0) {
+    const totalD = dorabotki.reduce((a,r) => a+(r.elapsed||0), 0);
+    html += '<div style="margin:0 16px 12px;background:rgba(230,200,50,0.06);border:1px solid rgba(230,200,50,0.3);border-radius:10px;overflow:hidden;">'+
+      '<div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<div style="font-size:15px;font-weight:700;color:#e6c832;">&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 ('+dorabotki.length+')</div>'+
+      '<div style="font-size:13px;color:#e6c832;font-weight:700;">'+(totalD>0?fmtMs(totalD):'')+'</div></div>';
+    dorabotki.forEach(r => {
+      html += '<div style="padding:10px 16px;border-top:1px solid rgba(230,200,50,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div style="flex:1;"><div style="font-size:13px;color:var(--text);">'+r.desc+'</div>'+
+        '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
+        '<div style="font-size:14px;color:#e6c832;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
+        '<button onclick="openEventModal(\'dorabotka\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:4px;color:#e6c832;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
+        '</div></div>';
+    });
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
 function startStep(jobId, stepId) {
   const d = load(), job = d.jobs.find(j => j.id === jobId);
   if (!job) return;
@@ -693,8 +717,7 @@ function stopStep(jobId, stepId) {
   if (!step) return;
   step.elapsed = (step.elapsed||0) + (Date.now() - step.startTime);
   step.running = false; step.startTime = null;
-  save(d);
-  clearInterval(timers[jobId+'_'+stepId]); delete timers[jobId+'_'+stepId];
+  save(d); clearInterval(timers[jobId+'_'+stepId]); delete timers[jobId+'_'+stepId];
   openJob(jobId); showToast('\u042d\u0442\u0430\u043f \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d: '+fmtMs(step.elapsed));
 }
 function restartStep(jobId, stepId) {
@@ -714,15 +737,14 @@ function startTimerDisplay(jobId, stepId, startTime, prevElapsed) {
   }, 500);
 }
 
-// ── STEP NOTES ────────────────────────────────────────────────────────────────
 function openStepNote(jobId, stepId) {
   const d = load(), job = d.jobs.find(j => j.id === jobId);
   const step = job && job.steps.find(s => s.id === stepId);
   if (!step) return;
   noteTargetStep = {jobId, stepId};
   document.getElementById('note-modal-title').textContent = step.name;
-  document.getElementById('note-problems').value = step.notes||'';
-  document.getElementById('note-parts').value = step.parts||'';
+  document.getElementById('note-problems').value = step.notes||'  ';
+  document.getElementById('note-parts').value = step.parts||'  ';
   openModal('modal-note');
 }
 function saveStepNote() {
@@ -736,15 +758,14 @@ function saveStepNote() {
   save(d); closeModal('modal-note'); openJob(jobId); showToast('\u0417\u0430\u043c\u0435\u0442\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0430');
 }
 
-// ── PHASE TIME ────────────────────────────────────────────────────────────────
 function addPhaseTime(jobId, phaseId, minutes) {
   const d = load(), job = d.jobs.find(j => j.id === jobId);
   if (!job) return;
-  const phaseSteps = job.steps.filter(s => s.phase === phaseId);
-  if (phaseSteps.length === 0) return;
-  phaseSteps[0].elapsed = (phaseSteps[0].elapsed||0) + minutes*60000;
+  const ps = job.steps.filter(s => s.phase === phaseId);
+  if (ps.length === 0) return;
+  ps[0].elapsed = (ps[0].elapsed||0) + minutes*60000;
   save(d); openJob(jobId);
-  showToast('+'+(minutes<60?minutes+'\u043c':(minutes/60)+'\u0447')+' → '+(phaseId==='service'?'Full Service':'\u0421\u0431\u043e\u0440\u043a\u0430'));
+  showToast('+'+(minutes<60?minutes+'\u043c':(minutes/60)+'\u0447')+' \u2192 '+(phaseId==='service'?'Full Service':'\u0421\u0431\u043e\u0440\u043a\u0430'));
 }
 function openPhaseCustomTime(jobId, phaseId) {
   phaseCustomTarget = {jobId, phaseId};
@@ -761,8 +782,6 @@ function togglePhaseDetail(jobId, phaseId) {
   if (detail) detail.classList.toggle('open');
   if (chevron) chevron.classList.toggle('open');
 }
-
-// ── QUICK TIME ────────────────────────────────────────────────────────────────
 function addQuickTime(jobId, stepId, minutes) {
   const d = load(), job = d.jobs.find(j => j.id === jobId);
   if (!job) return;
@@ -780,47 +799,31 @@ function applyCustomTime() {
   const val = parseInt(document.getElementById('inp-custom-min').value);
   if (!val || val <= 0) { showToast('\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0447\u0438\u0441\u043b\u043e \u043c\u0438\u043d\u0443\u0442'); return; }
   closeModal('modal-custom-time');
-  if (phaseCustomTarget) {
-    addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val);
-    phaseCustomTarget = null;
-  } else if (customTimeTarget) {
-    addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val);
-    customTimeTarget = null;
-  }
+  if (phaseCustomTarget) { addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val); phaseCustomTarget = null; }
+  else if (customTimeTarget) { addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val); customTimeTarget = null; }
 }
 
-// ── COMPLETE / DELETE ─────────────────────────────────────────────────────────
 function completeJob() {
   if (!currentJobId) return;
   const d = load(), idx = d.jobs.findIndex(j => j.id === currentJobId);
   if (idx === -1) return;
   const job = d.jobs[idx];
   job.steps.forEach(step => {
-    if (step.running) {
-      step.elapsed = (step.elapsed||0) + (Date.now()-step.startTime);
-      step.running = false; step.startTime = null;
-    }
+    if (step.running) { step.elapsed = (step.elapsed||0)+(Date.now()-step.startTime); step.running=false; step.startTime=null; }
   });
   job.done = true; job.completedAt = Date.now();
-  d.jobs.splice(idx, 1);
-  if (!d.done) d.done = [];
-  d.done.push(job); save(d);
-  showToast('\u0420\u0430\u0431\u043e\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0430 ✓'); navigate('home');
+  d.jobs.splice(idx, 1); if (!d.done) d.done = []; d.done.push(job); save(d);
+  showToast('\u0420\u0430\u0431\u043e\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0430 &#10003;'); navigate('home');
 }
 function deleteJob() {
   if (!currentJobId) return;
   if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u044d\u0442\u0443 \u0437\u0430\u043f\u0438\u0441\u044c?')) return;
-  const d = load();
-  d.jobs = d.jobs.filter(j => j.id !== currentJobId);
+  const d = load(); d.jobs = d.jobs.filter(j => j.id !== currentJobId);
   save(d); showToast('\u0423\u0434\u0430\u043b\u0435\u043d\u043e'); navigate('home');
 }
 
-// ── NEW JOB ───────────────────────────────────────────────────────────────────
 function openNewJobModal() {
-  ['inp-serial','inp-ref','inp-model','inp-note'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+  ['inp-serial','inp-ref','inp-model','inp-note'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   openModal('modal-new');
 }
 function createJob() {
@@ -831,412 +834,352 @@ function createJob() {
   const model = document.getElementById('inp-model').value.trim();
   const note = document.getElementById('inp-note').value.trim();
   const steps = getStepsFor(type).map(s => ({...s, startTime:null, elapsed:0, running:false, notes:'', parts:''}));
-  const job = {id: Date.now().toString(), ref, model, serial, type, note, createdAt: Date.now(), steps, returns:[], done: false, completedAt: null};
-  const d = load();
-  d.jobs.push(job); save(d);
+  const job = {id:Date.now().toString(), ref, model, serial, type, note, createdAt:Date.now(), steps, returns:[], dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  const d = load(); d.jobs.push(job); save(d);
   closeModal('modal-new'); showToast('\u0427\u0430\u0441\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b');
   renderHome(); setTimeout(() => openJob(job.id), 300);
 }
 
-// ── HISTORY ───────────────────────────────────────────────────────────────────
+function openEventModal(type, eventId) {
+  currentEventType = type;
+  editingEventId = eventId || null;
+  const isVozvrat = type === 'vozvrat';
+  const color = isVozvrat ? '#e6821e' : '#e6c832';
+  const title = isVozvrat ? '&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442' : '&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430';
+  document.getElementById('event-modal-title').innerHTML = title;
+  document.getElementById('event-modal-title').style.color = color;
+  const saveBtn = document.getElementById('event-save-btn');
+  saveBtn.style.background = isVozvrat?'rgba(230,130,30,0.15)':'rgba(230,200,50,0.15)';
+  saveBtn.style.color = color;
+  saveBtn.style.border = '1px solid '+(isVozvrat?'rgba(230,130,30,0.35)':'rgba(230,200,50,0.35)')+'';
+  const hint = document.getElementById('event-edit-hint');
+  if (eventId) {
+    const d = load();
+    const job = d.jobs.find(j => j.id===currentJobId)||(d.done||[]).find(j => j.id===currentJobId);
+    const arr = isVozvrat ? (job?.vozvrat||[]) : (job?.dorabotki||[]);
+    const ev = arr.find(r => r.id===eventId);
+    if (!ev) return;
+    document.getElementById('inp-event-desc').value = ev.desc;
+    document.getElementById('inp-event-time').value = ev.elapsed ? Math.round(ev.elapsed/60000) : '';
+    if (hint) { hint.style.display='block'; hint.textContent='\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435'; }
+  } else {
+    document.getElementById('inp-event-desc').value = '';
+    document.getElementById('inp-event-time').value = '';
+    if (hint) hint.style.display='none';
+  }
+  openModal('modal-event');
+}
+
+function saveEvent() {
+  const desc = document.getElementById('inp-event-desc').value.trim();
+  if (!desc) { showToast('\u041e\u043f\u0438\u0448\u0438\u0442\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435'); return; }
+  const mins = parseInt(document.getElementById('inp-event-time').value) || 0;
+  const d = load();
+  let job = d.jobs.find(j => j.id===currentJobId)||(d.done||[]).find(j => j.id===currentJobId);
+  if (!job) return;
+  const isVozvrat = currentEventType === 'vozvrat';
+  const arr = isVozvrat ? job.vozvrat : job.dorabotki;
+  if (!arr) { if (isVozvrat) job.vozvrat=[]; else job.dorabotki=[]; }
+  const target = isVozvrat ? job.vozvrat : job.dorabotki;
+  if (editingEventId) {
+    const ev = target.find(r => r.id===editingEventId);
+    if (ev) { ev.desc=desc; ev.elapsed=mins*60000; }
+    showToast('\u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u043e');
+  } else {
+    target.push({id:Date.now().toString(), desc, elapsed:mins*60000, date:Date.now()});
+    showToast(isVozvrat?'\u0412\u043e\u0437\u0432\u0440\u0430\u0442 \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d':'\u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0430');
+  }
+  save(d); closeModal('modal-event'); editingEventId=null;
+  const isDone = !!(d.done||[]).find(j => j.id===currentJobId);
+  if (isDone) { renderHistory(); openHistoryDetail(currentJobId); }
+  else openJob(currentJobId);
+}
+
+function deleteEvent(jobId, eventId, type) {
+  const d = load();
+  const job = d.jobs.find(j => j.id===jobId)||(d.done||[]).find(j => j.id===jobId);
+  if (!job) return;
+  if (type==='vozvrat') job.vozvrat = (job.vozvrat||[]).filter(r => r.id!==eventId);
+  else job.dorabotki = (job.dorabotki||[]).filter(r => r.id!==eventId);
+  save(d); showToast('\u0423\u0434\u0430\u043b\u0435\u043d\u043e');
+  const isDone = !!(d.done||[]).find(j => j.id===jobId);
+  if (isDone) { renderHistory(); openHistoryDetail(jobId); }
+  else openJob(jobId);
+}
+
+function deleteFromHistory(id) {
+  if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u044d\u0442\u0438 \u0447\u0430\u0441\u044b \u0438\u0437 \u0438\u0441\u0442\u043e\u0440\u0438\u0438?')) return;
+  const d = load(); d.done = (d.done||[]).filter(j => j.id!==id);
+  save(d); closeModal('modal-history-detail'); showToast('\u0417\u0430\u043f\u0438\u0441\u044c \u0443\u0434\u0430\u043b\u0435\u043d\u0430'); renderHistory();
+}
+
 function historyCard(j, compact) {
   const total = totalTime(j);
   const fsTime = j.steps.filter(s => s.phase==='service').reduce((a,s) => a+(s.elapsed||0), 0);
   const asTime = j.steps.filter(s => s.phase==='assembly').reduce((a,s) => a+(s.elapsed||0), 0);
   const hasDorab = j.dorabotki && j.dorabotki.length > 0;
-  return '<div class="history-item '+(hasDorab?'card-dorabotka':'')+'" onclick="openHistoryDetail(\''+j.id+'\')">'
-    +'<div class="history-header"><div class="history-ref">'+(j.serial||j.ref)+'</div>'
-    +'<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div></div>'
-    +'<div class="history-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' · ':'')+( j.model||'')+'</div>'
-    +'<div class="history-times">'
-    +'<div class="history-time">\u0418\u0442\u043e\u0433\u043e: <span>'+fmtMs(total)+'</span></div>'
-    +(j.type==='full'?'<div class="history-time">Service: <span>'+fmtMs(fsTime)+'</span></div>':'')
-    +'<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>'
-    +speedBadges(j)
-    +(hasDorab?'<span class="badge badge-dorabotka">\u21ba \xd7'+j.dorabotki.length+'</span>':'')
-    +'</div></div>';
+  const hasVozvrat = j.vozvrat && j.vozvrat.length > 0;
+  const borderCls = hasVozvrat?'card-vozvrat':(hasDorab?'card-dorabotka':'');
+  return '<div class="history-item '+borderCls+'" onclick="openHistoryDetail(\''+ j.id+'\')">'+
+    '<div class="history-header"><div class="history-ref">'+(j.serial||j.ref)+'</div>'+
+    '<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div></div>'+
+    '<div class="history-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' \xb7 ':'')+( j.model||'')+'</div>'+
+    '<div class="history-times">'+
+    '<div class="history-time">\u0418\u0442\u043e\u0433\u043e: <span>'+fmtMs(total)+'</span></div>'+
+    (j.type==='full'?'<div class="history-time">Service: <span>'+fmtMs(fsTime)+'</span></div>':'')+
+    '<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>'+
+    speedBadges(j)+
+    (hasDorab?'<span class="badge badge-dorabotka">&#8635; \xd7'+j.dorabotki.length+'</span>':'')+
+    (hasVozvrat?'<span class="badge badge-vozvrat">&#8617; \xd7'+j.vozvrat.length+'</span>':'')+
+    '</div></div>';
 }
+
 function renderHistory() {
   const d = load();
   const q = (document.getElementById('history-search')?.value || '').toLowerCase().trim();
   let done = (d.done||[]).slice().reverse();
-  if (q) {
-    done = done.filter(j =>
-      (j.serial||'').toLowerCase().includes(q) ||
-      (j.ref||'').toLowerCase().includes(q) ||
-      (j.model||'').toLowerCase().includes(q) ||
-      (j.note||'').toLowerCase().includes(q) ||
-      j.steps.some(s => (s.notes||'').toLowerCase().includes(q) || (s.parts||'').toLowerCase().includes(q)) ||
-      (j.dorabotki||[]).some(r => r.desc.toLowerCase().includes(q))
-    );
-  }
-  document.getElementById('history-count').textContent = done.length+'\u00a0\u0447\u0430\u0441\u043e\u0432'+(q?' (\u043d\u0430\u0439\u0434\u0435\u043d\u043e)':'');
+  if (q) done = done.filter(j =>
+    (j.serial||''). toLowerCase().includes(q)||(j.ref||''). toLowerCase().includes(q)||
+    (j.model||''). toLowerCase().includes(q)||(j.note||''). toLowerCase().includes(q)||
+    j.steps.some(s => (s.notes||''). toLowerCase().includes(q)||(s.parts||''). toLowerCase().includes(q))||
+    (j.dorabotki||[]).some(r => r.desc.toLowerCase().includes(q))||
+    (j.vozvrat||[]).some(r => r.desc.toLowerCase().includes(q)));
+  document.getElementById('history-count').textContent = done.length+'\u00a0\u0447\u0430\u0441\u043e\u0432'+(q?' (\u043d\u0430\u0439\u0434\u0435\u043d\u043e)':'  ');
   const list = document.getElementById('history-list');
-  list.innerHTML = done.length === 0
-    ? '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u0443\u0441\u0442\u0430')+'</div></div>'
+  list.innerHTML = done.length===0
+    ? '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u0443\u0441\u0442\u0430')+'</div></div>'
     : done.map(j => historyCard(j, false)).join('');
 }
+
 function openHistoryDetail(id) {
-  const d = load(), job = (d.done||[]).find(j => j.id === id);
+  const d = load(), job = (d.done||[]).find(j => j.id===id);
   if (!job) return;
   currentJobId = id;
-  document.getElementById('hd-ref').textContent = (job.serial||job.ref)+(job.model?' · '+job.model:'');
-  const totalMs = totalTime(job), totalHours = totalMs/3600000;
-  let html = '<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">'
-    +speedBadges(job)
-    +'<span style="font-size:13px;color:var(--text-dim);align-self:center;">\u0418\u0442\u043e\u0433\u043e: <strong style="color:var(--gold)">'+fmtMs(totalMs)+'</strong></span></div>';
-  const phases = job.type==='full'
-    ? [{id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]
-    : [{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
+  document.getElementById('hd-ref').textContent = (job.serial||job.ref)+(job.model?' \xb7 '+job.model:'');
+  const totalMs = totalTime(job);
+  let html = '<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">'+speedBadges(job)+
+    '<span style="font-size:13px;color:var(--text-dim);align-self:center;">\u0418\u0442\u043e\u0433\u043e: <strong style="color:var(--gold)">'+fmtMs(totalMs)+'</strong></span></div>';
+  const phases = job.type==='full'?[{id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]:[{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
   phases.forEach(phase => {
     html += '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin:12px 0 8px;">'+phase.label+'</div>';
     job.steps.filter(s => s.phase===phase.id).forEach(step => {
-      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">'
-        +'<div><div style="font-size:14px;color:var(--text);">'+step.name+'</div>'
-        +(step.notes?'<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">'+step.notes+'</div>':'')
-        +(step.parts?'<span class="note-tag" style="margin-top:4px;">🔧 '+step.parts+'</span>':'')
-        +'</div><div style="font-size:14px;color:var(--gold);flex-shrink:0;margin-left:12px;font-weight:700;">'+fmtMs(step.elapsed)+'</div></div>';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">'+
+        '<div><div style="font-size:14px;color:var(--text);">'+step.name+'</div>'+
+        (step.notes?'<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">'+step.notes+'</div>':'')+
+        (step.parts?'<span class="note-tag" style="margin-top:4px;">&#128295; '+step.parts+'</span>':'')+
+        '</div><div style="font-size:14px;color:var(--gold);flex-shrink:0;margin-left:12px;font-weight:700;">'+fmtMs(step.elapsed)+'</div></div>';
     });
   });
   if (job.note) html += '<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text-dim);">'+job.note+'</div>';
-  if (job.dorabotki && job.dorabotki.length > 0) {
-    const totalDor = job.dorabotki.reduce((a,r) => a+(r.elapsed||0), 0);
-    html += '<div style="margin-top:14px;background:rgba(230,160,30,0.06);border:1px solid rgba(230,160,30,0.3);border-radius:8px;overflow:hidden;">'
-      +'<div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">'
-      +'<div style="font-size:14px;font-weight:700;color:#e6a01e;">↺ Доработки ('+job.dorabotki.length+')</div>'
-      +'<div style="font-size:13px;color:#e6a01e;font-weight:700;">'+(totalDor>0?fmtMs(totalDor):'')+'</div></div>';
-    job.dorabotki.forEach(r => {
-      html += '<div style="padding:10px 14px;border-top:1px solid rgba(230,160,30,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'
-        +'<div style="flex:1;"><div style="font-size:14px;color:var(--text);">'+r.desc+'</div>'
-        +'<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+fmtDate(r.date)+'</div></div>'
-        +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'
-        +'<div style="font-size:14px;color:#e6a01e;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'—')+'</div>'
-        +'<button onclick="closeModal(\'modal-history-detail\');openDorabotkaModal(\''+r.id+'\')" style="background:none;border:1px solid rgba(230,160,30,0.3);border-radius:4px;color:#e6a01e;font-size:12px;padding:4px 8px;cursor:pointer;">✎</button>'
-        +'<button onclick="deleteDorabotka(\''+id+'\',\''+r.id+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">✕</button>'
-        +'</div></div>';
+
+  const vozvrat = job.vozvrat || [];
+  if (vozvrat.length > 0) {
+    const totalV = vozvrat.reduce((a,r) => a+(r.elapsed||0), 0);
+    html += '<div style="margin-top:14px;background:rgba(230,130,30,0.06);border:1px solid rgba(230,130,30,0.3);border-radius:8px;overflow:hidden;">'+
+      '<div style="padding:12px 14px;display:flex;justify-content:space-between;">'+
+      '<div style="font-size:14px;font-weight:700;color:#e6821e;">&#8617; \u0412\u043e\u0437\u0432\u0440\u0430\u0442\u044b ('+vozvrat.length+')</div>'+
+      '<div style="font-size:13px;color:#e6821e;font-weight:700;">'+(totalV>0?fmtMs(totalV):'')+'</div></div>';
+    vozvrat.forEach(r => {
+      html += '<div style="padding:10px 14px;border-top:1px solid rgba(230,130,30,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div style="flex:1;"><div style="font-size:14px;color:var(--text);">'+r.desc+'</div>'+
+        '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
+        '<div style="font-size:14px;color:#e6821e;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
+        '<button onclick="closeModal(\'modal-history-detail\');openEventModal(\'vozvrat\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,130,30,0.3);border-radius:4px;color:#e6821e;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
+        '<button onclick="deleteEvent(\''+ id+'\',\''+ r.id+'\',\'vozvrat\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">&#10005;</button>'+
+        '</div></div>';
     });
     html += '</div>';
   }
-  html += '<button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob(\''+id+'\')">✎ Редактировать</button>'
-    +'<button class="btn" style="background:rgba(230,160,30,0.1);color:#e6a01e;border:1px solid rgba(230,160,30,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openDorabotkaModal()">↺ Добавить доработку</button>'
-    +'<button class="btn btn-danger" onclick="deleteFromHistory(\''+id+'\')" style="margin-top:8px;">Удалить из истории</button>'
-    +'<button class="btn btn-outline" onclick="closeModal(\'modal-history-detail\')">Закрыть</button>';
+
+  const dorabotki = job.dorabotki || [];
+  if (dorabotki.length > 0) {
+    const totalD = dorabotki.reduce((a,r) => a+(r.elapsed||0), 0);
+    html += '<div style="margin-top:14px;background:rgba(230,200,50,0.06);border:1px solid rgba(230,200,50,0.3);border-radius:8px;overflow:hidden;">'+
+      '<div style="padding:12px 14px;display:flex;justify-content:space-between;">'+
+      '<div style="font-size:14px;font-weight:700;color:#e6c832;">&#8635; \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 ('+dorabotki.length+')</div>'+
+      '<div style="font-size:13px;color:#e6c832;font-weight:700;">'+(totalD>0?fmtMs(totalD):'')+'</div></div>';
+    dorabotki.forEach(r => {
+      html += '<div style="padding:10px 14px;border-top:1px solid rgba(230,200,50,0.2);display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div style="flex:1;"><div style="font-size:14px;color:var(--text);">'+r.desc+'</div>'+
+        '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+ fmtDate(r.date)+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'+
+        '<div style="font-size:14px;color:#e6c832;font-weight:700;">'+(r.elapsed?fmtMs(r.elapsed):'\u2014')+'</div>'+
+        '<button onclick="closeModal(\'modal-history-detail\');openEventModal(\'dorabotka\',\''+ r.id+'\')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:4px;color:#e6c832;font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>'+
+        '<button onclick="deleteEvent(\''+ id+'\',\''+ r.id+'\',\'dorabotka\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:4px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;">&#10005;</button>'+
+        '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<button class="btn btn-gold" style="margin-top:16px;" onclick="openEditJob(\''+ id+'\')">&#9998; \u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c</button>'+
+    '<button class="btn" style="background:rgba(230,200,50,0.1);color:#e6c832;border:1px solid rgba(230,200,50,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openEventModal(\'dorabotka\')">&#8635; \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443</button>'+
+    '<button class="btn" style="background:rgba(230,130,30,0.1);color:#e6821e;border:1px solid rgba(230,130,30,0.35);margin-top:8px;" onclick="closeModal(\'modal-history-detail\');openEventModal(\'vozvrat\')">&#8617; \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0432\u043e\u0437\u0432\u0440\u0430\u0442</button>'+
+    '<button class="btn btn-danger" onclick="deleteFromHistory(\''+ id+'\')" style="margin-top:8px;">\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0438\u0437 \u0438\u0441\u0442\u043e\u0440\u0438\u0438</button>'+
+    '<button class="btn btn-outline" onclick="closeModal(\'modal-history-detail\')">\u0417\u0430\u043a\u0440\u044b\u0442\u044c</button>';
   document.getElementById('hd-body').innerHTML = html;
   openModal('modal-history-detail');
 }
 
-// ── EDIT JOB ──────────────────────────────────────────────────────────────────
 function openEditJob(id) {
-  const d = load(), job = (d.done||[]).find(j => j.id === id);
+  const d = load(), job = (d.done||[]).find(j => j.id===id);
   if (!job) return;
   closeModal('modal-history-detail');
-
-  const phases = job.type==='full'
-    ? [{id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]
-    : [{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
-
-  let html = '<div class="form-group"><label class="form-label">\u0421\u0435\u0440\u0438\u0439\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440</label><input class="form-input" id="edit-serial" value="'+(job.serial||'')+'" /></div>'
-    +'<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'
-    +'<div class="form-group"><label class="form-label">\u041c\u043e\u0434\u0435\u043b\u044c</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'
-    +'<div class="form-group"><label class="form-label">\u0417\u0430\u043c\u0435\u0442\u043a\u0430</label><textarea class="form-textarea" id="edit-note">'+(job.note||'')+'</textarea></div>';
+  const phases = job.type==='full'?[{id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]:[{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
+  let html = '<div class="form-group"><label class="form-label">\u0421\u0435\u0440\u0438\u0439\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440</label><input class="form-input" id="edit-serial" value="'+(job.serial||'')+'" /></div>'+
+    '<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'+
+    '<div class="form-group"><label class="form-label">\u041c\u043e\u0434\u0435\u043b\u044c</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'+
+    '<div class="form-group"><label class="form-label">\u0417\u0430\u043c\u0435\u0442\u043a\u0430</label><textarea class="form-textarea" id="edit-note">'+(job.note||'')+'</textarea></div>';
 
 phases.forEach(phase => {
-const phaseSteps = job.steps.filter(s => s.phase === phase.id);
-const phaseTotal = phaseSteps.reduce((a,s) => a+(s.elapsed||0), 0);
-const phaseMins = Math.round(phaseTotal/60000);
-const hasDetails = phaseSteps.some(s => s.elapsed > 0);
-
-```
-html += '<div style="margin:14px 0 8px;">'
-  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-  +'<label class="form-label" style="margin:0;">'+phase.label+' (\u043c\u0438\u043d)</label>'
-  +(hasDetails?'<span style="font-size:12px;color:var(--text-dim);cursor:pointer;" onclick="toggleEditDetails(\'details-'+phase.id+'\')">\u2261 \u043f\u043e\u044d\u0442\u0430\u043f\u043d\u043e</span>':'')
-  +'</div>'
-  +'<input class="form-input edit-phase-time" data-phase="'+phase.id+'" type="number" value="'+phaseMins+'" min="0" placeholder="0" />'
-  +'</div>';
-
-// Collapsible step details — hidden by default
-html += '<div id="details-'+phase.id+'" style="display:none;margin-bottom:8px;padding:10px;background:var(--bg3);border-radius:6px;">';
-phaseSteps.forEach(step => {
-  const mins = step.elapsed ? Math.round(step.elapsed/60000) : 0;
-  if (mins > 0) {
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-      +'<div style="font-size:13px;color:var(--text-dim);flex:1;">'+step.name+'</div>'
-      +'<input class="form-input edit-step-time" data-stepid="'+step.id+'" type="number" value="'+mins+'" min="0" style="width:80px;padding:6px;font-size:14px;" /></div>';
-  }
+const ps = job.steps.filter(s => s.phase===phase.id);
+const pt = ps.reduce((a,s) => a+(s.elapsed||0), 0);
+const pm = Math.round(pt/60000);
+const hasDet = ps.some(s => s.elapsed>0);
+html += ‘<div style="margin:14px 0 8px;">’+
+‘<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">’+
+‘<label class="form-label" style="margin:0;">’+phase.label+’ (\u043c\u0438\u043d)</label>’+
+(hasDet?’<span style="font-size:12px;color:var(--text-dim);cursor:pointer;" onclick="toggleEditDetails(\'details-'+ phase.id+'\')">≡ \u043f\u043e\u044d\u0442\u0430\u043f\u043d\u043e</span>’:’’)+
+‘</div><input class="form-input edit-phase-time" data-phase="'+phase.id+'" type="number" value="'+pm+'" min="0" /></div>’;
+html += ‘<div id="details-'+phase.id+'" style="display:none;margin-bottom:8px;padding:10px;background:var(--bg3);border-radius:6px;">’;
+ps.forEach(step => {
+const m = step.elapsed ? Math.round(step.elapsed/60000) : 0;
+html += ‘<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">’+
+‘<div style="font-size:13px;color:var(--text-dim);flex:1;">’+step.name+’</div>’+
+‘<input class="form-input edit-step-time" data-stepid="'+step.id+'" type="number" value="'+m+'" min="0" style="width:80px;padding:6px;font-size:14px;" /></div>’;
 });
-// Add empty steps too (collapsed)
-phaseSteps.filter(s => !s.elapsed || s.elapsed === 0).forEach(step => {
-  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-    +'<div style="font-size:13px;color:var(--text-dim);flex:1;">'+step.name+'</div>'
-    +'<input class="form-input edit-step-time" data-stepid="'+step.id+'" type="number" value="0" min="0" style="width:80px;padding:6px;font-size:14px;" /></div>';
+html += ‘</div>’;
 });
-html += '</div>';
-```
-
-});
-
-html += ‘<button class="btn btn-gold" style="margin-top:8px;" onclick="saveEditJob(\''+id+'\')">\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c</button>’
-+’<button class="btn btn-outline" onclick="closeModal(\'modal-edit-job\')">\u041e\u0442\u043c\u0435\u043d\u0430</button>’;
+html += ‘<button class="btn btn-gold" style="margin-top:8px;" onclick="saveEditJob(\''+ id+'\')">\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c</button>’+
+‘<button class="btn btn-outline" onclick="closeModal(\'modal-edit-job\')">\u041e\u0442\u043c\u0435\u043d\u0430</button>’;
 document.getElementById(‘edit-job-body’).innerHTML = html;
 openModal(‘modal-edit-job’);
 }
-
-function toggleEditDetails(id) {
-const el = document.getElementById(id);
-if (el) el.style.display = el.style.display === ‘none’ ? ‘block’ : ‘none’;
-}
-
+function toggleEditDetails(id) { const el=document.getElementById(id); if(el) el.style.display=el.style.display===‘none’?‘block’:‘none’; }
 function saveEditJob(id) {
-const d = load(), job = (d.done||[]).find(j => j.id === id);
+const d = load(), job = (d.done||[]).find(j => j.id===id);
 if (!job) return;
 job.serial = document.getElementById(‘edit-serial’).value.trim();
 job.ref    = document.getElementById(‘edit-ref’).value.trim();
 job.model  = document.getElementById(‘edit-model’).value.trim();
 job.note   = document.getElementById(‘edit-note’).value.trim();
-
-// If step details were edited, use those
 const stepInputs = document.querySelectorAll(’.edit-step-time’);
 if (stepInputs.length > 0) {
-stepInputs.forEach(inp => {
-const step = job.steps.find(s => s.id === inp.dataset.stepid);
-if (step) step.elapsed = Math.round((parseFloat(inp.value)||0)*60000);
-});
+stepInputs.forEach(inp => { const step=job.steps.find(s => s.id===inp.dataset.stepid); if(step) step.elapsed=Math.round((parseFloat(inp.value)||0)*60000); });
 } else {
-// Use phase totals — distribute to first step of each phase
 document.querySelectorAll(’.edit-phase-time’).forEach(inp => {
-const phaseId = inp.dataset.phase;
-const phaseSteps = job.steps.filter(s => s.phase === phaseId);
-const totalMs = Math.round((parseFloat(inp.value)||0)*60000);
-if (phaseSteps.length > 0) phaseSteps[0].elapsed = totalMs;
+const ps=job.steps.filter(s => s.phase===inp.dataset.phase);
+if(ps.length>0) ps[0].elapsed=Math.round((parseFloat(inp.value)||0)*60000);
 });
 }
-
 save(d); closeModal(‘modal-edit-job’); showToast(’\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b’); renderHistory();
 }
 
-// ── STATS ─────────────────────────────────────────────────────────────────────
 function renderStats() {
 const d = load(), done = d.done||[];
 const totalJobs = done.length;
 const fullJobs = done.filter(j => j.type===‘full’).length;
 const assemblyOnly = done.filter(j => j.type===‘assembly’).length;
-const avgTotal = totalJobs > 0 ? done.reduce((a,j) => a+totalTime(j), 0)/totalJobs : 0;
-const dorabCount = done.filter(j => j.dorabotki && j.dorabotki.length > 0).length;
-const dorabPct = totalJobs > 0 ? Math.round(dorabCount/totalJobs*100) : 0;
+const avgTotal = totalJobs>0 ? done.reduce((a,j) => a+totalTime(j),0)/totalJobs : 0;
+const dorabCount = done.filter(j => j.dorabotki && j.dorabotki.length>0).length;
+const vozvratCount = done.filter(j => j.vozvrat && j.vozvrat.length>0).length;
+const vozvratPct = totalJobs>0 ? Math.round(vozvratCount/totalJobs*100) : 0;
 document.getElementById(‘stats-grid’).innerHTML =
-‘<div class="stat-card"><div class="stat-card-val">’+totalJobs+’</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>’
-+’<div class="stat-card"><div class="stat-card-val">’+fmtMs(avgTotal)+’</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>’
-+’<div class="stat-card"><div class="stat-card-val">’+fullJobs+’</div><div class="stat-card-lbl">Full Service</div></div>’
-+’<div class="stat-card"><div class="stat-card-val">’+assemblyOnly+’</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>’
-+’<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,160,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6a01e':'var(--gold)')+';">’+dorabCount+’</div><div class="stat-card-lbl">\u21ba \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>’
-+’<div class="stat-card" style="border-color:'+(dorabPct>20?'rgba(230,160,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabPct>20?'#e6a01e':dorabPct>10?'#e6ac00':'var(--green)')+';">’+dorabPct+’%</div><div class="stat-card-lbl">% \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>’;
-
+‘<div class="stat-card"><div class="stat-card-val">’+totalJobs+’</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>’+
+‘<div class="stat-card"><div class="stat-card-val">’+fmtMs(avgTotal)+’</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>’+
+‘<div class="stat-card"><div class="stat-card-val">’+fullJobs+’</div><div class="stat-card-lbl">Full Service</div></div>’+
+‘<div class="stat-card"><div class="stat-card-val">’+assemblyOnly+’</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>’+
+‘<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">’+dorabCount+’</div><div class="stat-card-lbl">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>’+
+‘<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">’+vozvratPct+’%</div><div class="stat-card-lbl">↩ % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>’;
 if (done.length > 0) {
-const countSpeed = (jobs, type) => {
-let fast=0,mid=0,slow=0;
-jobs.forEach(j => {
-const h = totalTime(j)/3600000;
-if (type===‘full’) { if(h<=5)fast++; else if(h<=7)mid++; else slow++; }
-else { if(h<3)fast++; else if(h<=4)mid++; else slow++; }
-});
-return {fast,mid,slow};
-};
+const countSpeed = (jobs, type) => { let f=0,m=0,s=0; jobs.forEach(j => { const h=totalTime(j)/3600000; if(type===‘full’){if(h<=5)f++;else if(h<=7)m++;else s++;}else{if(h<3)f++;else if(h<=4)m++;else s++;} }); return {fast:f,mid:m,slow:s}; };
 let speedHtml = ‘’;
 const fullDone = done.filter(j => j.type===‘full’);
-const asmDone  = done.filter(j => j.type===‘assembly’);
+const asmDone = done.filter(j => j.type===‘assembly’);
 if (fullDone.length > 0) {
 const s = countSpeed(fullDone, ‘full’);
-speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’
-+’<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Full Service — \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>’
-+’<div style="display:flex;gap:10px;">’
-+’<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ ≤5\u0447</div></div>’
-+’<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 6–7\u0447</div></div>’
-+’<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥8\u0447</div></div>’
-+’</div></div>’;
+speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’+
+‘<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Full Service \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>’+
+‘<div style="display:flex;gap:10px;">’+
+‘<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ ≤5\u0447</div></div>’+
+‘<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 6\u20137\u0447</div></div>’+
+‘<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥8\u0447</div></div>’+
+‘</div></div>’;
 }
 if (asmDone.length > 0) {
 const s = countSpeed(asmDone, ‘assembly’);
-speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’
-+’<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">\u0421\u0431\u043e\u0440\u043a\u0430 — \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>’
-+’<div style="display:flex;gap:10px;">’
-+’<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ <3\u0447</div></div>’
-+’<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 3–4\u0447</div></div>’
-+’<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥5\u0447</div></div>’
-+’</div></div>’;
+speedHtml += ‘<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">’+
+‘<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">\u0421\u0431\u043e\u0440\u043a\u0430 \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>’+
+‘<div style="display:flex;gap:10px;">’+
+‘<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">’+s.fast+’</div><div style="font-size:11px;color:var(--text-dim);">⚡ <3\u0447</div></div>’+
+‘<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">’+s.mid+’</div><div style="font-size:11px;color:var(--text-dim);">⏱ 3\u20134\u0447</div></div>’+
+‘<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">’+s.slow+’</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥5\u0447</div></div>’+
+‘</div></div>’;
 }
 document.getElementById(‘stats-speed’).innerHTML = speedHtml;
 }
-
 const stageChart = document.getElementById(‘stage-chart’);
-if (done.length === 0) {
-stageChart.innerHTML = ‘<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445</div>’;
-} else {
-const stageMap = {};
+if (done.length===0) { stageChart.innerHTML=’<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445</div>’; }
+else {
+const sm = {};
 done.forEach(j => j.steps.forEach(s => {
-if (!stageMap[s.id]) stageMap[s.id] = {name:s.name, total:0, count:0};
-if (s.elapsed > 0) { stageMap[s.id].total += s.elapsed; stageMap[s.id].count++; }
+if (!sm[s.id]) sm[s.id]={name:s.name,total:0,count:0};
+if (s.elapsed>0) { sm[s.id].total+=s.elapsed; sm[s.id].count++; }
 }));
-const stages = Object.values(stageMap).filter(s => s.count > 0)
-.map(s => ({name:s.name, avg:s.total/s.count})).sort((a,b) => b.avg-a.avg).slice(0,8);
-const maxAvg = Math.max(…stages.map(s => s.avg), 1);
+const stages = Object.values(sm).filter(s => s.count>0).map(s => ({name:s.name,avg:s.total/s.count})).sort((a,b) => b.avg-a.avg).slice(0,8);
+const maxA = Math.max(…stages.map(s => s.avg),1);
 stageChart.innerHTML = stages.map(s =>
-‘<div class="bar-row"><div class="bar-label" title="'+s.name+'">’+s.name.split(’ ‘)[0]+’</div>’
-+’<div class="bar-track"><div class="bar-fill" style="width:'+((s.avg/maxAvg*100).toFixed(1))+'%"></div></div>’
-+’<div class="bar-val">’+fmtMs(s.avg)+’</div></div>’
+‘<div class="bar-row"><div class="bar-label" title="'+s.name+'">’+s.name.split(’ ‘)[0]+’</div>’+
+‘<div class="bar-track"><div class="bar-fill" style="width:'+(s.avg/maxA*100).toFixed(1)+'%"></div></div>’+
+‘<div class="bar-val">’+fmtMs(s.avg)+’</div></div>’
 ).join(’’);
 }
-const avgFull = fullJobs > 0 ? done.filter(j=>j.type===‘full’).reduce((a,j)=>a+totalTime(j),0)/fullJobs : 0;
-const avgAsm  = assemblyOnly > 0 ? done.filter(j=>j.type===‘assembly’).reduce((a,j)=>a+totalTime(j),0)/assemblyOnly : 0;
-const maxT = Math.max(avgFull, avgAsm, 1);
+const aF = fullJobs>0?done.filter(j=>j.type===‘full’).reduce((a,j)=>a+totalTime(j),0)/fullJobs:0;
+const aA = assemblyOnly>0?done.filter(j=>j.type===‘assembly’).reduce((a,j)=>a+totalTime(j),0)/assemblyOnly:0;
+const mT = Math.max(aF,aA,1);
 document.getElementById(‘type-chart’).innerHTML =
-‘<div class="bar-row"><div class="bar-label">Full Service</div><div class="bar-track"><div class="bar-fill" style="width:'+((avgFull/maxT*100).toFixed(1))+'%"></div></div><div class="bar-val">’+fmtMs(avgFull)+’</div></div>’
-+’<div class="bar-row"><div class="bar-label">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div><div class="bar-track"><div class="bar-fill" style="width:'+((avgAsm/maxT*100).toFixed(1))+'%;background:var(--blue)"></div></div><div class="bar-val">’+fmtMs(avgAsm)+’</div></div>’;
+‘<div class="bar-row"><div class="bar-label">Full Service</div><div class="bar-track"><div class="bar-fill" style="width:'+(aF/mT*100).toFixed(1)+'%"></div></div><div class="bar-val">’+fmtMs(aF)+’</div></div>’+
+‘<div class="bar-row"><div class="bar-label">\u0421\u0431\u043e\u0440\u043a\u0430</div><div class="bar-track"><div class="bar-fill" style="width:'+(aA/mT*100).toFixed(1)+'%;background:var(--blue)"></div></div><div class="bar-val">’+fmtMs(aA)+’</div></div>’;
 }
 
-// ── DORABOTKA ─────────────────────────────────────────────────────────────────
-let editingDorabotkaId = null;
-
-function openDorabotkaModal(dorabotkaId) {
-editingDorabotkaId = dorabotkaId || null;
-const hint = document.getElementById(‘dorabotka-edit-hint’);
-if (dorabotkaId) {
-// Edit mode — load existing
-const d = load();
-const job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-const dor = job && job.dorabotki && job.dorabotki.find(r => r.id === dorabotkaId);
-if (!dor) return;
-document.getElementById(‘inp-dorabotka-desc’).value = dor.desc;
-document.getElementById(‘inp-dorabotka-time’).value = dor.elapsed ? Math.round(dor.elapsed/60000) : ‘’;
-if (hint) { hint.style.display=‘block’; hint.textContent = ‘Редактирование существующей доработки’; }
-} else {
-document.getElementById(‘inp-dorabotka-desc’).value = ‘’;
-document.getElementById(‘inp-dorabotka-time’).value = ‘’;
-if (hint) hint.style.display = ‘none’;
-}
-openModal(‘modal-dorabotka’);
-}
-
-function saveDorabotka() {
-const desc = document.getElementById(‘inp-dorabotka-desc’).value.trim();
-if (!desc) { showToast(‘Опишите доработку’); return; }
-const mins = parseInt(document.getElementById(‘inp-dorabotka-time’).value) || 0;
-const d = load();
-let job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-if (!job) return;
-if (!job.dorabotki) job.dorabotki = [];
-
-if (editingDorabotkaId) {
-// Update existing
-const dor = job.dorabotki.find(r => r.id === editingDorabotkaId);
-if (dor) { dor.desc = desc; dor.elapsed = mins * 60000; }
-showToast(‘Доработка обновлена’);
-} else {
-job.dorabotki.push({ id: Date.now().toString(), desc, elapsed: mins * 60000, date: Date.now() });
-showToast(‘Доработка добавлена’);
-}
-
-save(d);
-closeModal(‘modal-dorabotka’);
-editingDorabotkaId = null;
-const isDone = !!(d.done||[]).find(j => j.id === currentJobId);
-if (isDone) { renderHistory(); openHistoryDetail(currentJobId); }
-else openJob(currentJobId);
-}
-
-function deleteDorabotka(jobId, dorabotkaId) {
-const d = load();
-const job = d.jobs.find(j => j.id === jobId) || (d.done||[]).find(j => j.id === jobId);
-if (!job || !job.dorabotki) return;
-job.dorabotki = job.dorabotki.filter(r => r.id !== dorabotkaId);
-save(d);
-showToast(‘Доработка удалена’);
-const isDone = !!(d.done||[]).find(j => j.id === jobId);
-if (isDone) { renderHistory(); openHistoryDetail(jobId); }
-else openJob(jobId);
-}
-
-function deleteFromHistory(id) {
-if (!confirm(‘Удалить эти часы из истории?’)) return;
-const d = load();
-d.done = (d.done||[]).filter(j => j.id !== id);
-save(d);
-closeModal(‘modal-history-detail’);
-showToast(‘Запись удалена’);
-renderHistory();
-}
-
-function renderDorabotki(job) {
-const container = document.getElementById(‘work-dorabotka-container’);
-if (!container) return;
-if (!job.dorabotki || job.dorabotki.length === 0) { container.innerHTML = ‘’; return; }
-const totalDorTime = job.dorabotki.reduce((a,r) => a + (r.elapsed||0), 0);
-let html = ‘<div class="dorabotka-block">’
-+ ‘<div class="dorabotka-header">’
-+ ‘<div class="dorabotka-title">↺ Доработки (’+job.dorabotki.length+’)</div>’
-+ ‘<div style="font-size:13px;color:#e6a01e;font-weight:700;">’+(totalDorTime>0?fmtMs(totalDorTime):’’)+’</div>’
-+ ‘</div>’;
-job.dorabotki.forEach(r => {
-html += ‘<div class="dorabotka-item">’
-+ ‘<div style="flex:1;"><div class="dorabotka-item-desc">’+r.desc+’</div>’
-+ ‘<div class="dorabotka-item-meta">’+fmtDate(r.date)+’</div></div>’
-+ ‘<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">’
-+ ‘<div class="dorabotka-item-time">’+(r.elapsed?fmtMs(r.elapsed):’—’)+’</div>’
-+ ‘<button onclick="openDorabotkaModal(\''+r.id+'\')" style="background:none;border:1px solid rgba(230,160,30,0.3);border-radius:4px;color:#e6a01e;font-size:12px;padding:4px 8px;cursor:pointer;">✎</button>’
-+ ‘</div></div>’;
-});
-html += ‘</div>’;
-container.innerHTML = html;
-}
-
-// ── EXPORT / IMPORT ───────────────────────────────────────────────────────────
 function exportData() {
 const d = load();
-const json = JSON.stringify(d, null, 2);
-const blob = new Blob([json], {type: ‘application/json’});
+const blob = new Blob([JSON.stringify(d,null,2)],{type:‘application/json’});
 const url = URL.createObjectURL(blob);
 const a = document.createElement(‘a’);
-a.href = url;
-a.download = ‘service-tracker-backup-’ + new Date().toISOString().slice(0,10) + ‘.json’;
-a.click();
-URL.revokeObjectURL(url);
+a.href=url; a.download=‘service-tracker-backup-’+new Date().toISOString().slice(0,10)+’.json’;
+a.click(); URL.revokeObjectURL(url);
 showToast(’\u0414\u0430\u043d\u043d\u044b\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b \u0432 \u0444\u0430\u0439\u043b’);
 }
-
 function importData(input) {
-const file = input.files[0];
-if (!file) return;
+const file = input.files[0]; if (!file) return;
 const reader = new FileReader();
 reader.onload = function(e) {
 try {
 const data = JSON.parse(e.target.result);
-if (!data.jobs || !data.done) throw new Error(‘bad format’);
-localStorage.setItem(‘rst_data’, JSON.stringify(data));
-showToast(’\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e ’ + (data.done||[]).length + ’ \u0437\u0430\u043f\u0438\u0441\u0435\u0439’);
-setTimeout(() => { renderHome(); navigate(‘home’); }, 1000);
-} catch(err) {
-showToast(’\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430 — \u043f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0444\u043e\u0440\u043c\u0430\u0442’);
-}
-input.value = ‘’;
+if (!data.jobs||!data.done) throw new Error(‘bad’);
+localStorage.setItem(‘rst_data’,JSON.stringify(data));
+showToast(’\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e ‘+( data.done||[]).length+’ \u0437\u0430\u043f\u0438\u0441\u0435\u0439’);
+setTimeout(()=>{renderHome();navigate(‘home’);},1000);
+} catch(err) { showToast(’\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430’); }
+input.value=’’;
 };
 reader.readAsText(file);
 }
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
 function toggleTheme() {
 const isLight = document.documentElement.classList.toggle(‘light’);
-localStorage.setItem(‘rst_theme’, isLight ? ‘light’ : ‘dark’);
-document.getElementById(‘theme-btn’).textContent = isLight ? ‘🌙 \u0422\u0451\u043c\u043d\u0430\u044f’ : ‘☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f’;
+localStorage.setItem(‘rst_theme’, isLight?‘light’:‘dark’);
+document.getElementById(‘theme-btn’).textContent = isLight?’🌙 \u0422\u0451\u043c\u043d\u0430\u044f’:’☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f’;
 }
-if (localStorage.getItem(‘rst_theme’) === ‘light’) {
+if (localStorage.getItem(‘rst_theme’)===‘light’) {
 document.documentElement.classList.add(‘light’);
 window.addEventListener(‘load’, () => {
-const btn = document.getElementById(‘theme-btn’);
-if (btn) btn.textContent = ‘🌙 \u0422\u0451\u043c\u043d\u0430\u044f’;
+const btn=document.getElementById(‘theme-btn’);
+if(btn) btn.textContent=’🌙 \u0422\u0451\u043c\u043d\u0430\u044f’;
 });
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
 renderHome();
 </script>
 
