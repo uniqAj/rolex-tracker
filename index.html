@@ -533,12 +533,40 @@
     .part-models { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .part-model-tag { font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(96,160,255,0.1); color: var(--blue); border: 1px solid rgba(96,160,255,0.2); }
     .catalog-empty { text-align: center; padding: 50px 30px; color: var(--text-dim); font-size: 14px; }
+
+    @keyframes splashPulse { 0%,100%{transform:scale(1);opacity:0.8} 50%{transform:scale(1.1);opacity:1} }
+    @keyframes splashWatchIn { from{transform:scale(0.4) rotate(-20deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+    @keyframes splashFadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+    @keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    @keyframes splashOut { to{opacity:0;transform:scale(1.05)} }
+    .empty-watch-anim { width:90px;height:90px;border-radius:50%;border:1.5px solid rgba(240,192,96,0.25);background:radial-gradient(circle at 40% 35%,rgba(240,192,96,0.08),transparent);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:emptyFloat 3s ease-in-out infinite; }
+    .empty-watch-ring { width:64px;height:64px;border-radius:50%;border:1px solid rgba(240,192,96,0.15);display:flex;align-items:center;justify-content:center; }
+    @keyframes emptyFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
     ::-webkit-scrollbar { width: 2px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 1px; }
   </style>
 </head>
 <body>
+
+<div id="splash-screen" style="position:fixed;inset:0;z-index:9999;background:#080612;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease,transform 0.6s ease;">
+  <div id="splash-glow" style="position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(240,192,96,0.12) 0%,transparent 70%);animation:splashPulse 2s ease-in-out infinite;"></div>
+  <div id="splash-watch" style="width:110px;height:110px;border-radius:50%;border:2px solid rgba(240,192,96,0.35);background:radial-gradient(circle at 40% 35%,rgba(240,192,96,0.12),#080612 60%);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;animation:splashWatchIn 0.8s cubic-bezier(.34,1.56,.64,1) both;">
+    <div style="width:80px;height:80px;border-radius:50%;border:1px solid rgba(240,192,96,0.2);background:#080612;display:flex;align-items:center;justify-content:center;">
+      <svg width="28" height="22" viewBox="0 0 14 11" fill="none"><path d="M1 10L2.8 3.5L7 8L7 2L11.2 3.5L13 10Z" fill="none" stroke="rgba(240,192,96,0.8)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div style="position:relative;z-index:2;text-align:center;margin-top:24px;animation:splashFadeUp 0.6s 0.4s both;">
+    <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:600;background:linear-gradient(135deg,#ffda85,#f0c060,#c9a84c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.02em;">Service Tracker</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.25em;text-transform:uppercase;margin-top:6px;">Workshop Log</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:36px;position:relative;z-index:2;animation:splashFadeUp 0.6s 0.8s both;">
+    <div style="width:6px;height:6px;border-radius:50%;background:rgba(240,192,96,0.25);"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:#f0c060;animation:dotPulse 1.2s 1s infinite;"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:rgba(240,192,96,0.25);"></div>
+  </div>
+</div>
+
 <div class="topbar">
   <div>
     <div class="topbar-title">&#x231a; Service Tracker</div>
@@ -550,7 +578,11 @@
   </div>
 </div>
 
-<div class="page active" id="page-home">
+<div class="page active" id="page-home" style="position:relative;">
+  <div style="position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden;">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:340px;height:340px;border-radius:50%;border:1px solid rgba(240,192,96,0.07);background:radial-gradient(circle at 40% 35%,rgba(240,192,96,0.05) 0%,transparent 65%);"></div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:260px;height:260px;border-radius:50%;border:1px solid rgba(240,192,96,0.05);"></div>
+  </div>
   <div class="section-header">
     <div class="section-title">&#1040;&#1082;&#1090;&#1080;&#1074;&#1085;&#1099;&#1077;</div>
     <div class="section-meta" id="home-count"></div>
@@ -592,11 +624,11 @@
   </div>
   <div class="stats-grid" id="stats-grid"></div>
   <div id="stats-speed"></div>
-  <div class="chart-container">
+  <div id="stats-block-stage" class="chart-container">
     <div class="chart-title">&#1057;&#1088;&#1077;&#1076;&#1085;&#1077;&#1077; &#1074;&#1088;&#1077;&#1084;&#1103; &#1087;&#1086; &#1101;&#1090;&#1072;&#1087;&#1072;&#1084;</div>
     <div class="bar-chart" id="stage-chart"></div>
   </div>
-  <div class="chart-container">
+  <div id="stats-block-type" class="chart-container">
     <div class="chart-title">Full Service vs &#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</div>
     <div class="bar-chart" id="type-chart"></div>
   </div>
@@ -1470,6 +1502,14 @@ function renderStats() {
   const dorabCount = done.filter(j => j.dorabotki && j.dorabotki.length>0).length;
   const vozvratCount = done.filter(j => j.vozvrat && j.vozvrat.length>0).length;
   const vozvratPct = totalJobs>0 ? Math.round(vozvratCount/totalJobs*100) : 0;
+
+  // Apply block visibility
+  var stageBlock = document.getElementById('stats-block-stage');
+  var typeBlock = document.getElementById('stats-block-type');
+  var speedBlock = document.getElementById('stats-speed');
+  if (stageBlock) stageBlock.style.display = isBlockVisible('stage') ? '' : 'none';
+  if (typeBlock) typeBlock.style.display = isBlockVisible('type') ? '' : 'none';
+  if (speedBlock) speedBlock.style.display = isBlockVisible('speed') ? '' : 'none';
   document.getElementById('stats-grid').innerHTML =
     '<div class="stat-card"><div class="stat-card-val">'+totalJobs+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+fmtMs(avgTotal)+'</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>'+
@@ -1721,6 +1761,110 @@ function animateBars() {
 
 renderHome();
 
+
+// ── SPLASH ────────────────────────────────────────────────────────────────────
+(function() {
+  var splash = document.getElementById('splash-screen');
+  if (!splash) return;
+  setTimeout(function() {
+    splash.style.animation = 'splashOut 0.5s ease forwards';
+    setTimeout(function() {
+      splash.style.display = 'none';
+    }, 500);
+  }, 1800);
+})();
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+const STATS_BLOCKS = [
+  {id:'speed',    label:'Скорость (быстро/средне/долго)'},
+  {id:'stage',    label:'График по этапам'},
+  {id:'type',     label:'Full Service vs Сборка'},
+  {id:'dorabotka',label:'Статистика доработок'},
+];
+
+function loadSettings() {
+  try {
+    return JSON.parse(localStorage.getItem('rst_settings') || '{}');
+  } catch(e) { return {}; }
+}
+
+function saveSettings() {
+  var s = loadSettings();
+  s.fsFast = parseFloat(document.getElementById('set-fs-fast').value) || 5;
+  s.fsMid  = parseFloat(document.getElementById('set-fs-mid').value)  || 7;
+  s.asmFast = parseFloat(document.getElementById('set-asm-fast').value) || 3;
+  s.asmMid  = parseFloat(document.getElementById('set-asm-mid').value)  || 4;
+  s.statsBlocks = {};
+  STATS_BLOCKS.forEach(function(b) {
+    var el = document.getElementById('toggle-'+b.id);
+    s.statsBlocks[b.id] = el ? el.checked : true;
+  });
+  localStorage.setItem('rst_settings', JSON.stringify(s));
+  closeModal('modal-settings');
+  showToast('\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b');
+}
+
+function openSettingsModal() {
+  var s = loadSettings();
+  document.getElementById('set-fs-fast').value = s.fsFast || 5;
+  document.getElementById('set-fs-mid').value  = s.fsMid  || 7;
+  document.getElementById('set-asm-fast').value = s.asmFast || 3;
+  document.getElementById('set-asm-mid').value  = s.asmMid  || 4;
+
+  var togglesEl = document.getElementById('stats-toggles');
+  if (togglesEl) {
+    togglesEl.innerHTML = STATS_BLOCKS.map(function(b) {
+      var checked = s.statsBlocks ? (s.statsBlocks[b.id] !== false) : true;
+      return '<label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--glass-border);cursor:pointer;">'
+        + '<span style="font-size:15px;color:var(--text);">' + b.label + '</span>'
+        + '<input type="checkbox" id="toggle-' + b.id + '"' + (checked?' checked':'') + ' style="width:20px;height:20px;accent-color:var(--gold);cursor:pointer;" />'
+        + '</label>';
+    }).join('');
+  }
+
+  // Highlight active theme
+  var isDark = !document.documentElement.classList.contains('light');
+  var darkBtn = document.getElementById('theme-dark-btn');
+  var lightBtn = document.getElementById('theme-light-btn');
+  if (darkBtn) darkBtn.style.background = isDark ? 'var(--gold)' : 'var(--glass)';
+  if (darkBtn) darkBtn.style.color = isDark ? '#000' : 'var(--text-dim)';
+  if (lightBtn) lightBtn.style.background = !isDark ? 'var(--gold)' : 'var(--glass)';
+  if (lightBtn) lightBtn.style.color = !isDark ? '#000' : 'var(--text-dim)';
+
+  openModal('modal-settings');
+}
+
+function setTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.classList.add('light');
+  } else {
+    document.documentElement.classList.remove('light');
+  }
+  localStorage.setItem('rst_theme', theme);
+  openSettingsModal();
+}
+
+function getSpeedLevel(hours, type) {
+  var s = loadSettings();
+  if (type === 'service') {
+    var fast = s.fsFast || 5;
+    var mid  = s.fsMid  || 7;
+    if (hours <= fast) return 'fast';
+    if (hours <= mid)  return 'mid';
+    return 'slow';
+  } else {
+    var fast = s.asmFast || 3;
+    var mid  = s.asmMid  || 4;
+    if (hours <= fast) return 'fast';
+    if (hours <= mid)  return 'mid';
+    return 'slow';
+  }
+}
+
+function isBlockVisible(id) {
+  var s = loadSettings();
+  return s.statsBlocks ? s.statsBlocks[id] !== false : true;
+}
+
 function showPartPage(num, name, page) {
   document.getElementById('part-img-title').textContent = num + ' — ' + name;
   document.getElementById('part-img-src').src = 'parts/p' + page + '.webp';
@@ -1733,122 +1877,122 @@ const CATALOG_DATA = {
   '3135': {
     label: 'Cal.\u00a03135',
     parts: [
-      {num:'4494',name:'In-setting spring for escape wheel upper/lower',desc:'From Cal.2030',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'5021',name:'Roller',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'5044',name:'Minute wheel stud',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'95019-1',name:'Shock absorber for balance lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'95019-2',name:'In-setting for balance upper/lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'95019-3',name:'Cap jewel for balance upper/lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'95019-4',name:'In-setting spring for balance upper/lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'95067',name:'Jewel for reversing wheel & driving wheel for ratchet',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
-      {num:'2130-0913-2',name:'Cap jewel for escape wheel upper/lower',desc:'From Cal.2130',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-100',name:'Main plate',desc:'Base plate of the movement',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-105',name:'Barrel bridge',desc:'Bridge over the barrel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-110',name:'Train wheel bridge',desc:'Bridge covering the gear train',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-115',name:'Pallet bridge',desc:'Bridge holding the pallet fork',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-118',name:'Balance guard',desc:'Protection for the balance wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-120',name:'Balance bridge',desc:'Bridge holding the balance assembly',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-125',name:'Minute pinion bridge',desc:'Bridge for minute pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-130',name:'Winding bridge',desc:'Bridge for winding mechanism',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-135',name:'Automatic device lower bridge',desc:'Lower bridge for automatic device',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
-      {num:'3135-140',name:'Automatic device upper bridge',desc:'Upper bridge for automatic device',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-145',name:'Automatic device module',desc:'Complete automatic winding module',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-201',name:'Winding stem',desc:'Crown stem for winding',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-204',name:'Winding pinion',desc:'Winding pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-205',name:'Sliding pinion',desc:'Coupling/sliding pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-210',name:'Crown wheel',desc:'Crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-211',name:'Crown wheel core',desc:'Core of crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-212',name:'Core for intermediate crown wheel',desc:'Core of intermediate crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-213',name:'Intermediate crown wheel',desc:'Intermediate crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-217',name:'Yoke for sliding gear',desc:'Yoke/lever for sliding gear',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-220',name:'Setting-lever',desc:'Setting lever (tirette)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-225',name:'Setting-lever spring',desc:'Spring for setting lever',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
-      {num:'3135-230',name:'Setting-lever jumper',desc:'Jumper for setting lever',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-240',name:'Yoke for sliding pinion',desc:'Yoke for sliding pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-241',name:'Yoke spring',desc:'Spring for yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-245',name:'Balance stop spring',desc:'Spring to stop the balance',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-250',name:'Setting-wheel',desc:'Setting wheel (renvoi)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-260',name:'Minute wheel',desc:'Minute wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-266',name:'Yoke for setting-wheel',desc:'Yoke for setting wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-268',name:'Mechanism cover, mounted',desc:'Mechanism cover assembled',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-270',name:'Cannon pinion ht. 2.86mm',desc:'Friction cannon pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-280',name:'Hour wheel',desc:'Hour wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-300',name:'Click',desc:'Click pawl (cliquet)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-301',name:'Click spring',desc:'Spring for click',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-305',name:'Ratchet wheel',desc:'Ratchet wheel (rochet)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:8},
-      {num:'3135-307',name:'Barrel arbor',desc:'Barrel arbor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-311',name:'Mainspring, standard strength',desc:'Standard strength mainspring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-311-1',name:'Mainspring, weak strength',desc:'Weak strength mainspring variant',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-315',name:'Barrel complete with mainspring',desc:'Complete barrel with arbor and spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-330',name:'Great wheel',desc:'Great/centre wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-335',name:'Minute pinion with cannon pinion',desc:'Minute pinion with friction cannon',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-340',name:'Third wheel',desc:'Third wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-360',name:'Second wheel',desc:'Second wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-410',name:'Escape wheel',desc:'Escape wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-419',name:'Pallet staff',desc:'Pallet fork staff/pivot',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-421',name:'Pallet fork',desc:'Pallet fork (lever escapement)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-429',name:'Balance staff',desc:'Balance staff/pivot',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-432',name:'Balance with Breguet hairspring, timed',desc:'Complete regulated balance assembly',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-450',name:'Stud support',desc:'Hairspring stud holder',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
-      {num:'3135-451',name:'Bridle for stud support',desc:'Clamp for stud holder',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-510',name:'Driving wheel for ratchet wheel',desc:'Driving wheel for ratchet',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-540',name:'Reversing wheel, mounted',desc:'Complete reversing wheel assembly',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-550',name:'Pinion for oscillating weight',desc:'Pinion for rotor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-560-1',name:'Spring-clip for oscillating weight 0.18mm',desc:'Rotor spring-clip 0.18mm',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-560-2',name:'Spring-clip for oscillating weight 0.160mm',desc:'Rotor spring-clip 0.160mm',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-560-3',name:'Spring-clip for oscillating weight 0.200mm',desc:'Rotor spring-clip 0.200mm',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-561',name:'Bridle for spring-clip',desc:'Bridle for rotor spring-clip',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-568',name:'Axle for oscillating weight',desc:'Axle/shaft for rotor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-570',name:'Oscillating weight',desc:'Rotor / oscillating weight',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-600',name:'Date indicator seating',desc:'Date ring seating plate',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
-      {num:'3135-614',name:'Date jumper',desc:'Date indicator jumper spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-623',name:'Date finger',desc:'Date advance finger',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-625',name:'Date wheel, mounted',desc:'Date disc assembled',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-633',name:'Yoke for cam',desc:'Cam yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-635',name:'Cam yoke spring',desc:'Spring for cam yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-639',name:'Intermediate date corrector wheel',desc:'Intermediate wheel for date correction',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-645',name:'Date corrector',desc:'Date corrector mechanism',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-670',name:'Intermediate date wheel',desc:'Intermediate date drive wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-0913',name:'In-setting for escape wheel upper/lower',desc:'Jewel setting for escape wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-0915',name:'Shock absorber for balance-upper',desc:'Upper shock absorber for balance',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-0945',name:'Regulating friction-spring for balance bridge',desc:'Friction regulation spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:4},
-      {num:'3135-5000',name:'Set of screws',desc:'Complete screw set for movement',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5013',name:'Dial screw',desc:'Screw for securing the dial',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5100',name:'Screw for case',desc:'Case fixing screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5110',name:'Screw for bridges (balance guard, balance, winding, auto lower/upper, barrel, train)',desc:'Multi-purpose bridge screws',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5115',name:'Screw for (spring-clip bridle, stud holder, click, setting-lever spring/jumper, minute pinion bridge, pallet bridge, mechanism cover)',desc:'Various mechanism screws',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5120',name:'Regulating nut for balance bridge height',desc:'Height adjustment nut for balance bridge',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5210',name:'Screw for crown wheel & ratchet wheel',desc:'Crown and ratchet wheel screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5213',name:'Screw for intermediate crown wheel',desc:'Intermediate crown wheel screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5452',name:'Screw for hairspring clamp',desc:'Hairspring clamp screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
-      {num:'3135-5600',name:'Screw for date indicator seating',desc:'Date indicator seating screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-5625',name:'Screw for date wheel',desc:'Date wheel screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7115',name:'Tapped foot for pallet bridge',desc:'Threaded foot for pallet bridge',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7120',name:'Tapped foot for balance bridge',desc:'Threaded foot for balance bridge',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7240',name:'Yoke stud',desc:'Stud pin for yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7250',name:'Setting-wheel ring',desc:'Ring for setting wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7600',name:'Foot for date indicator seating',desc:'Foot for date seating',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7625',name:'Tapped foot for date wheel',desc:'Threaded foot for date wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-7635',name:'Stud for cam yoke spring',desc:'Stud for cam yoke spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9310',name:'Jewel for barrel arbor-upper',desc:'Upper jewel for barrel arbor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9311',name:'Jewel for barrel arbor-lower',desc:'Lower jewel for barrel arbor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9319',name:'Bush for minute pinion-lower',desc:'Lower bush for minute pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9330',name:'Jewel for great wheel upper/lower',desc:'Jewel bearing for great wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9335',name:'In-setting for minute pinion-upper',desc:'Upper in-setting for minute pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9340',name:'Jewel for third wheel upper/lower',desc:'Jewel bearing for third wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
-      {num:'3135-9360',name:'Jewel for second wheel-upper',desc:'Upper jewel for second wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9421',name:'Jewel for pallet fork upper/lower',desc:'Jewel for pallet fork pivots',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9510',name:'Jewel for driving wheel for ratchet support',desc:'Jewel for ratchet driving wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9511',name:'Jewel for driving wheel for ratchet-lower',desc:'Lower jewel for ratchet driving wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9570',name:'Jewel for oscillating weight-upper',desc:'Upper jewel for rotor bearing',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9571',name:'Jewel for oscillating weight-lower',desc:'Lower jewel for rotor bearing',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9633',name:'Jewel for cam yoke',desc:'Jewel bearing for cam yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-9670',name:'Jewel for intermediate date wheel upper/lower',desc:'Jewel for intermediate date wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-16100',name:'Date indicator, champagne',desc:'Champagne date disc',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-16101',name:'Date indicator, champagne arabic/persian',desc:'Champagne with arabic/persian numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-16102',name:'Date indicator, champagne chinese',desc:'Champagne with chinese numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-16103',name:'Date indicator, champagne persian',desc:'Champagne with persian numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
-      {num:'3135-16104',name:'Date indicator, champagne modern chinese',desc:'Champagne with modern chinese numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1}
+      {num:'4494',name:'In-setting spring for escape wheel upper/lower',desc:'From Cal.2030',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'5021',name:'Roller',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'5044',name:'Minute wheel stud',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'95019-1',name:'Shock absorber for balance lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'95019-2',name:'In-setting for balance upper/lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'95019-3',name:'Cap jewel for balance upper/lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'95019-4',name:'In-setting spring for balance upper/lower',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'95067',name:'Jewel for reversing wheel & driving wheel for ratchet',desc:'From Cal.3035',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:1},
+      {num:'2130-0913-2',name:'Cap jewel for escape wheel upper/lower',desc:'From Cal.2130',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-100',name:'Main plate',desc:'Base plate of the movement',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-105',name:'Barrel bridge',desc:'Bridge over the barrel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-110',name:'Train wheel bridge',desc:'Bridge covering the gear train',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-115',name:'Pallet bridge',desc:'Bridge holding the pallet fork',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-118',name:'Balance guard',desc:'Protection for the balance wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-120',name:'Balance bridge',desc:'Bridge holding the balance assembly',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-125',name:'Minute pinion bridge',desc:'Bridge for minute pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-130',name:'Winding bridge',desc:'Bridge for winding mechanism',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-135',name:'Automatic device lower bridge',desc:'Lower bridge for automatic device',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:2},
+      {num:'3135-140',name:'Automatic device upper bridge',desc:'Upper bridge for automatic device',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-145',name:'Automatic device module',desc:'Complete automatic winding module',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-201',name:'Winding stem',desc:'Crown stem for winding',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-204',name:'Winding pinion',desc:'Winding pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-205',name:'Sliding pinion',desc:'Coupling/sliding pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-210',name:'Crown wheel',desc:'Crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-211',name:'Crown wheel core',desc:'Core of crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-212',name:'Core for intermediate crown wheel',desc:'Core of intermediate crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-213',name:'Intermediate crown wheel',desc:'Intermediate crown wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-217',name:'Yoke for sliding gear',desc:'Yoke/lever for sliding gear',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-220',name:'Setting-lever',desc:'Setting lever (tirette)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-225',name:'Setting-lever spring',desc:'Spring for setting lever',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:3},
+      {num:'3135-230',name:'Setting-lever jumper',desc:'Jumper for setting lever',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-240',name:'Yoke for sliding pinion',desc:'Yoke for sliding pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-241',name:'Yoke spring',desc:'Spring for yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-245',name:'Balance stop spring',desc:'Spring to stop the balance',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-250',name:'Setting-wheel',desc:'Setting wheel (renvoi)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-260',name:'Minute wheel',desc:'Minute wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-266',name:'Yoke for setting-wheel',desc:'Yoke for setting wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-268',name:'Mechanism cover, mounted',desc:'Mechanism cover assembled',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-270',name:'Cannon pinion ht. 2.86mm',desc:'Friction cannon pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-280',name:'Hour wheel',desc:'Hour wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-300',name:'Click',desc:'Click pawl (cliquet)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-301',name:'Click spring',desc:'Spring for click',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-305',name:'Ratchet wheel',desc:'Ratchet wheel (rochet)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:5},
+      {num:'3135-307',name:'Barrel arbor',desc:'Barrel arbor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-311',name:'Mainspring, standard strength',desc:'Standard strength mainspring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-311-1',name:'Mainspring, weak strength',desc:'Weak strength mainspring variant',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-315',name:'Barrel complete with mainspring',desc:'Complete barrel with arbor and spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-330',name:'Great wheel',desc:'Great/centre wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-335',name:'Minute pinion with cannon pinion',desc:'Minute pinion with friction cannon',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-340',name:'Third wheel',desc:'Third wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-360',name:'Second wheel',desc:'Second wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-410',name:'Escape wheel',desc:'Escape wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-419',name:'Pallet staff',desc:'Pallet fork staff/pivot',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-421',name:'Pallet fork',desc:'Pallet fork (lever escapement)',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-429',name:'Balance staff',desc:'Balance staff/pivot',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-432',name:'Balance with Breguet hairspring, timed',desc:'Complete regulated balance assembly',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-450',name:'Stud support',desc:'Hairspring stud holder',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:6},
+      {num:'3135-451',name:'Bridle for stud support',desc:'Clamp for stud holder',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-510',name:'Driving wheel for ratchet wheel',desc:'Driving wheel for ratchet',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-540',name:'Reversing wheel, mounted',desc:'Complete reversing wheel assembly',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-550',name:'Pinion for oscillating weight',desc:'Pinion for rotor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-560-1',name:'Spring-clip for oscillating weight 0.18mm',desc:'Rotor spring-clip 0.18mm',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-560-2',name:'Spring-clip for oscillating weight 0.160mm',desc:'Rotor spring-clip 0.160mm',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-560-3',name:'Spring-clip for oscillating weight 0.200mm',desc:'Rotor spring-clip 0.200mm',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-561',name:'Bridle for spring-clip',desc:'Bridle for rotor spring-clip',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-568',name:'Axle for oscillating weight',desc:'Axle/shaft for rotor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-570',name:'Oscillating weight',desc:'Rotor / oscillating weight',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-600',name:'Date indicator seating',desc:'Date ring seating plate',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:7},
+      {num:'3135-614',name:'Date jumper',desc:'Date indicator jumper spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-623',name:'Date finger',desc:'Date advance finger',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-625',name:'Date wheel, mounted',desc:'Date disc assembled',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-633',name:'Yoke for cam',desc:'Cam yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-635',name:'Cam yoke spring',desc:'Spring for cam yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-639',name:'Intermediate date corrector wheel',desc:'Intermediate wheel for date correction',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-645',name:'Date corrector',desc:'Date corrector mechanism',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-670',name:'Intermediate date wheel',desc:'Intermediate date drive wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-0913',name:'In-setting for escape wheel upper/lower',desc:'Jewel setting for escape wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-0915',name:'Shock absorber for balance-upper',desc:'Upper shock absorber for balance',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-0945',name:'Regulating friction-spring for balance bridge',desc:'Friction regulation spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:9},
+      {num:'3135-5000',name:'Set of screws',desc:'Complete screw set for movement',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5013',name:'Dial screw',desc:'Screw for securing the dial',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5100',name:'Screw for case',desc:'Case fixing screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5110',name:'Screw for bridges (balance guard, balance, winding, auto lower/upper, barrel, train)',desc:'Multi-purpose bridge screws',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5115',name:'Screw for (spring-clip bridle, stud holder, click, setting-lever spring/jumper, minute pinion bridge, pallet bridge, mechanism cover)',desc:'Various mechanism screws',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5120',name:'Regulating nut for balance bridge height',desc:'Height adjustment nut for balance bridge',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5210',name:'Screw for crown wheel & ratchet wheel',desc:'Crown and ratchet wheel screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5213',name:'Screw for intermediate crown wheel',desc:'Intermediate crown wheel screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5452',name:'Screw for hairspring clamp',desc:'Hairspring clamp screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:10},
+      {num:'3135-5600',name:'Screw for date indicator seating',desc:'Date indicator seating screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-5625',name:'Screw for date wheel',desc:'Date wheel screw',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7115',name:'Tapped foot for pallet bridge',desc:'Threaded foot for pallet bridge',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7120',name:'Tapped foot for balance bridge',desc:'Threaded foot for balance bridge',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7240',name:'Yoke stud',desc:'Stud pin for yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7250',name:'Setting-wheel ring',desc:'Ring for setting wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7600',name:'Foot for date indicator seating',desc:'Foot for date seating',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7625',name:'Tapped foot for date wheel',desc:'Threaded foot for date wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-7635',name:'Stud for cam yoke spring',desc:'Stud for cam yoke spring',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9310',name:'Jewel for barrel arbor-upper',desc:'Upper jewel for barrel arbor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9311',name:'Jewel for barrel arbor-lower',desc:'Lower jewel for barrel arbor',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9319',name:'Bush for minute pinion-lower',desc:'Lower bush for minute pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9330',name:'Jewel for great wheel upper/lower',desc:'Jewel bearing for great wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9335',name:'In-setting for minute pinion-upper',desc:'Upper in-setting for minute pinion',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9340',name:'Jewel for third wheel upper/lower',desc:'Jewel bearing for third wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:11},
+      {num:'3135-9360',name:'Jewel for second wheel-upper',desc:'Upper jewel for second wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9421',name:'Jewel for pallet fork upper/lower',desc:'Jewel for pallet fork pivots',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9510',name:'Jewel for driving wheel for ratchet support',desc:'Jewel for ratchet driving wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9511',name:'Jewel for driving wheel for ratchet-lower',desc:'Lower jewel for ratchet driving wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9570',name:'Jewel for oscillating weight-upper',desc:'Upper jewel for rotor bearing',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9571',name:'Jewel for oscillating weight-lower',desc:'Lower jewel for rotor bearing',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9633',name:'Jewel for cam yoke',desc:'Jewel bearing for cam yoke',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-9670',name:'Jewel for intermediate date wheel upper/lower',desc:'Jewel for intermediate date wheel',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-16100',name:'Date indicator, champagne',desc:'Champagne date disc',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-16101',name:'Date indicator, champagne arabic/persian',desc:'Champagne with arabic/persian numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-16102',name:'Date indicator, champagne chinese',desc:'Champagne with chinese numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-16103',name:'Date indicator, champagne persian',desc:'Champagne with persian numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
+      {num:'3135-16104',name:'Date indicator, champagne modern chinese',desc:'Champagne with modern chinese numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12}
     ]
   }
 };
@@ -1935,7 +2079,6 @@ function filterCatalogParts() {
       + '</div>'
       + '<div class="part-name">' + p.name + '</div>'
       + '<div class="part-desc">' + p.desc + '</div>'
-      + '<div class="part-models">' + p.models.map(function(m) { return '<span class="part-model-tag">' + m + '</span>'; }).join('') + '</div>'
       + '</div>';
   }).join('');
 }
@@ -1944,6 +2087,52 @@ function setCatalogMech(key) {
   openMechCatalog(key);
 }
 </script>
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ Настройки</div>
+    <div class="modal-body">
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Тема</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <button onclick="setTheme('dark')" id="theme-dark-btn" class="btn" style="flex:1;padding:12px;font-size:14px;">🌙 Тёмная</button>
+        <button onclick="setTheme('light')" id="theme-light-btn" class="btn" style="flex:1;padding:12px;font-size:14px;">☀️ Светлая</button>
+      </div>
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Нормативы Full Service (часы)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div>
+          <label class="form-label">⚡ Быстро — до</label>
+          <input class="form-input" id="set-fs-fast" type="number" min="1" max="24" step="0.5" placeholder="5" />
+        </div>
+        <div>
+          <label class="form-label">⏱ Средне — до</label>
+          <input class="form-input" id="set-fs-mid" type="number" min="1" max="24" step="0.5" placeholder="7" />
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:20px;">🐢 Долго — всё что больше среднего</div>
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Нормативы Сборки (часы)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div>
+          <label class="form-label">⚡ Быстро — до</label>
+          <input class="form-input" id="set-asm-fast" type="number" min="1" max="24" step="0.5" placeholder="3" />
+        </div>
+        <div>
+          <label class="form-label">⏱ Хорошо — до</label>
+          <input class="form-input" id="set-asm-mid" type="number" min="1" max="24" step="0.5" placeholder="4" />
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Показывать в статистике</div>
+      <div id="stats-toggles" style="margin-bottom:20px;"></div>
+
+      <button class="btn btn-gold" onclick="saveSettings()">Сохранить</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-settings')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-part-img">
   <div class="modal" style="border-radius:20px 20px 0 0;">
     <div class="modal-handle"></div>
