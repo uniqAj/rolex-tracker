@@ -899,7 +899,7 @@ function showToast(msg) {
 
 function renderHome() {
   const d = load();
-  const q = (document.getElementById('home-search')?.value || '').toLowerCase().trim();
+  const q = (document.getElementById('home-search') ? document.getElementById('home-search').value : '').toLowerCase().trim();
   let active = d.jobs.filter(j => !j.done);
   if (q) active = active.filter(j =>
     (j.serial||''). toLowerCase().includes(q)||(j.ref||''). toLowerCase().includes(q)||
@@ -940,7 +940,7 @@ function jobCard(j) {
     '<div class="card-stats">'+
     '<div class="stat"><div class="stat-val">'+(fmtMs(elapsed)||'\u2014')+'</div><div class="stat-lbl">\u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e</div></div>'+
     '<div class="stat"><div class="stat-val">'+done+'/'+total+'</div><div class="stat-lbl">\u042d\u0442\u0430\u043f\u043e\u0432</div></div>'+
-    (activeStep?'<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'…</div><div class="stat-lbl">\u0421\u0435\u0439\u0447\u0430\u0441</div></div>':'')+
+    (activeStep?'<div class="stat"><div class="stat-val" style="color:var(--gold)">'+activeStep.name.split(' ')[0]+'...</div><div class="stat-lbl">\u0421\u0435\u0439\u0447\u0430\u0441</div></div>':'')+
     '</div></div>'+
     '<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">\u041e\u0442\u043a\u0440\u044b\u0442\u044c →</div></div>'+
     '</div>';
@@ -1224,7 +1224,7 @@ function openEventModal(type, eventId) {
   if (eventId) {
     const d = load();
     const job = d.jobs.find(j => j.id===currentJobId)||(d.done||[]).find(j => j.id===currentJobId);
-    const arr = isVozvrat ? (job?.vozvrat||[]) : (job?.dorabotki||[]);
+    const arr = isVozvrat ? (job && job.vozvrat ? job.vozvrat : []) : (job && job.dorabotki ? job.dorabotki : []);
     const ev = arr.find(r => r.id===eventId);
     if (!ev) return;
     document.getElementById('inp-event-desc').value = ev.desc;
@@ -1304,7 +1304,7 @@ function historyCard(j, compact) {
 
 function renderHistory() {
   const d = load();
-  const q = (document.getElementById('history-search')?.value || '').toLowerCase().trim();
+  const q = (document.getElementById('history-search') ? document.getElementById('history-search').value : '').toLowerCase().trim();
   let done = (d.done||[]).slice().reverse();
   if (q) done = done.filter(j =>
     (j.serial||''). toLowerCase().includes(q)||(j.ref||''). toLowerCase().includes(q)||
@@ -1594,7 +1594,7 @@ parts: [
 let currentMechanism = ‘3135’;
 
 function renderCatalog() {
-const q = (document.getElementById(‘catalog-search’)?.value || ‘’).toLowerCase().trim();
+const q = (document.getElementById(‘catalog-search’) ? document.getElementById(‘catalog-search’).value : ‘’).toLowerCase().trim();
 const tabsEl = document.getElementById(‘catalog-tabs’);
 if (tabsEl) {
 tabsEl.innerHTML = Object.keys(CATALOG_DATA).map(key =>
