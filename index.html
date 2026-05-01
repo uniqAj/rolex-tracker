@@ -688,13 +688,6 @@
           </div>
         </a>
       </div>
-      <div style="margin-top:8px;">
-        <button class="mech-pick-btn" onclick="openTroubleshooting()" style="border-color:rgba(96,160,255,0.3);">
-          <div><div class="mech-pick-name" style="color:var(--blue);">&#128295; Troubleshooting</div>
-          <div class="mech-pick-count">База проблем и решений</div></div>
-          <div class="mech-pick-arrow">&#8594;</div>
-        </button>
-      </div>
     </div>
   </div>
 
@@ -2028,8 +2021,38 @@ function animateBars() {
 
 renderHome();
 
+// ── DEBUG ─────────────────────────────────────────────────────────────────────
+function toggleDebug() {
+  var panel = document.getElementById('debug-panel');
+  if (!panel) return;
+  panel.classList.toggle('open');
+}
 
-// ── SPLASH ────────────────────────────────────────────────────────────────────
+function clearDebug() {
+  var entries = document.getElementById('debug-entries');
+  if (entries) entries.innerHTML = '';
+  var btn = document.getElementById('debug-btn');
+  if (btn) btn.classList.remove('has-error');
+}
+
+function debugLog(msg, type) {
+  var entries = document.getElementById('debug-entries');
+  if (!entries) return;
+  var div = document.createElement('div');
+  var color = type==='error'?'#ff6b6b':type==='warn'?'#e6c84c':'rgba(240,236,232,0.7)';
+  div.style.cssText = 'font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);color:'+color+';';
+  div.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+  entries.appendChild(div);
+  entries.scrollTop = entries.scrollHeight;
+  if (type === 'error') {
+    var btn = document.getElementById('debug-btn');
+    if (btn) btn.classList.add('has-error');
+  }
+}
+
+window.onerror = function(msg, src, line) {
+  debugLog('\u274c ' + msg + ' (line ' + line + ')', 'error');
+};
 (function() {
   var splash = document.getElementById('splash-screen');
   if (!splash) return;
