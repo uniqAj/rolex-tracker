@@ -662,6 +662,20 @@
     <div style="padding:0 16px 20px;">
       <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;letter-spacing:0.05em;">&#1042;&#1099;&#1073;&#1077;&#1088;&#1080;&#1090;&#1077; &#1082;&#1072;&#1083;&#1080;&#1073;&#1088;:</div>
       <div id="mech-picker-list"></div>
+      <div style="margin-top:8px;">
+        <button class="mech-pick-btn" onclick="openTroubleshooting()" style="border-color:rgba(96,160,255,0.3);">
+          <div><div class="mech-pick-name" style="color:var(--blue);">&#128295; Troubleshooting</div>
+          <div class="mech-pick-count">&#1041;&#1072;&#1079;&#1072; &#1087;&#1088;&#1086;&#1073;&#1083;&#1077;&#1084; &#1080; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1081;</div></div>
+          <div class="mech-pick-arrow">&#8594;</div>
+        </button>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="mech-pick-btn" onclick="openTroubleshooting()" style="border-color:rgba(96,160,255,0.3);">
+          <div><div class="mech-pick-name" style="color:var(--blue);">&#128295; Troubleshooting</div>
+          <div class="mech-pick-count">База проблем и решений</div></div>
+          <div class="mech-pick-arrow">&#8594;</div>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -675,6 +689,18 @@
       <input class="form-input" id="catalog-search" placeholder="&#128269; &#1053;&#1086;&#1084;&#1077;&#1088; &#1080;&#1083;&#1080; &#1085;&#1072;&#1079;&#1074;&#1072;&#1085;&#1080;&#1077;..." oninput="filterCatalogParts()" autocomplete="off" />
     </div>
     <div id="catalog-list"></div>
+  </div>
+
+  <!-- Troubleshooting screen -->
+  <div id="catalog-trouble" style="display:none;">
+    <div style="padding:0 16px 8px;display:flex;align-items:center;gap:12px;">
+      <button onclick="backToPicker()" style="background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;padding:0;">&#8592;</button>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:600;color:var(--gold);">&#128295; Troubleshooting</div>
+    </div>
+    <div style="padding:0 16px 12px;">
+      <input class="form-input" id="trouble-search" placeholder="&#128269; &#1055;&#1088;&#1086;&#1073;&#1083;&#1077;&#1084;&#1072;..." oninput="filterTrouble()" autocomplete="off" />
+    </div>
+    <div id="trouble-list"></div>
   </div>
 </div>
 
@@ -718,16 +744,61 @@
           <input class="form-input" id="inp-ref" placeholder="126610LN" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label class="form-label">&#1052;&#1086;&#1076;&#1077;&#1083;&#1100;</label>
-          <input class="form-input" id="inp-model" placeholder="Submariner" autocomplete="off" />
+          <label class="form-label">&#1050;&#1072;&#1083;&#1080;&#1073;&#1088;</label>
+          <input class="form-input" id="inp-model" placeholder="3135, 3235..." autocomplete="off" />
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">&#1058;&#1080;&#1087; &#1088;&#1072;&#1073;&#1086;&#1090;&#1099;</label>
-        <select class="form-select" id="inp-type">
-          <option value="full">Full Service + &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</option>
-          <option value="assembly">&#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</option>
-        </select>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;">
+            <input type="checkbox" id="type-full" value="full" onchange="syncJobType()" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+            <span style="font-size:15px;color:var(--text);">Full Service</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;">
+            <input type="checkbox" id="type-part" value="part" onchange="syncJobType()" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+            <span style="font-size:15px;color:var(--text);">Part Service</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;">
+            <input type="checkbox" id="type-assembly" value="assembly" onchange="syncJobType()" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+            <span style="font-size:15px;color:var(--text);">&#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;">
+            <input type="checkbox" id="type-dial" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+            <span style="font-size:15px;color:var(--text);">&#1047;&#1072;&#1084;&#1077;&#1085;&#1072; Dial</span>
+          </label>
+        </div>
+        <div style="margin-top:6px;">
+          <button type="button" onclick="toggleExtraTypes()" style="background:none;border:none;color:var(--text-dim);font-size:13px;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:6px;">
+            <span id="extra-arrow">&#9654;</span> &#1044;&#1086;&#1087;&#1086;&#1083;&#1085;&#1080;&#1090;&#1077;&#1083;&#1100;&#1085;&#1086;
+          </button>
+          <div id="extra-types" style="display:none;flex-direction:column;gap:8px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">
+              <input type="checkbox" id="type-ap" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              <span style="font-size:14px;color:var(--text-dim);">&#1040;&#1055; &#1088;&#1077;&#1084;&#1086;&#1085;&#1090;</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">
+              <input type="checkbox" id="type-rate" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              <span style="font-size:14px;color:var(--text-dim);">&#1042;&#1099;&#1082;&#1072;&#1095;&#1082;&#1072; / Rate</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">
+              <input type="checkbox" id="type-parts" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              <span style="font-size:14px;color:var(--text-dim);">&#1047;&#1072;&#1084;&#1077;&#1085;&#1072; &#1076;&#1077;&#1090;&#1072;&#1083;&#1077;&#1081;</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">
+              <input type="checkbox" id="type-hands" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              <span style="font-size:14px;color:var(--text-dim);">&#1057;&#1090;&#1088;&#1077;&#1083;&#1082;&#1080;</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">
+              <input type="checkbox" id="type-axle" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              <span style="font-size:14px;color:var(--text-dim);">&#1047;&#1072;&#1084;&#1077;&#1085;&#1072; &#1072;&#1082;&#1089;&#1077;&#1083;&#1103;</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">
+              <input type="checkbox" id="type-spring" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              <span style="font-size:14px;color:var(--text-dim);">&#1047;&#1072;&#1084;&#1077;&#1085;&#1072; &#1087;&#1088;&#1091;&#1078;&#1080;&#1085;&#1099;</span>
+            </label>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">&#1047;&#1072;&#1084;&#1077;&#1090;&#1082;&#1072; (&#1086;&#1087;&#1094;&#1080;&#1086;&#1085;&#1072;&#1083;&#1100;&#1085;&#1086;)</label>
@@ -914,7 +985,7 @@ function speedBadges(job) {
   if (job.type === 'full') {
     const fsLevel = speedLevel(fsTime/3600000, 'service');
     const asLevel = speedLevel(asTime/3600000, 'assembly');
-    return '<span class="speed-badge speed-'+fsLevel+'">FS: '+speedLabel(fsLevel)+'</span> <span class="speed-badge speed-'+asLevel+'">'+'\u0421\u0431: '+speedLabel(asLevel)+'</span>';
+    return '<span class="speed-badge speed-'+fsLevel+'">Service: '+speedLabel(fsLevel)+'</span> <span class="speed-badge speed-'+asLevel+'">'+'Assemble: '+speedLabel(asLevel)+'</span>';
   } else {
     const asLevel = speedLevel(asTime/3600000, 'assembly');
     return '<span class="speed-badge speed-'+asLevel+'">'+speedLabel(asLevel)+'</span>';
@@ -1238,22 +1309,79 @@ function deleteJob() {
   save(d); showToast('\u0423\u0434\u0430\u043b\u0435\u043d\u043e'); navigate('home');
 }
 
+function toggleExtraTypes() {
+  var el = document.getElementById('extra-types');
+  var arr = document.getElementById('extra-arrow');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'flex';
+  if (arr) arr.textContent = open ? '\u25b6' : '\u25bc';
+}
+
+function syncJobType() {
+  var full = document.getElementById('type-full');
+  var asm = document.getElementById('type-assembly');
+  if (full && full.checked && asm && !asm.checked) asm.checked = true;
+}
+
+function getSelectedTypes() {
+  var types = [];
+  var map = [
+    {id:'type-full',    label:'Full Service'},
+    {id:'type-part',    label:'Part Service'},
+    {id:'type-assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'},
+    {id:'type-dial',    label:'\u0417\u0430\u043c\u0435\u043d\u0430 Dial'},
+    {id:'type-ap',      label:'\u0410\u041f \u0440\u0435\u043c\u043e\u043d\u0442'},
+    {id:'type-rate',    label:'\u0412\u044b\u043a\u0430\u0447\u043a\u0430 / Rate'},
+    {id:'type-parts',   label:'\u0417\u0430\u043c\u0435\u043d\u0430 \u0434\u0435\u0442\u0430\u043b\u0435\u0439'},
+    {id:'type-hands',   label:'\u0421\u0442\u0440\u0435\u043b\u043a\u0438'},
+    {id:'type-axle',    label:'\u0417\u0430\u043c\u0435\u043d\u0430 \u0430\u043a\u0441\u0435\u043b\u044f'},
+    {id:'type-spring',  label:'\u0417\u0430\u043c\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u044b'},
+  ];
+  map.forEach(function(t) {
+    var el = document.getElementById(t.id);
+    if (el && el.checked) types.push(t.label);
+  });
+  return types;
+}
+
+function resetTypeCheckboxes() {
+  ['type-full','type-part','type-assembly','type-dial','type-ap','type-rate','type-parts','type-hands','type-axle','type-spring'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  var extra = document.getElementById('extra-types');
+  var arr = document.getElementById('extra-arrow');
+  if (extra) extra.style.display = 'none';
+  if (arr) arr.textContent = '\u25b6';
+}
+
 function openNewJobModal() {
-  ['inp-serial','inp-ref','inp-model','inp-note'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['inp-serial','inp-ref','inp-model','inp-note'].forEach(function(id) { var el=document.getElementById(id); if(el) el.value=''; });
+  resetTypeCheckboxes();
   openModal('modal-new');
 }
+
 function createJob() {
-  const ref = document.getElementById('inp-ref').value.trim();
-  const serial = document.getElementById('inp-serial').value.trim();
+  var ref = document.getElementById('inp-ref').value.trim();
+  var serial = document.getElementById('inp-serial').value.trim();
   if (!ref && !serial) { showToast('\u0412\u0432\u0435\u0434\u0438\u0442\u0435 Ref \u0438\u043b\u0438 \u0441\u0435\u0440\u0438\u0439\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440'); return; }
-  const type = document.getElementById('inp-type').value;
-  const model = document.getElementById('inp-model').value.trim();
-  const note = document.getElementById('inp-note').value.trim();
-  const steps = getStepsFor(type).map(s => ({...s, startTime:null, elapsed:0, running:false, notes:'', parts:''}));
-  const job = {id:Date.now().toString(), ref, model, serial, type, note, createdAt:Date.now(), steps, returns:[], dorabotki:[], vozvrat:[], done:false, completedAt:null};
-  const d = load(); d.jobs.push(job); save(d);
+
+  var selectedTypes = getSelectedTypes();
+  if (selectedTypes.length === 0) { showToast('\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u0438\u043f \u0440\u0430\u0431\u043e\u0442\u044b'); return; }
+
+  // Determine main type for steps
+  var hasFull = document.getElementById('type-full') && document.getElementById('type-full').checked;
+  var hasAsm = document.getElementById('type-assembly') && document.getElementById('type-assembly').checked;
+  var mainType = hasFull ? 'full' : (hasAsm ? 'assembly' : 'assembly');
+
+  var model = document.getElementById('inp-model').value.trim();
+  var note = document.getElementById('inp-note').value.trim();
+  var steps = getStepsFor(mainType).map(function(s) { return Object.assign({}, s, {startTime:null, elapsed:0, running:false, notes:'', parts:''}); });
+  var job = {id:Date.now().toString(), ref, model, serial, type:mainType, workTypes:selectedTypes, note, createdAt:Date.now(), steps, returns:[], dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  var d = load(); d.jobs.push(job); save(d);
   closeModal('modal-new'); showToast('\u0427\u0430\u0441\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b');
-  renderHome(); setTimeout(() => openJob(job.id), 300);
+  renderHome(); setTimeout(function() { openJob(job.id); }, 300);
 }
 
 function openEventModal(type, eventId) {
@@ -1444,7 +1572,7 @@ function openEditJob(id) {
   const phases = job.type==='full'?[{id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]:[{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
   let html = '<div class="form-group"><label class="form-label">\u0421\u0435\u0440\u0438\u0439\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440</label><input class="form-input" id="edit-serial" value="'+(job.serial||'')+'" /></div>'+
     '<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'+
-    '<div class="form-group"><label class="form-label">\u041c\u043e\u0434\u0435\u043b\u044c</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'+
+    '<div class="form-group"><label class="form-label">\u041a\u0430\u043b\u0438\u0431\u0440</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'+
     '<div class="form-group"><label class="form-label">\u0417\u0430\u043c\u0435\u0442\u043a\u0430</label><textarea class="form-textarea" id="edit-note">'+(job.note||'')+'</textarea></div>';
   phases.forEach(phase => {
     const ps = job.steps.filter(s => s.phase===phase.id);
@@ -1869,6 +1997,249 @@ function showPartPage(num, name, page) {
   openModal('modal-part-img');
 }
 
+// ── TROUBLESHOOTING ───────────────────────────────────────────────────────────
+const TROUBLE_DATA = [
+  {
+    problem: 'Low amplitude / \u041c\u0430\u043b\u0435\u043d\u044c\u043a\u0430\u044f \u0430\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430',
+    tags: ['amplitude','low','small','\u0430\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430','\u043c\u0430\u043b\u0435\u043d\u044c\u043a\u0430\u044f'],
+    causes: [
+      'Dirty escapement — pallet fork, escape wheel, impulse jewel',
+      'Insufficient lubrication on pallet stones (elivar)',
+      'Weak or old mainspring — needs replacement',
+      'Balance jewels dirty or damaged',
+      'Hairspring coils touching each other or the regulator',
+      'End shake too tight on balance staff',
+      'Barrel arbor hook worn — spring slipping',
+    ],
+    checks: [
+      'Check amplitude on timegrapher in all positions',
+      'Inspect pallet fork jewels under microscope',
+      'Check mainspring tension by feel when winding',
+      'Verify balance end shake (should be 0.05-0.10mm)',
+      'Inspect hairspring for coil sticking',
+    ]
+  },
+  {
+    problem: 'Rotor / AP noise — \u0428\u0443\u043c \u0440\u043e\u0442\u043e\u0440\u0430 / \u0410\u041f',
+    tags: ['rotor','ap','\u0410\u041f','\u0440\u043e\u0442\u043e\u0440','\u0448\u0443\u043c','\u0441\u043a\u0440\u0438\u043f\u0438\u0442','\u0445\u0440\u0443\u0441\u0442\u0438\u0442','noise','click','scratch'],
+    causes: [
+      'Dirt or debris in reversing wheels',
+      'Reversing wheel jewel worn or damaged',
+      'Rotor bearing worn — lateral play',
+      'Spring-clip thickness wrong (0.160 / 0.180 / 0.200mm)',
+      'Oscillating weight axle worn',
+      'Driving wheel for ratchet dirty',
+    ],
+    checks: [
+      'Remove rotor and check reversing wheels for smooth rotation',
+      'Check rotor bearing play — lateral and vertical',
+      'Inspect reversing wheel jewels (3135-9510, 3135-9511)',
+      'Verify spring-clip size — try different thickness',
+      'Clean and re-oil reversing wheels',
+    ]
+  },
+  {
+    problem: 'High beat error / \u0411\u043e\u043b\u044c\u0448\u043e\u0439 beat error',
+    tags: ['beat','error','beat error','\u0431\u0438\u0442','\u043e\u0442\u043a\u043b\u043e\u043d\u0435\u043d\u0438\u0435'],
+    causes: [
+      'Impulse roller (roller table) displaced on balance staff',
+      'Roller jewel not centered in pallet fork notch',
+      'Balance incorrectly installed after service',
+      'Impact damage — roller table shifted',
+    ],
+    checks: [
+      'Check beat error on timegrapher — should be under 0.3ms',
+      'Inspect roller table position on balance staff',
+      'Adjust beat by rotating roller table slightly',
+      'Re-check after adjustment in multiple positions',
+    ]
+  },
+  {
+    problem: 'Crown not winding / \u0412\u044b\u043a\u0430\u0447\u043a\u0430 \u043d\u0435 \u0437\u0430\u0432\u043e\u0434\u0438\u0442',
+    tags: ['crown','winding','\u0437\u0430\u0432\u043e\u0434','\u0432\u044b\u043a\u0430\u0447\u043a\u0430','\u043d\u0435 \u0437\u0430\u0432\u043e\u0434\u0438\u0442'],
+    causes: [
+      'Broken mainspring — replace (3135-311)',
+      'Click spring broken or missing (3135-301)',
+      'Click worn — not engaging ratchet wheel',
+      'Winding stem damaged or worn',
+      'Crown wheel core stripped',
+    ],
+    checks: [
+      'Check if mainspring is broken by resistance feel',
+      'Inspect click and click spring engagement',
+      'Verify ratchet wheel teeth are intact',
+      'Check crown wheel for damage',
+    ]
+  },
+  {
+    problem: 'Crown not setting / \u0421\u0442\u0440\u0435\u043b\u043a\u0438 \u043d\u0435 \u0441\u0442\u0430\u0432\u044f\u0442\u0441\u044f',
+    tags: ['crown','setting','time','\u0441\u0442\u0440\u0435\u043b\u043a\u0438','\u043f\u0435\u0440\u0435\u0432\u043e\u0434','\u043d\u0435 \u0441\u0442\u0430\u0432\u044f\u0442\u0441\u044f'],
+    causes: [
+      'Setting lever not engaging properly',
+      'Setting lever spring weak or broken (3135-225)',
+      'Yoke for sliding pinion worn (3135-240)',
+      'Crown worn — not pulling stem out far enough',
+      'Setting wheel dirty or damaged',
+    ],
+    checks: [
+      'Check setting lever engagement with stem',
+      'Inspect setting lever spring tension',
+      'Verify yoke movement is smooth',
+      'Test crown positions 1 and 2 for positive engagement',
+    ]
+  },
+  {
+    problem: 'Watch stopping / \u0427\u0430\u0441\u044b \u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u044e\u0442\u0441\u044f',
+    tags: ['stopping','stops','\u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u0435\u0442\u0441\u044f','\u0441\u0442\u043e\u043f','\u0432\u0441\u0442\u0430\u0435\u0442'],
+    causes: [
+      'Hair or debris caught in escapement',
+      'Pallet fork jewel chipped or missing',
+      'Escape wheel tooth bent or damaged',
+      'Balance spring coil catching on anything',
+      'Oil dried on pallet stones — sticky',
+      'Mainspring fully run down',
+      'Shock absorber spring missing or damaged',
+    ],
+    checks: [
+      'Inspect escapement under microscope for debris',
+      'Check all pallet fork jewels intact',
+      'Spin escape wheel freely — should coast smoothly',
+      'Verify hairspring is perfectly flat and free',
+      'Check shock absorber springs on both sides',
+    ]
+  },
+  {
+    problem: 'Rate inconsistency / \u041d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u0445\u043e\u0434',
+    tags: ['rate','inconsistent','unstable','\u0445\u043e\u0434','\u043d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439','\u043d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e'],
+    causes: [
+      'Hairspring not perfectly centered on balance',
+      'Hairspring coils not evenly spaced',
+      'Regulator pins too tight or too loose on hairspring',
+      'Balance jewels worn — eccentric rotation',
+      'Magnetized parts — especially hairspring',
+      'End shake inconsistency in train wheels',
+    ],
+    checks: [
+      'Demagnetize movement before diagnosis',
+      'Check rate in 6 positions on timegrapher',
+      'Inspect hairspring under microscope',
+      'Verify regulator pin spacing',
+      'Check all train wheel end shakes',
+    ]
+  },
+  {
+    problem: 'Date not changing / \u0414\u0430\u0442\u0430 \u043d\u0435 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f',
+    tags: ['date','calendar','\u0434\u0430\u0442\u0430','\u043a\u0430\u043b\u0435\u043d\u0434\u0430\u0440\u044c','\u043d\u0435 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f'],
+    causes: [
+      'Date jumper spring weak or bent (3135-614)',
+      'Date driving wheel not engaging date disc',
+      'Date disc teeth worn or damaged',
+      'Cam yoke not functioning (3135-633)',
+      'Insufficient lubrication on date mechanism',
+    ],
+    checks: [
+      'Check date jumper spring tension',
+      'Verify date finger advances disc by one tooth',
+      'Inspect date disc teeth for damage',
+      'Check cam yoke and its spring',
+      'Ensure date mechanism is clean and lubricated',
+    ]
+  },
+  {
+    problem: 'Shock absorber issues / \u0410\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440',
+    tags: ['shock','absorber','\u0430\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440','incabloc','kif'],
+    causes: [
+      'Shock spring missing or displaced',
+      'Cap jewel cracked or missing',
+      'Shock spring wrong size installed',
+      'Spring not seated properly in its slot',
+    ],
+    checks: [
+      'Verify both shock springs present (upper and lower)',
+      'Check cap jewels are not cracked',
+      'Ensure springs are properly seated',
+      'Test by gentle tap — balance should spring back',
+    ]
+  },
+  {
+    problem: 'Crown worn / water ingress / \u0418\u0437\u043d\u043e\u0441 \u0437\u0430\u0432\u043e\u0434\u043d\u043e\u0439 \u0433\u043e\u043b\u043e\u0432\u043a\u0438',
+    tags: ['crown','tube','gasket','water','\u0432\u043e\u0434\u0430','\u0443\u043f\u043b\u043e\u0442\u043d\u0435\u043d\u0438\u0435','\u0442\u044e\u0431'],
+    causes: [
+      'Crown gasket worn — needs replacement',
+      'Tube (crown tube) damaged or cross-threaded',
+      'Crown itself worn — gasket groove damaged',
+      'Winding stem diameter worn',
+    ],
+    checks: [
+      'Pressure test after assembly (waterproof test)',
+      'Inspect crown gasket condition',
+      'Check tube for damage before assembly',
+      'Measure winding stem diameter',
+    ]
+  },
+];
+
+function openTroubleshooting() {
+  var picker = document.getElementById('catalog-picker');
+  var trouble = document.getElementById('catalog-trouble');
+  if (picker) picker.style.display = 'none';
+  if (trouble) trouble.style.display = 'block';
+  var countEl = document.getElementById('catalog-count');
+  if (countEl) countEl.textContent = TROUBLE_DATA.length + ' \u043f\u0440\u043e\u0431\u043b\u0435\u043c';
+  var search = document.getElementById('trouble-search');
+  if (search) search.value = '';
+  filterTrouble();
+}
+
+function filterTrouble() {
+  var q = (document.getElementById('trouble-search') ? document.getElementById('trouble-search').value : '').toLowerCase().trim();
+  var list = document.getElementById('trouble-list');
+  if (!list) return;
+
+  var items = q ? TROUBLE_DATA.filter(function(t) {
+    return t.problem.toLowerCase().indexOf(q) !== -1 ||
+      t.tags.some(function(tag) { return tag.toLowerCase().indexOf(q) !== -1; }) ||
+      t.causes.some(function(c) { return c.toLowerCase().indexOf(q) !== -1; });
+  }) : TROUBLE_DATA;
+
+  var countEl = document.getElementById('catalog-count');
+  if (countEl) countEl.textContent = items.length + ' \u043f\u0440\u043e\u0431\u043b\u0435\u043c';
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="catalog-empty">\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(function(t, i) {
+    var id = 'trouble-' + i;
+    return '<div class="part-card" style="animation-delay:' + (i*0.05) + 's;cursor:pointer;" onclick="toggleTrouble(\'' + id + '\')">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<div class="part-name" style="color:var(--blue);">' + t.problem + '</div>'
+      + '<span style="color:var(--text-dim);font-size:14px;" id="arr-' + id + '">\u25bc</span>'
+      + '</div>'
+      + '<div id="' + id + '" style="display:none;margin-top:12px;">'
+      + '<div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">Possible causes</div>'
+      + t.causes.map(function(c) {
+          return '<div style="font-size:13px;color:var(--text);padding:6px 0;border-bottom:1px solid var(--glass-border);">&#8226; ' + c + '</div>';
+        }).join('')
+      + '<div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin:12px 0 8px;">What to check</div>'
+      + t.checks.map(function(c) {
+          return '<div style="font-size:13px;color:var(--green);padding:6px 0;border-bottom:1px solid var(--glass-border);">&#10003; ' + c + '</div>';
+        }).join('')
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function toggleTrouble(id) {
+  var el = document.getElementById(id);
+  var arr = document.getElementById('arr-' + id);
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (arr) arr.textContent = open ? '\u25bc' : '\u25b2';
+}
+
 // ── CATALOG ───────────────────────────────────────────────────────────────────
 const CATALOG_DATA = {
   '3135': {
@@ -2040,8 +2411,10 @@ function backToPicker() {
   currentMechanism = null;
   var picker = document.getElementById('catalog-picker');
   var parts = document.getElementById('catalog-parts');
+  var trouble = document.getElementById('catalog-trouble');
   if (picker) picker.style.display = 'block';
   if (parts) parts.style.display = 'none';
+  if (trouble) trouble.style.display = 'none';
   var countEl = document.getElementById('catalog-count');
   if (countEl) countEl.textContent = Object.keys(CATALOG_DATA).length + ' \u043a\u0430\u043b\u0438\u0431\u0440\u043e\u0432';
 }
