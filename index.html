@@ -596,7 +596,7 @@
     <div class="topbar-subtitle">Workshop Log</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
-    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;cursor:pointer;">&#x2600;&#xFE0F; &#1057;&#1074;&#1077;&#1090;&#1083;&#1072;&#1103;</button>
+    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1px solid var(--glass-border);border-radius:6px;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;cursor:pointer;">&#x2600;&#xFE0F; &#1057;&#1074;&#1077;&#1090;&#1083;&#1072;&#1103;</button>
     <div id="topbar-clock" style="font-size:13px;color:var(--text-dim);"></div>
   </div>
 </div>
@@ -1007,7 +1007,14 @@ function load() {
     return d;
   } catch(e) { return {jobs:[], done:[]}; }
 }
-function save(d) { localStorage.setItem('rst_data', JSON.stringify(d)); }
+function save(d) {
+  try {
+    localStorage.setItem('rst_data', JSON.stringify(d));
+  } catch(e) {
+    showToast('\u26a0\ufe0f \u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c (\u043f\u0430\u043c\u044f\u0442\u044c?)');
+    debugLog('save() failed: ' + (e && e.message ? e.message : e), 'error');
+  }
+}
 
 let currentJobId = null;
 let noteTargetStep = null;
@@ -1041,8 +1048,20 @@ function fmtDate(ts) {
 function totalTime(job) { return job.steps.reduce((a, s) => a + (s.elapsed||0), 0); }
 
 function speedLevel(hours, type) {
-  if (type === 'service') { if (hours <= 5) return 'fast'; if (hours <= 7) return 'mid'; return 'slow'; }
-  else { if (hours < 3) return 'fast'; if (hours <= 4) return 'mid'; return 'slow'; }
+  var s = loadSettings();
+  if (type === 'service') {
+    var fast = s.fsFast || 5;
+    var mid  = s.fsMid  || 7;
+    if (hours <= fast) return 'fast';
+    if (hours <= mid)  return 'mid';
+    return 'slow';
+  } else {
+    var fast = s.asmFast || 3;
+    var mid  = s.asmMid  || 4;
+    if (hours <= fast) return 'fast';
+    if (hours <= mid)  return 'mid';
+    return 'slow';
+  }
 }
 function speedLabel(level) {
   if (level === 'fast') return '\u26a1';
@@ -2071,7 +2090,11 @@ function renderStats() {
     '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+dorabCount+'</div><div class="stat-card-lbl">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>'+
     '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+vozvratPct+'%</div><div class="stat-card-lbl">↩ % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>';
   if (done.length > 0) {
-    const countSpeed = (jobs, type) => { let f=0,m=0,s=0; jobs.forEach(j => { const h=totalTime(j)/3600000; if(type==='full'){if(h<=5)f++;else if(h<=7)m++;else s++;}else{if(h<3)f++;else if(h<=4)m++;else s++;} }); return {fast:f,mid:m,slow:s}; };
+    const ss = loadSettings();
+    const fsFast = ss.fsFast || 5, fsMid = ss.fsMid || 7;
+    const asmFast = ss.asmFast || 3, asmMid = ss.asmMid || 4;
+    const countSpeed = (jobs, type) => { let f=0,m=0,s=0; jobs.forEach(j => { const h=totalTime(j)/3600000; if(type==='full'){if(h<=fsFast)f++;else if(h<=fsMid)m++;else s++;}else{if(h<=asmFast)f++;else if(h<=asmMid)m++;else s++;} }); return {fast:f,mid:m,slow:s}; };
+    const fmtNum = n => Number.isInteger(n) ? n : n.toFixed(1).replace(/\.0$/, '');
     let speedHtml = '';
     const fullDone = done.filter(j => j.type==='full');
     const asmDone = done.filter(j => j.type==='assembly');
@@ -2080,9 +2103,9 @@ function renderStats() {
       speedHtml += '<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">'+
         '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Full Service \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>'+
         '<div style="display:flex;gap:10px;">'+
-        '<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">'+s.fast+'</div><div style="font-size:11px;color:var(--text-dim);">⚡ ≤5\u0447</div></div>'+
-        '<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">'+s.mid+'</div><div style="font-size:11px;color:var(--text-dim);">⏱ 6\u20137\u0447</div></div>'+
-        '<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">'+s.slow+'</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥8\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">'+s.fast+'</div><div style="font-size:11px;color:var(--text-dim);">\u26a1 \u2264'+fmtNum(fsFast)+'\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">'+s.mid+'</div><div style="font-size:11px;color:var(--text-dim);">\u23f1 '+fmtNum(fsFast)+'\u2013'+fmtNum(fsMid)+'\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">'+s.slow+'</div><div style="font-size:11px;color:var(--text-dim);">\ud83d\udc22 >'+fmtNum(fsMid)+'\u0447</div></div>'+
         '</div></div>';
     }
     if (asmDone.length > 0) {
@@ -2090,9 +2113,9 @@ function renderStats() {
       speedHtml += '<div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">'+
         '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">\u0421\u0431\u043e\u0440\u043a\u0430 \u2014 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c</div>'+
         '<div style="display:flex;gap:10px;">'+
-        '<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">'+s.fast+'</div><div style="font-size:11px;color:var(--text-dim);">⚡ <3\u0447</div></div>'+
-        '<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">'+s.mid+'</div><div style="font-size:11px;color:var(--text-dim);">⏱ 3\u20134\u0447</div></div>'+
-        '<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">'+s.slow+'</div><div style="font-size:11px;color:var(--text-dim);">🐢 ≥5\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4caf82;">'+s.fast+'</div><div style="font-size:11px;color:var(--text-dim);">\u26a1 \u2264'+fmtNum(asmFast)+'\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#e6ac00;">'+s.mid+'</div><div style="font-size:11px;color:var(--text-dim);">\u23f1 '+fmtNum(asmFast)+'\u2013'+fmtNum(asmMid)+'\u0447</div></div>'+
+        '<div style="flex:1;text-align:center;padding:10px;background:rgba(201,76,76,0.08);border:1px solid rgba(201,76,76,0.25);border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#c94c4c;">'+s.slow+'</div><div style="font-size:11px;color:var(--text-dim);">\ud83d\udc22 >'+fmtNum(asmMid)+'\u0447</div></div>'+
         '</div></div>';
     }
     document.getElementById('stats-speed').innerHTML = speedHtml;
@@ -2157,150 +2180,6 @@ if (localStorage.getItem('rst_theme')==='light') {
     const btn=document.getElementById('theme-btn');
     if(btn) btn.textContent='🌙 \u0422\u0451\u043c\u043d\u0430\u044f';
   });
-}
-
-// ── DORABOTKA & VOZVRAT ───────────────────────────────────────────────────────
-let editingDorabotkaId = null;
-let editingVozvratId = null;
-
-function openDorabotkaModal(dorabotkaId) {
-  editingDorabotkaId = dorabotkaId || null;
-  if (dorabotkaId) {
-    const d = load();
-    const job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-    const dor = job && job.dorabotki && job.dorabotki.find(r => r.id === dorabotkaId);
-    if (!dor) return;
-    document.getElementById('inp-dorabotka-desc').value = dor.desc;
-    document.getElementById('inp-dorabotka-time').value = dor.elapsed ? Math.round(dor.elapsed/60000) : '';
-  } else {
-    document.getElementById('inp-dorabotka-desc').value = '';
-    document.getElementById('inp-dorabotka-time').value = '';
-  }
-  openModal('modal-dorabotka');
-}
-
-function saveDorabotka() {
-  const desc = document.getElementById('inp-dorabotka-desc').value.trim();
-  if (!desc) { showToast('Опишите доработку'); return; }
-  const mins = parseInt(document.getElementById('inp-dorabotka-time').value) || 0;
-  const d = load();
-  let job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-  if (!job) return;
-  if (!job.dorabotki) job.dorabotki = [];
-  if (editingDorabotkaId) {
-    const dor = job.dorabotki.find(r => r.id === editingDorabotkaId);
-    if (dor) { dor.desc = desc; dor.elapsed = mins*60000; }
-    showToast('Доработка обновлена');
-  } else {
-    job.dorabotki.push({id:Date.now().toString(), desc, elapsed:mins*60000, date:Date.now()});
-    showToast('Доработка добавлена');
-  }
-  save(d); closeModal('modal-dorabotka'); editingDorabotkaId = null;
-  const isDone = !!(d.done||[]).find(j => j.id === currentJobId);
-  if (isDone) { renderHistory(); openHistoryDetail(currentJobId); } else openJob(currentJobId);
-}
-
-function deleteDorabotka(jobId, dorabotkaId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId) || (d.done||[]).find(j => j.id === jobId);
-  if (!job) return;
-  job.dorabotki = (job.dorabotki||[]).filter(r => r.id !== dorabotkaId);
-  save(d); showToast('Доработка удалена');
-  const isDone = !!(d.done||[]).find(j => j.id === jobId);
-  if (isDone) { renderHistory(); openHistoryDetail(jobId); } else openJob(jobId);
-}
-
-function openVozvratModal(vozvratId) {
-  editingVozvratId = vozvratId || null;
-  if (vozvratId) {
-    const d = load();
-    const job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-    const v = job && job.vozvrat && job.vozvrat.find(r => r.id === vozvratId);
-    if (!v) return;
-    document.getElementById('inp-vozvrat-desc').value = v.desc;
-    document.getElementById('inp-vozvrat-time').value = v.elapsed ? Math.round(v.elapsed/60000) : '';
-  } else {
-    document.getElementById('inp-vozvrat-desc').value = '';
-    document.getElementById('inp-vozvrat-time').value = '';
-  }
-  openModal('modal-vozvrat');
-}
-
-function saveVozvrat() {
-  const desc = document.getElementById('inp-vozvrat-desc').value.trim();
-  if (!desc) { showToast('Опишите возврат'); return; }
-  const mins = parseInt(document.getElementById('inp-vozvrat-time').value) || 0;
-  const d = load();
-  let job = d.jobs.find(j => j.id === currentJobId) || (d.done||[]).find(j => j.id === currentJobId);
-  if (!job) return;
-  if (!job.vozvrat) job.vozvrat = [];
-  if (editingVozvratId) {
-    const v = job.vozvrat.find(r => r.id === editingVozvratId);
-    if (v) { v.desc = desc; v.elapsed = mins*60000; }
-    showToast('Возврат обновлён');
-  } else {
-    job.vozvrat.push({id:Date.now().toString(), desc, elapsed:mins*60000, date:Date.now()});
-    showToast('Возврат добавлен');
-  }
-  save(d); closeModal('modal-vozvrat'); editingVozvratId = null;
-  const isDone = !!(d.done||[]).find(j => j.id === currentJobId);
-  if (isDone) { renderHistory(); openHistoryDetail(currentJobId); } else openJob(currentJobId);
-}
-
-function deleteVozvrat(jobId, vozvratId) {
-  const d = load();
-  const job = d.jobs.find(j => j.id === jobId) || (d.done||[]).find(j => j.id === jobId);
-  if (!job) return;
-  job.vozvrat = (job.vozvrat||[]).filter(r => r.id !== vozvratId);
-  save(d); showToast('Возврат удалён');
-  const isDone = !!(d.done||[]).find(j => j.id === jobId);
-  if (isDone) { renderHistory(); openHistoryDetail(jobId); } else openJob(jobId);
-}
-
-function renderDorabotki(job) {
-  var container = document.getElementById('work-dorabotka-container');
-  if (!container) return;
-  var dorabotki = job.dorabotki || [];
-  var vozvrat = job.vozvrat || [];
-  if (dorabotki.length === 0 && vozvrat.length === 0) { container.innerHTML = ''; return; }
-  var html = '';
-  if (dorabotki.length > 0) {
-    var totalD = dorabotki.reduce(function(a,r){return a+(r.elapsed||0);}, 0);
-    html += '<div class="dorabotka-block">';
-    html += '<div class="dorabotka-header">';
-    html += '<div class="dorabotka-title">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 (' + dorabotki.length + ')</div>';
-    html += '<div style="font-size:13px;color:var(--amber);font-weight:700;">' + (totalD>0?fmtMs(totalD):'') + '</div>';
-    html += '</div>';
-    dorabotki.forEach(function(r) {
-      html += '<div class="dorabotka-item">';
-      html += '<div style="flex:1;"><div class="dorabotka-item-desc">' + r.desc + '</div>';
-      html += '<div class="dorabotka-item-meta">' + fmtDate(r.date) + '</div></div>';
-      html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">';
-      html += '<div class="dorabotka-item-time">' + (r.elapsed?fmtMs(r.elapsed):'\u2014') + '</div>';
-      html += '<button onclick="openDorabotkaModal(' + "'" + r.id + "'" + ')" style="background:none;border:1px solid rgba(230,200,50,0.3);border-radius:6px;color:var(--amber);font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>';
-      html += '</div></div>';
-    });
-    html += '</div>';
-  }
-  if (vozvrat.length > 0) {
-    var totalV = vozvrat.reduce(function(a,r){return a+(r.elapsed||0);}, 0);
-    html += '<div class="vozvrat-block">';
-    html += '<div class="vozvrat-header">';
-    html += '<div class="vozvrat-title">\u21a9 \u0412\u043e\u0437\u0432\u0440\u0430\u0442 (' + vozvrat.length + ')</div>';
-    html += '<div style="font-size:13px;color:var(--orange);font-weight:700;">' + (totalV>0?fmtMs(totalV):'') + '</div>';
-    html += '</div>';
-    vozvrat.forEach(function(r) {
-      html += '<div class="vozvrat-item">';
-      html += '<div style="flex:1;"><div style="font-size:13px;color:var(--text);">' + r.desc + '</div>';
-      html += '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + fmtDate(r.date) + '</div></div>';
-      html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">';
-      html += '<div style="font-size:14px;color:var(--orange);font-weight:700;">' + (r.elapsed?fmtMs(r.elapsed):'\u2014') + '</div>';
-      html += '<button onclick="openVozvratModal(' + "'" + r.id + "'" + ')" style="background:none;border:1px solid rgba(230,130,20,0.3);border-radius:6px;color:var(--orange);font-size:12px;padding:4px 8px;cursor:pointer;">&#9998;</button>';
-      html += '</div></div>';
-    });
-    html += '</div>';
-  }
-  container.innerHTML = html;
 }
 
 // ── ANIMATIONS ────────────────────────────────────────────────────────────────
@@ -2404,43 +2283,7 @@ function openSettingsModal() {
     }).join('');
   }
 
-  // Highlight active theme
-  var isDark = !document.documentElement.classList.contains('light');
-  var darkBtn = document.getElementById('theme-dark-btn');
-  var lightBtn = document.getElementById('theme-light-btn');
-  if (darkBtn) darkBtn.style.background = isDark ? 'var(--gold)' : 'var(--glass)';
-  if (darkBtn) darkBtn.style.color = isDark ? '#000' : 'var(--text-dim)';
-  if (lightBtn) lightBtn.style.background = !isDark ? 'var(--gold)' : 'var(--glass)';
-  if (lightBtn) lightBtn.style.color = !isDark ? '#000' : 'var(--text-dim)';
-
   openModal('modal-settings');
-}
-
-function setTheme(theme) {
-  if (theme === 'light') {
-    document.documentElement.classList.add('light');
-  } else {
-    document.documentElement.classList.remove('light');
-  }
-  localStorage.setItem('rst_theme', theme);
-  openSettingsModal();
-}
-
-function getSpeedLevel(hours, type) {
-  var s = loadSettings();
-  if (type === 'service') {
-    var fast = s.fsFast || 5;
-    var mid  = s.fsMid  || 7;
-    if (hours <= fast) return 'fast';
-    if (hours <= mid)  return 'mid';
-    return 'slow';
-  } else {
-    var fast = s.asmFast || 3;
-    var mid  = s.asmMid  || 4;
-    if (hours <= fast) return 'fast';
-    if (hours <= mid)  return 'mid';
-    return 'slow';
-  }
 }
 
 function isBlockVisible(id) {
@@ -3007,12 +2850,6 @@ function setCatalogMech(key) {
     <div class="modal-handle"></div>
     <div class="modal-title">⚙️ Настройки</div>
     <div class="modal-body">
-
-      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Тема</div>
-      <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <button onclick="setTheme('dark')" id="theme-dark-btn" class="btn" style="flex:1;padding:12px;font-size:14px;">🌙 Тёмная</button>
-        <button onclick="setTheme('light')" id="theme-light-btn" class="btn" style="flex:1;padding:12px;font-size:14px;">☀️ Светлая</button>
-      </div>
 
       <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Нормативы Full Service (часы)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
