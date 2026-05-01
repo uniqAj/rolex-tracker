@@ -1092,8 +1092,8 @@ function jobCard(j) {
   var typeBadgeClass = (j.type==='assembly') ? 'badge-assembly' : 'badge-full';
   const typeBadge = '<span class="badge ' + typeBadgeClass + '">' + typeLabel + '</span>';
   const runBadge = isRunning ? '<span class="badge badge-active">\u25cf \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>' : '';
-  const dorabBadge = hasDorab ? '<span class="badge badge-dorabotka">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>' : '';
-  const vozvratBadge = hasVozvrat ? '<span class="badge badge-vozvrat">\u21a9 \u0412\u043e\u0437\u0432\u0440\u0430\u0442 \xd7'+j.vozvrat.length+'</span>' : '';
+  const dorabBadge = hasDorab ? '<span class="badge badge-dorabotka" style="font-size:12px;">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>' : '';
+  const vozvratBadge = hasVozvrat ? '<span class="badge badge-vozvrat" style="font-size:12px;">\u21a9 \u0412\u043e\u0437\u0432\u0440\u0430\u0442 \xd7'+j.vozvrat.length+'</span>' : '';
   const borderCls = hasVozvrat ? 'card-vozvrat' : (hasDorab ? 'card-dorabotka' : '');
 
   // Service + Assembly times
@@ -1443,9 +1443,7 @@ function toggleExtraTypes() {
 }
 
 function syncJobType() {
-  var full = document.getElementById('type-full');
-  var asm = document.getElementById('type-assembly');
-  if (full && full.checked && asm && !asm.checked) asm.checked = true;
+  // No auto-checking — user decides independently
 }
 
 function getSelectedTypes() {
@@ -1497,9 +1495,14 @@ function createJob() {
   // Determine main type for steps
   var hasFull = document.getElementById('type-full') && document.getElementById('type-full').checked;
   var hasPart = document.getElementById('type-part') && document.getElementById('type-part').checked;
-  var hasAsm = document.getElementById('type-assembly') && document.getElementById('type-assembly').checked;
-  // full = full service + assembly, part_asm = part service + assembly, part = part service only, assembly = assembly only
-  var mainType = hasFull ? 'full' : (hasPart && hasAsm ? 'part_asm' : (hasPart ? 'part' : 'assembly'));
+  var hasAsm  = document.getElementById('type-assembly') && document.getElementById('type-assembly').checked;
+
+  var mainType;
+  if (hasFull && hasAsm)       mainType = 'full';
+  else if (hasFull)            mainType = 'part'; // Full Service only = service steps only
+  else if (hasPart && hasAsm)  mainType = 'part_asm';
+  else if (hasPart)            mainType = 'part';
+  else                         mainType = 'assembly';
 
   var steps = getStepsFor(mainType).map(function(s) { return Object.assign({}, s, {startTime:null, elapsed:0, running:false, notes:'', parts:''}); });
   var model = document.getElementById('inp-model') ? document.getElementById('inp-model').value.trim() : '';
@@ -1599,8 +1602,8 @@ function historyCard(j, compact) {
     (j.type==='full'?'<div class="history-time">Service: <span>'+fmtMs(fsTime)+'</span></div>':'')+
     '<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>'+
     speedBadges(j)+
-    (hasDorab?'<span class="badge badge-dorabotka">↻ \xd7'+j.dorabotki.length+'</span>':'')+
-    (hasVozvrat?'<span class="badge badge-vozvrat">↩ \xd7'+j.vozvrat.length+'</span>':'')+
+    (hasDorab?'<span class="badge badge-dorabotka" style="font-size:12px;padding:3px 10px;">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \xd7'+j.dorabotki.length+'</span>':'')+
+    (hasVozvrat?'<span class="badge badge-vozvrat" style="font-size:12px;padding:3px 10px;">\u21a9 \u0412\u043e\u0437\u0432\u0440\u0430\u0442 \xd7'+j.vozvrat.length+'</span>':'')+
     '</div></div>';
 }
 
