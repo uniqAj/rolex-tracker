@@ -668,6 +668,13 @@
           <div class="mech-pick-count">&#1041;&#1072;&#1079;&#1072; &#1087;&#1088;&#1086;&#1073;&#1083;&#1077;&#1084; &#1080; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1081;</div></div>
           <div class="mech-pick-arrow">&#8594;</div>
         </button>
+        <a href="docs/Rolex_Movement_Calibre_3130_3185_5.pdf" target="_blank" style="text-decoration:none;">
+          <div class="mech-pick-btn" style="border-color:rgba(255,107,107,0.3);margin-top:8px;">
+            <div><div class="mech-pick-name" style="color:var(--red);">&#128196; Technical Manual</div>
+            <div class="mech-pick-count">Rolex Cal. 3130&#8211;3185 &#8212; Official PDF</div></div>
+            <div class="mech-pick-arrow" style="color:var(--red);">&#8599;</div>
+          </div>
+        </a>
       </div>
       <div style="margin-top:8px;">
         <button class="mech-pick-btn" onclick="openTroubleshooting()" style="border-color:rgba(96,160,255,0.3);">
@@ -2012,7 +2019,7 @@ const TROUBLE_DATA = [
       'Barrel arbor hook worn — spring slipping',
     ],
     checks: [
-      'Check amplitude on timegrapher in all positions',
+      'Check amplitude — target 220-250° wound / 200°+ unwound (Rolex min 200°, max 310°)',
       'Inspect pallet fork jewels under microscope',
       'Check mainspring tension by feel when winding',
       'Verify balance end shake (should be 0.05-0.10mm)',
@@ -2051,7 +2058,7 @@ const TROUBLE_DATA = [
       'Check beat error on timegrapher — should be under 0.3ms',
       'Inspect roller table position on balance staff',
       'Adjust beat by rotating roller table slightly',
-      'Re-check after adjustment in multiple positions',
+      'Re-check in 5 positions — target ≤0.2ms in all'  ,
     ]
   },
   {
@@ -2159,6 +2166,26 @@ const TROUBLE_DATA = [
       'Check cap jewels are not cracked',
       'Ensure springs are properly seated',
       'Test by gentle tap — balance should spring back',
+    ]
+  },
+  {
+    problem: 'Performance specs / Технические нормативы Cal.3135',
+    tags: ['spec','norm','rate','amplitude','beat','performance','норматив','характеристики'],
+    causes: [
+      'Frequency: 28800 vib/h (4 Hz)',
+      'Lift angle: 52°',
+      'Power reserve: approx. 48h',
+      'Full winding: 40 stem rotations / 10 ratchet rotations',
+      '24h unwinding: 20 stem / 4.8 ratchet rotations',
+    ],
+    checks: [
+      'Rate (Rolex official): -2/+4 s/d average of 5 positions',
+      'Rate max variation between positions: 10 s/d',
+      'Amplitude wound: 220-250° (target), max 310°',
+      'Amplitude unwound 24h: min 200°',
+      'Beat error: ≤0.2ms (workshop target), Rolex spec max 0.8ms',
+      'Date jump: between -1 and +2 minutes before midnight',
+      'Hands sync at 12h: ±1 minute',
     ]
   },
   {
@@ -2361,6 +2388,73 @@ const CATALOG_DATA = {
       {num:'3135-16102',name:'Date indicator, champagne chinese',desc:'Champagne with chinese numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
       {num:'3135-16103',name:'Date indicator, champagne persian',desc:'Champagne with persian numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12},
       {num:'3135-16104',name:'Date indicator, champagne modern chinese',desc:'Champagne with modern chinese numerals',models:["Submariner Date", "Sea-Dweller", "Datejust", "Explorer II", "GMT-Master II", "Yacht-Master"],page:12}
+    ]
+  },
+  '3130': {
+    label: 'Cal. 3130',
+    parts: [
+      {num:'3130-100',name:'Main plate',desc:'Base plate — no date version',page:0},
+      {num:'3130-130',name:'Winding bridge',desc:'Winding bridge for cal.3130',page:0},
+      {num:'3130-148',name:'Distance piece for dial',desc:'Spacer for dial fitting',page:0},
+      {num:'3130-230',name:'Setting lever jumper',desc:'Jumper for setting lever',page:0},
+      {num:'3130-236',name:'Mechanism cover',desc:'Mechanism cover (1st & 2nd version)',page:0},
+      {num:'3130-240',name:'Yoke for sliding pinion',desc:'Yoke for sliding pinion',page:0},
+      {num:'3130-241',name:'Spring for yoke',desc:'Spring for yoke',page:0},
+      {num:'3130-270',name:'Cannon pinion ht. 2.51mm',desc:'Cannon pinion, height 2.51mm',page:0},
+      {num:'3130-280',name:'Hour wheel',desc:'Hour wheel for cal.3130',page:0},
+      {num:'3130-335',name:'Minute pinion with cannon pinion',desc:'Minute pinion with cannon',page:0},
+      {num:'3130-360',name:'Second wheel',desc:'Second wheel for cal.3130',page:0},
+    ]
+  },
+  '3155': {
+    label: 'Cal. 3155',
+    parts: [
+      {num:'3155-130',name:'Winding bridge',desc:'Winding bridge for cal.3155',page:0},
+      {num:'3155-270',name:'Cannon pinion ht. 3.31mm',desc:'Cannon pinion, height 3.31mm',page:0},
+      {num:'3155-280',name:'Hour wheel',desc:'Hour wheel for cal.3155',page:0},
+      {num:'3155-335',name:'Minute pinion with cannon pinion',desc:'Minute pinion with cannon',page:0},
+      {num:'3155-360',name:'Second wheel',desc:'Second wheel',page:0},
+      {num:'3155-600',name:'Date indicator seating',desc:'Date indicator seating',page:0},
+      {num:'3155-614',name:'Date jumper',desc:'Date jumper spring',page:0},
+      {num:'3155-618',name:'Day jumper',desc:'Day indicator jumper spring',page:0},
+      {num:'3155-626',name:'Finger for date',desc:'Date advance finger',page:0},
+      {num:'3155-635',name:'Spring for cam yoke',desc:'Cam yoke spring',page:0},
+      {num:'3155-645',name:'Date corrector',desc:'Date corrector mechanism',page:0},
+      {num:'3155-670',name:'Intermediate date wheel',desc:'Intermediate date wheel',page:0},
+      {num:'127',name:'Casing-up clamp',desc:'Clamp for casing-up (x2)',page:0},
+      {num:'166',name:'Screw for casing-up clamp',desc:'Screw for casing-up clamp (x2)',page:0},
+    ]
+  },
+  '3175': {
+    label: 'Cal. 3175',
+    parts: [
+      {num:'3175-130',name:'Winding bridge',desc:'Winding bridge for cal.3175',page:0},
+      {num:'3175-260',name:'Minute wheel 24h',desc:'24h minute wheel',page:0},
+      {num:'3175-280',name:'Hour wheel 24h',desc:'Hour wheel 24h',page:0},
+      {num:'3175-284',name:'Hour wheel 12h',desc:'Hour wheel 12h',page:0},
+      {num:'3175-670',name:'Intermediate date wheel',desc:'Intermediate date wheel',page:0},
+      {num:'5226',name:'Friction spring for hour wheel',desc:'Friction spring for additional hour wheel',page:0},
+    ]
+  },
+  '3185': {
+    label: 'Cal. 3185',
+    parts: [
+      {num:'3185-130',name:'Winding bridge',desc:'Winding bridge for cal.3185',page:0},
+      {num:'3185-268',name:'Mechanism cover, mounted',desc:'Mechanism cover assembled',page:0},
+      {num:'3185-280',name:'Hour wheel 24h',desc:'Hour wheel 24h (time-zones)',page:0},
+      {num:'3185-284',name:'Hour wheel 12h',desc:'Hour wheel 12h',page:0},
+      {num:'3185-600',name:'Date indicator seating',desc:'Date indicator seating',page:0},
+      {num:'3185-614',name:'Date jumper',desc:'Date jumper spring',page:0},
+      {num:'3185-623',name:'Finger for date',desc:'Date advance finger',page:0},
+      {num:'3185-625',name:'Date wheel, mounted',desc:'Date disc assembled',page:0},
+      {num:'3185-656',name:'Wheel for jumping hours',desc:'Jumping hour wheel',page:0},
+      {num:'3185-660',name:'Module for jumping hours',desc:'Hour jump module',page:0},
+      {num:'3185-662',name:'Corrector wheel',desc:'Date corrector wheel',page:0},
+      {num:'3185-670',name:'Intermediate date wheel',desc:'Intermediate date wheel',page:0},
+      {num:'5226',name:'Friction spring for hour wheel',desc:'Friction spring for additional hour wheel',page:0},
+      {num:'5242',name:'Click for jumping hours',desc:'Click for jumping hours (x2)',page:0},
+      {num:'5243',name:'Spring for jumping hour click',desc:'Spring for jumping hour click',page:0},
+      {num:'5244',name:'Spring clip for jumping hour module',desc:'Spring clip for jumping hour module',page:0},
     ]
   }
 };
