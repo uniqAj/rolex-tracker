@@ -641,6 +641,33 @@
     <div class="chart-title">Full Service vs &#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</div>
     <div class="bar-chart" id="type-chart"></div>
   </div>
+  <!-- Нормативы прямо в статистике -->
+  <div style="margin:0 16px 16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:16px;backdrop-filter:blur(12px);">
+    <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;">&#9201; &#1053;&#1086;&#1088;&#1084;&#1072;&#1090;&#1080;&#1074;&#1099;</div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Service (&#1095;)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;">&#26a1; &#1041;&#1099;&#1089;&#1090;&#1088;&#1086; &#8212; &#1076;&#1086;</label>
+        <input class="form-input" id="stats-fs-fast" type="number" min="1" max="24" step="0.5" style="padding:8px 12px;font-size:15px;" onchange="saveStatsNorms()" />
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;">&#23f1; &#1057;&#1088;&#1077;&#1076;&#1085;&#1077; &#8212; &#1076;&#1086;</label>
+        <input class="form-input" id="stats-fs-mid" type="number" min="1" max="24" step="0.5" style="padding:8px 12px;font-size:15px;" onchange="saveStatsNorms()" />
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Assemble (&#1095;)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;">&#26a1; &#1041;&#1099;&#1089;&#1090;&#1088;&#1086; &#8212; &#1076;&#1086;</label>
+        <input class="form-input" id="stats-asm-fast" type="number" min="1" max="24" step="0.5" style="padding:8px 12px;font-size:15px;" onchange="saveStatsNorms()" />
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;">&#23f1; &#1057;&#1088;&#1077;&#1076;&#1085;&#1077; &#8212; &#1076;&#1086;</label>
+        <input class="form-input" id="stats-asm-mid" type="number" min="1" max="24" step="0.5" style="padding:8px 12px;font-size:15px;" onchange="saveStatsNorms()" />
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:10px;">&#128422; &#1042;&#1089;&#1105; &#1095;&#1090;&#1086; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077; &#1089;&#1088;&#1077;&#1076;&#1085;&#1077;&#1075;&#1086; = &#128422;</div>
+  </div>
   <div style="margin:0 16px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;">
     <div style="font-size:12px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">&#128190; &#1044;&#1072;&#1085;&#1085;&#1099;&#1077;</div>
     <button class="btn btn-outline" style="margin-top:0;" onclick="exportData()">&#8681; &#1069;&#1082;&#1089;&#1087;&#1086;&#1088;&#1090; &#1076;&#1072;&#1085;&#1085;&#1099;&#1093;</button>
@@ -993,9 +1020,9 @@ function speedLevel(hours, type) {
   else { if (hours < 3) return 'fast'; if (hours <= 4) return 'mid'; return 'slow'; }
 }
 function speedLabel(level) {
-  if (level === 'fast') return '\u26a1 \u0411\u044b\u0441\u0442\u0440\u043e';
-  if (level === 'mid') return '\u23f1 \u0425\u043e\u0440\u043e\u0448\u043e';
-  return '\ud83d\udc22 \u0414\u043e\u043b\u0433\u043e';
+  if (level === 'fast') return '\u26a1';
+  if (level === 'mid') return '\u23f1';
+  return '\ud83d\udc22';
 }
 function speedBadges(job) {
   const fsTime = job.steps.filter(s => s.phase==='service').reduce((a,s) => a+(s.elapsed||0), 0);
@@ -1475,7 +1502,9 @@ function createJob() {
   var mainType = hasFull ? 'full' : (hasPart && hasAsm ? 'part_asm' : (hasPart ? 'part' : 'assembly'));
 
   var steps = getStepsFor(mainType).map(function(s) { return Object.assign({}, s, {startTime:null, elapsed:0, running:false, notes:'', parts:''}); });
-  var job = {id:Date.now().toString(), ref, model, serial, type:mainType, workTypes:selectedTypes, note, features:'', createdAt:Date.now(), steps, returns:[], dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  var model = document.getElementById('inp-model') ? document.getElementById('inp-model').value.trim() : '';
+  var note  = document.getElementById('inp-note')  ? document.getElementById('inp-note').value.trim()  : '';
+  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:Date.now(), steps:steps, returns:[], dorabotki:[], vozvrat:[], done:false, completedAt:null};
   var d = load(); d.jobs.push(job); save(d);
   closeModal('modal-new'); showToast('\u0427\u0430\u0441\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b');
   renderHome(); setTimeout(function() { openJob(job.id); }, 300);
@@ -1730,6 +1759,31 @@ function saveEditJob(id) {
   save(d); closeModal('modal-edit-job'); showToast('\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b'); renderHistory();
 }
 
+function saveStatsNorms() {
+  var s = loadSettings();
+  s.fsFast  = parseFloat(document.getElementById('stats-fs-fast').value)  || 5;
+  s.fsMid   = parseFloat(document.getElementById('stats-fs-mid').value)   || 7;
+  s.asmFast = parseFloat(document.getElementById('stats-asm-fast').value) || 3;
+  s.asmMid  = parseFloat(document.getElementById('stats-asm-mid').value)  || 4;
+  localStorage.setItem('rst_settings', JSON.stringify(s));
+  // sync settings modal too
+  var el;
+  el = document.getElementById('set-fs-fast');  if(el) el.value = s.fsFast;
+  el = document.getElementById('set-fs-mid');   if(el) el.value = s.fsMid;
+  el = document.getElementById('set-asm-fast'); if(el) el.value = s.asmFast;
+  el = document.getElementById('set-asm-mid');  if(el) el.value = s.asmMid;
+  renderStats();
+}
+
+function populateStatsNorms() {
+  var s = loadSettings();
+  var el;
+  el = document.getElementById('stats-fs-fast');  if(el) el.value = s.fsFast  || 5;
+  el = document.getElementById('stats-fs-mid');   if(el) el.value = s.fsMid   || 7;
+  el = document.getElementById('stats-asm-fast'); if(el) el.value = s.asmFast || 3;
+  el = document.getElementById('stats-asm-mid');  if(el) el.value = s.asmMid  || 4;
+}
+
 var currentPeriod = 'month';
 
 function setPeriod(period) {
@@ -1755,6 +1809,7 @@ function renderStats() {
   const d = load();
   const allDone = d.done||[];
   const done = filterByPeriod(allDone);
+  populateStatsNorms();
   const totalJobs = done.length;
   const fullJobs = done.filter(j => j.type==='full').length;
   const assemblyOnly = done.filter(j => j.type==='assembly').length;
