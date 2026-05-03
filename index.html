@@ -994,7 +994,6 @@ function load() {
     if (!d.jobs) d.jobs = [];
     if (!d.done) d.done = [];
     [...d.jobs, ...d.done].forEach(j => {
-      if (!j.returns) j.returns = [];
       if (!j.dorabotki) j.dorabotki = [];
       if (!j.features) j.features = '';
       if (!j.vozvrat) j.vozvrat = [];
@@ -1311,7 +1310,7 @@ function openJob(id) {
   document.getElementById('work-model').textContent = (job.ref?'Ref '+job.ref:'')+(job.ref&&job.model?' \xb7 ':'')+( job.model||'')+'';
   var badgeTypes = (job.workTypes && job.workTypes.length > 0)
     ? job.workTypes.join(' + ')
-    : (job.type==='full' ? 'Full Service + Сборка' : job.type==='part_asm' ? 'Part Service + Сборка' : job.type==='part' ? 'Part Service' : 'Сборка');
+    : (job.type==='full' ? 'Full Service + \u0421\u0431\u043e\u0440\u043a\u0430' : job.type==='part_asm' ? 'Part Service + \u0421\u0431\u043e\u0440\u043a\u0430' : job.type==='part' ? 'Part Service' : '\u0421\u0431\u043e\u0440\u043a\u0430');
   var badgeColor = (job.type==='full' || job.type==='part_asm') ? 'badge-full' : (job.type==='part' ? 'badge-full' : 'badge-assembly');
   document.getElementById('work-badge').innerHTML = '<span class="badge ' + badgeColor + '">' + badgeTypes + '</span>';
   renderWorkSteps(job);
@@ -2023,12 +2022,6 @@ function saveStatsNorms() {
   s.asmFast = parseFloat(document.getElementById('stats-asm-fast').value) || 3;
   s.asmMid  = parseFloat(document.getElementById('stats-asm-mid').value)  || 4;
   localStorage.setItem('rst_settings', JSON.stringify(s));
-  // sync settings modal too
-  var el;
-  el = document.getElementById('set-fs-fast');  if(el) el.value = s.fsFast;
-  el = document.getElementById('set-fs-mid');   if(el) el.value = s.fsMid;
-  el = document.getElementById('set-asm-fast'); if(el) el.value = s.asmFast;
-  el = document.getElementById('set-asm-mid');  if(el) el.value = s.asmMid;
   renderStats();
 }
 
@@ -2237,10 +2230,10 @@ window.onerror = function(msg, src, line) {
 })();
 // ── SETTINGS ──────────────────────────────────────────────────────────────────
 const STATS_BLOCKS = [
-  {id:'speed',    label:'Скорость (быстро/средне/долго)'},
-  {id:'stage',    label:'График по этапам'},
-  {id:'type',     label:'Full Service vs Сборка'},
-  {id:'dorabotka',label:'Статистика доработок'},
+  {id:'speed',    label:'\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c (\u0431\u044b\u0441\u0442\u0440\u043e/\u0441\u0440\u0435\u0434\u043d\u0435/\u0434\u043e\u043b\u0433\u043e)'},
+  {id:'stage',    label:'\u0413\u0440\u0430\u0444\u0438\u043a \u043f\u043e \u044d\u0442\u0430\u043f\u0430\u043c'},
+  {id:'type',     label:'Full Service vs \u0421\u0431\u043e\u0440\u043a\u0430'},
+  {id:'dorabotka',label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a'},
 ];
 
 function loadSettings() {
@@ -2251,10 +2244,6 @@ function loadSettings() {
 
 function saveSettings() {
   var s = loadSettings();
-  s.fsFast = parseFloat(document.getElementById('set-fs-fast').value) || 5;
-  s.fsMid  = parseFloat(document.getElementById('set-fs-mid').value)  || 7;
-  s.asmFast = parseFloat(document.getElementById('set-asm-fast').value) || 3;
-  s.asmMid  = parseFloat(document.getElementById('set-asm-mid').value)  || 4;
   s.statsBlocks = {};
   STATS_BLOCKS.forEach(function(b) {
     var el = document.getElementById('toggle-'+b.id);
@@ -2267,11 +2256,6 @@ function saveSettings() {
 
 function openSettingsModal() {
   var s = loadSettings();
-  document.getElementById('set-fs-fast').value = s.fsFast || 5;
-  document.getElementById('set-fs-mid').value  = s.fsMid  || 7;
-  document.getElementById('set-asm-fast').value = s.asmFast || 3;
-  document.getElementById('set-asm-mid').value  = s.asmMid  || 4;
-
   var togglesEl = document.getElementById('stats-toggles');
   if (togglesEl) {
     togglesEl.innerHTML = STATS_BLOCKS.map(function(b) {
@@ -2282,7 +2266,6 @@ function openSettingsModal() {
         + '</label>';
     }).join('');
   }
-
   openModal('modal-settings');
 }
 
@@ -2851,33 +2834,10 @@ function setCatalogMech(key) {
     <div class="modal-title">⚙️ Настройки</div>
     <div class="modal-body">
 
-      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Нормативы Full Service (часы)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-        <div>
-          <label class="form-label">⚡ — до</label>
-          <input class="form-input" id="set-fs-fast" type="number" min="1" max="24" step="0.5" placeholder="5" />
-        </div>
-        <div>
-          <label class="form-label">⏱ Средне — до</label>
-          <input class="form-input" id="set-fs-mid" type="number" min="1" max="24" step="0.5" placeholder="7" />
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--text-dim);margin-bottom:20px;">🐢 — всё что больше среднего</div>
-
-      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Нормативы Сборки (часы)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-        <div>
-          <label class="form-label">⚡ — до</label>
-          <input class="form-input" id="set-asm-fast" type="number" min="1" max="24" step="0.5" placeholder="3" />
-        </div>
-        <div>
-          <label class="form-label">⏱ — до</label>
-          <input class="form-input" id="set-asm-mid" type="number" min="1" max="24" step="0.5" placeholder="4" />
-        </div>
-      </div>
-
       <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Показывать в статистике</div>
       <div id="stats-toggles" style="margin-bottom:20px;"></div>
+
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;">Нормативы скорости можно изменить прямо на странице статистики.</div>
 
       <button class="btn btn-gold" onclick="saveSettings()">Сохранить</button>
       <button class="btn btn-outline" onclick="closeModal('modal-settings')">Закрыть</button>
