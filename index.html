@@ -250,6 +250,48 @@
     :root.light .modal { background: rgba(245,242,236,0.95); }
     @keyframes modalUp { from { transform: translateY(80px); opacity: 0; } to { transform: none; opacity: 1; } }
     .modal-handle { width: 40px; height: 4px; background: var(--glass-border); border-radius: 2px; margin: 14px auto 0; }
+
+    /* Fullscreen image viewer with pinch-to-zoom */
+    .img-viewer {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      flex-direction: column;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .img-viewer.open { display: flex; }
+    .img-viewer-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: max(12px, env(safe-area-inset-top, 12px)) 16px 10px;
+      color: #fff; font-family: 'Syne', sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.7), transparent);
+      position: relative; z-index: 2;
+    }
+    .img-viewer-title { font-size: 15px; font-weight: 600; color: var(--gold); flex: 1; padding-right: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .img-viewer-close { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .img-viewer-stage {
+      flex: 1; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .img-viewer-img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      transform-origin: 0 0;
+      transition: transform 0.18s ease-out;
+      will-change: transform;
+      pointer-events: none;
+    }
+    .img-viewer-img.dragging { transition: none; }
+    .img-viewer-bottom {
+      padding: 12px 16px max(12px, env(safe-area-inset-bottom, 12px));
+      color: rgba(255,255,255,0.6);
+      font-size: 12px; text-align: center;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      position: relative; z-index: 2;
+    }
     .modal-title {
       font-family: 'Syne', sans-serif;
       font-size: 22px; font-weight: 600; padding: 18px 22px 0;
@@ -1290,7 +1332,7 @@ function initDragToDismiss(modalId) {
 
 // Init drag-to-dismiss on all modals after page load
 setTimeout(function() {
-  ['modal-new','modal-edit-job','modal-settings','modal-event','modal-part-img'].forEach(initDragToDismiss);
+  ['modal-new','modal-edit-job','modal-settings','modal-event'].forEach(initDragToDismiss);
 }, 800);
 
 function renderHome() {
@@ -2381,11 +2423,132 @@ function isBlockVisible(id) {
 }
 
 function showPartPage(num, name, page) {
-  document.getElementById('part-img-title').textContent = num + ' — ' + name;
-  document.getElementById('part-img-src').src = 'parts/p' + page + '.webp';
+  document.getElementById('part-img-title').textContent = num + ' \u2014 ' + name;
+  var img = document.getElementById('part-img-src');
+  img.src = 'parts/p' + page + '.webp';
   document.getElementById('part-img-hint').textContent = 'Catalog page ' + page + ' of 12';
-  openModal('modal-part-img');
+  resetImgTransform();
+  document.getElementById('img-viewer').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
+function closeImgViewer() {
+  document.getElementById('img-viewer').classList.remove('open');
+  document.body.style.overflow = '';
+  resetImgTransform();
+}
+
+// ── IMAGE VIEWER: pinch-zoom, pan, double-tap ─────────────────────────────────
+var imgState = { scale: 1, tx: 0, ty: 0, minScale: 1, maxScale: 5 };
+var imgTouch = { mode: null, startDist: 0, startScale: 1, startTx: 0, startTy: 0, startX: 0, startY: 0, lastTap: 0 };
+
+function resetImgTransform() {
+  imgState.scale = 1; imgState.tx = 0; imgState.ty = 0;
+  applyImgTransform(false);
+}
+function applyImgTransform(noAnim) {
+  var img = document.getElementById('part-img-src');
+  if (!img) return;
+  if (noAnim) img.classList.add('dragging'); else img.classList.remove('dragging');
+  img.style.transform = 'translate(' + imgState.tx + 'px,' + imgState.ty + 'px) scale(' + imgState.scale + ')';
+}
+function clampPan() {
+  var stage = document.getElementById('img-viewer-stage');
+  var img = document.getElementById('part-img-src');
+  if (!stage || !img) return;
+  var sw = stage.clientWidth, sh = stage.clientHeight;
+  var iw = img.clientWidth * imgState.scale;
+  var ih = img.clientHeight * imgState.scale;
+  var maxX = Math.max(0, (iw - sw) / 2);
+  var maxY = Math.max(0, (ih - sh) / 2);
+  if (imgState.tx >  maxX) imgState.tx =  maxX;
+  if (imgState.tx < -maxX) imgState.tx = -maxX;
+  if (imgState.ty >  maxY) imgState.ty =  maxY;
+  if (imgState.ty < -maxY) imgState.ty = -maxY;
+}
+function distanceBetween(t1, t2) {
+  var dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+(function initImgViewerGestures() {
+  var stage = document.getElementById('img-viewer-stage');
+  if (!stage) return;
+
+  stage.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      imgTouch.mode = 'pinch';
+      imgTouch.startDist = distanceBetween(e.touches[0], e.touches[1]);
+      imgTouch.startScale = imgState.scale;
+    } else if (e.touches.length === 1) {
+      // Double-tap
+      var now = Date.now();
+      if (now - imgTouch.lastTap < 300) {
+        if (imgState.scale > 1.05) {
+          resetImgTransform();
+        } else {
+          imgState.scale = 2.5;
+          imgState.tx = 0; imgState.ty = 0;
+          applyImgTransform(false);
+        }
+        imgTouch.lastTap = 0;
+        e.preventDefault();
+        return;
+      }
+      imgTouch.lastTap = now;
+      if (imgState.scale > 1) {
+        imgTouch.mode = 'pan';
+        imgTouch.startX = e.touches[0].clientX;
+        imgTouch.startY = e.touches[0].clientY;
+        imgTouch.startTx = imgState.tx;
+        imgTouch.startTy = imgState.ty;
+      } else {
+        imgTouch.mode = null;
+      }
+    }
+  }, { passive: false });
+
+  stage.addEventListener('touchmove', function(e) {
+    if (imgTouch.mode === 'pinch' && e.touches.length === 2) {
+      var d = distanceBetween(e.touches[0], e.touches[1]);
+      var ratio = d / imgTouch.startDist;
+      var ns = imgTouch.startScale * ratio;
+      if (ns < imgState.minScale) ns = imgState.minScale;
+      if (ns > imgState.maxScale) ns = imgState.maxScale;
+      imgState.scale = ns;
+      clampPan();
+      applyImgTransform(true);
+      e.preventDefault();
+    } else if (imgTouch.mode === 'pan' && e.touches.length === 1) {
+      imgState.tx = imgTouch.startTx + (e.touches[0].clientX - imgTouch.startX);
+      imgState.ty = imgTouch.startTy + (e.touches[0].clientY - imgTouch.startY);
+      clampPan();
+      applyImgTransform(true);
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  stage.addEventListener('touchend', function(e) {
+    if (e.touches.length === 0) imgTouch.mode = null;
+    if (imgState.scale < 1.05) resetImgTransform();
+  });
+
+  // Mouse wheel zoom for desktop
+  stage.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var ns = imgState.scale * (e.deltaY < 0 ? 1.15 : 0.87);
+    if (ns < imgState.minScale) ns = imgState.minScale;
+    if (ns > imgState.maxScale) ns = imgState.maxScale;
+    imgState.scale = ns;
+    clampPan();
+    applyImgTransform(false);
+  }, { passive: false });
+
+  // Click background to close
+  stage.addEventListener('click', function(e) {
+    if (e.target === stage && imgState.scale <= 1.05) closeImgViewer();
+  });
+})();
 
 // ── TROUBLESHOOTING ───────────────────────────────────────────────────────────
 const TROUBLE_DATA = [
@@ -3027,17 +3190,17 @@ function filterGlobalCatalog() {
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-part-img">
-  <div class="modal" style="border-radius:20px 20px 0 0;">
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;">
-      <div id="part-img-title" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:600;color:var(--gold);"></div>
-      <button onclick="closeModal('modal-part-img')" style="background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;">&#215;</button>
-    </div>
-    <div style="padding:0 12px 20px;">
-      <img id="part-img-src" src="" style="width:100%;border-radius:12px;border:1px solid var(--glass-border);" />
-      <div id="part-img-hint" style="font-size:12px;color:var(--text-dim);text-align:center;margin-top:8px;"></div>
-    </div>
+<div class="img-viewer" id="img-viewer">
+  <div class="img-viewer-top">
+    <div id="part-img-title" class="img-viewer-title"></div>
+    <button class="img-viewer-close" onclick="closeImgViewer()">&#215;</button>
+  </div>
+  <div class="img-viewer-stage" id="img-viewer-stage">
+    <img id="part-img-src" class="img-viewer-img" src="" alt="" />
+  </div>
+  <div class="img-viewer-bottom">
+    <span id="part-img-hint"></span>
+    <span style="margin-left:8px;opacity:0.6;">&#183; \u0429\u0438\u043f\u043e\u043a / \u0434\u0432\u043e\u0439\u043d\u043e\u0439 \u0442\u0430\u043f \u2014 \u0437\u0443\u043c</span>
   </div>
 </div>
 
