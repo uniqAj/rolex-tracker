@@ -729,6 +729,11 @@
 
   <!-- Mechanism picker screen -->
   <div id="catalog-picker">
+    <div style="padding:0 16px 12px;">
+      <input class="form-input" id="catalog-global-search" placeholder="&#128269; &#1054;&#1073;&#1097;&#1080;&#1081; &#1087;&#1086;&#1080;&#1089;&#1082; (&#1076;&#1077;&#1090;&#1072;&#1083;&#1080;, &#1082;&#1072;&#1083;&#1080;&#1073;&#1088;&#1099;, &#1087;&#1088;&#1086;&#1073;&#1083;&#1077;&#1084;&#1099;)..." oninput="filterGlobalCatalog()" autocomplete="off" />
+    </div>
+    <div id="global-search-results" style="display:none;"></div>
+    <div id="picker-default-content">
     <div style="padding:0 16px 20px;">
       <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;letter-spacing:0.05em;">&#1042;&#1099;&#1073;&#1077;&#1088;&#1080;&#1090;&#1077; &#1082;&#1072;&#1083;&#1080;&#1073;&#1088;:</div>
       <div id="mech-picker-list"></div>
@@ -746,6 +751,7 @@
           </div>
         </a>
       </div>
+    </div>
     </div>
   </div>
 
@@ -1314,7 +1320,7 @@ function jobCard(j) {
   const isRunning = j.steps && j.steps.some(function(s){ return s.running; });
   const hasDorab = j.dorabotki && j.dorabotki.length > 0;
   const hasVozvrat = j.vozvrat && j.vozvrat.length > 0;
-  var typeBadge = renderTypeBadges(j.workTypes, j.type);
+  var typeBadge = renderTypeBadges(j.workTypes, j.type, true);
   const runBadge = isRunning ? '<span class="badge badge-active">\u25cf \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>' : '';
   const dorabBadge = hasDorab ? '<span class="badge badge-dorabotka" style="font-size:13px;padding:3px 8px;">\u21bb\u00a0'+j.dorabotki.length+'</span>' : '';
   const vozvratBadge = hasVozvrat ? '<span class="badge badge-vozvrat" style="font-size:13px;padding:3px 8px;">\u21a9\u00a0'+j.vozvrat.length+'</span>' : '';
@@ -1684,13 +1690,19 @@ function typeColor(label) {
   return 'badge-misc';
 }
 
-function renderTypeBadges(workTypes, jobType) {
+var PRIMARY_TYPES = ['Full Service','Part Service','\u0421\u0431\u043e\u0440\u043a\u0430','\u0417\u0430\u043c\u0435\u043d\u0430 Dial'];
+
+function renderTypeBadges(workTypes, jobType, primaryOnly) {
   var types = (workTypes && workTypes.length > 0) ? workTypes : (function() {
     if (jobType === 'full')     return ['Full Service', '\u0421\u0431\u043e\u0440\u043a\u0430'];
     if (jobType === 'part_asm') return ['Part Service', '\u0421\u0431\u043e\u0440\u043a\u0430'];
     if (jobType === 'part')     return ['Part Service'];
     return ['\u0421\u0431\u043e\u0440\u043a\u0430'];
   })();
+  if (primaryOnly) {
+    types = types.filter(function(t) { return PRIMARY_TYPES.indexOf(t) !== -1; });
+    if (types.length === 0) types = ['\u0414\u0440\u0443\u0433\u043e\u0435'];
+  }
   return types.map(function(t) {
     return '<span class="badge ' + typeColor(t) + '" style="font-size:11px;padding:3px 9px;">' + t + '</span>';
   }).join('');
@@ -2837,9 +2849,15 @@ function renderCatalog() {
   currentMechanism = null;
   const picker = document.getElementById('catalog-picker');
   const parts = document.getElementById('catalog-parts');
+  const trouble = document.getElementById('catalog-trouble');
   const countEl = document.getElementById('catalog-count');
   if (picker) picker.style.display = 'block';
   if (parts) parts.style.display = 'none';
+  if (trouble) trouble.style.display = 'none';
+  // Reset global search
+  var gs = document.getElementById('catalog-global-search');
+  if (gs) gs.value = '';
+  filterGlobalCatalog();
   if (countEl) countEl.textContent = Object.keys(CATALOG_DATA).length + ' \u043a\u0430\u043b\u0438\u0431\u0440\u043e\u0432';
 
   const list = document.getElementById('mech-picker-list');
@@ -2880,6 +2898,9 @@ function backToPicker() {
   if (picker) picker.style.display = 'block';
   if (parts) parts.style.display = 'none';
   if (trouble) trouble.style.display = 'none';
+  var gs = document.getElementById('catalog-global-search');
+  if (gs) gs.value = '';
+  filterGlobalCatalog();
   var countEl = document.getElementById('catalog-count');
   if (countEl) countEl.textContent = Object.keys(CATALOG_DATA).length + ' \u043a\u0430\u043b\u0438\u0431\u0440\u043e\u0432';
 }
@@ -2920,6 +2941,73 @@ function filterCatalogParts() {
 
 function setCatalogMech(key) {
   openMechCatalog(key);
+}
+
+function filterGlobalCatalog() {
+  var inp = document.getElementById('catalog-global-search');
+  var q = inp ? inp.value.toLowerCase().trim() : '';
+  var resultsEl = document.getElementById('global-search-results');
+  var defaultEl = document.getElementById('picker-default-content');
+  if (!resultsEl || !defaultEl) return;
+
+  if (!q) {
+    resultsEl.style.display = 'none';
+    resultsEl.innerHTML = '';
+    defaultEl.style.display = 'block';
+    return;
+  }
+  defaultEl.style.display = 'none';
+  resultsEl.style.display = 'block';
+
+  // Search across all calibres' parts
+  var partMatches = [];
+  Object.keys(CATALOG_DATA).forEach(function(key) {
+    var mech = CATALOG_DATA[key];
+    mech.parts.forEach(function(p) {
+      var hay = (p.num+' '+p.name+' '+p.desc+' '+(p.models||[]).join(' ')).toLowerCase();
+      if (hay.indexOf(q) !== -1) partMatches.push({mechKey:key, mechLabel:mech.label, part:p});
+    });
+  });
+
+  // Search troubleshooting
+  var troubleMatches = TROUBLE_DATA.filter(function(t) {
+    var hay = (t.problem+' '+(t.tags||[]).join(' ')+' '+(t.causes||[]).join(' ')+' '+(t.fixes||[]).join(' ')).toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+
+  var html = '<div style="padding:0 16px 20px;">';
+
+  if (partMatches.length === 0 && troubleMatches.length === 0) {
+    html += '<div class="catalog-empty" style="text-align:center;padding:30px 16px;color:var(--text-dim);">\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e</div>';
+  } else {
+    if (partMatches.length > 0) {
+      html += '<div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">\u0414\u0435\u0442\u0430\u043b\u0438 (' + partMatches.length + ')</div>';
+      html += partMatches.map(function(m, i) {
+        var p = m.part;
+        var clickable = p.page ? ' onclick="showPartPage(\''+p.num+'\',\''+p.name.replace(/\u0027/g,'')+'\','+p.page+')" style="cursor:pointer;"' : '';
+        return '<div class="part-card"' + clickable + ' style="animation-delay:' + ((i%10)*0.04) + 's">'
+          + '<div style="display:flex;align-items:flex-start;justify-content:space-between;">'
+          + '<div class="part-num">' + p.num + '</div>'
+          + '<span style="font-size:10px;color:var(--gold);padding:3px 8px;background:rgba(240,192,96,0.1);border-radius:20px;border:1px solid rgba(240,192,96,0.3);">' + m.mechLabel + (p.page?' \u00b7 p.'+p.page:'') + '</span>'
+          + '</div>'
+          + '<div class="part-name">' + p.name + '</div>'
+          + '<div class="part-desc">' + p.desc + '</div>'
+          + '</div>';
+      }).join('');
+    }
+    if (troubleMatches.length > 0) {
+      html += '<div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin:18px 0 10px;">Troubleshooting (' + troubleMatches.length + ')</div>';
+      html += troubleMatches.map(function(t) {
+        return '<div onclick="openTroubleshooting()" style="cursor:pointer;background:var(--glass);border:1px solid rgba(96,160,255,0.25);border-radius:10px;padding:12px 14px;margin-bottom:8px;">'
+          + '<div style="font-size:14px;font-weight:600;color:var(--blue);">\u26a0 ' + t.problem + '</div>'
+          + '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">' + (t.causes||[]).length + ' \u043f\u0440\u0438\u0447\u0438\u043d \u00b7 \u043e\u0442\u043a\u0440\u044b\u0442\u044c</div>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  html += '</div>';
+  resultsEl.innerHTML = html;
 }
 </script>
 <div class="modal-overlay" id="modal-settings">
