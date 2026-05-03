@@ -1444,35 +1444,37 @@ function renderWorkSteps(job) {
     var qts = [{label:'15\u043c',min:15},{label:'30\u043c',min:30},{label:'1\u0447',min:60},{label:'2\u0447',min:120},{label:'4\u0447',min:240},{label:'8\u0447',min:480}];
 
     var phaseAccent = 'phase-label-' + phase.id;
+    var notesEsc = (mainStep.notes||'').replace(/"/g, '&quot;');
     html += '<div class="phase-block" id="phase-'+job.id+'-'+phase.id+'">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;">'+
-      '<div class="phase-label '+phaseAccent+'">'+phase.label+'</div>'+
-      '<div id="phase-total-'+job.id+'-'+phase.id+'" style="font-size:20px;font-weight:700;color:'+(phaseElapsed>0?'var(--green)':'var(--text-dim)') + ';">'+(phaseElapsed>0?fmtMs(phaseElapsed):'\u2014')+'</div>'+
-      '</div>'+
-      '<div style="padding:0 16px 16px;">'+
-
-      // Live timer + start/stop button
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
+      // Compact header: round button + label + live timer
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;">'+
       '<button onclick="togglePhaseTimer(\''+job.id+'\',\''+phase.id+'\')" '+
-      'id="phase-timer-btn-'+job.id+'-'+phase.id+'" '+
-      'style="flex:1;padding:14px;border-radius:12px;font-size:16px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;'+
-      (isRunning?'background:rgba(255,107,107,0.15);color:var(--red);border:1px solid rgba(255,107,107,0.3);':'background:rgba(240,192,96,0.12);color:var(--gold);border:1px solid rgba(240,192,96,0.25);')+'">'+(isRunning?'\u25a0 \u0421\u0442\u043e\u043f':'\u25b6 \u0421\u0442\u0430\u0440\u0442')+'</button>'+
-      '<div id="phase-live-'+job.id+'-'+phase.id+'" style="font-size:22px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;min-width:70px;text-align:center;">'+(isRunning?'00:00':'')+'</div>'+
+        'id="phase-timer-btn-'+job.id+'-'+phase.id+'" '+
+        'aria-label="'+(isRunning?'Stop':'Start')+'" '+
+        'style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0;transition:transform 0.15s;'+
+        (isRunning?'background:rgba(255,107,107,0.15);color:var(--red);border:1px solid rgba(255,107,107,0.35);':'background:rgba(240,192,96,0.12);color:var(--gold);border:1px solid rgba(240,192,96,0.3);')+
+        '">'+(isRunning?'\u25a0':'\u25b6')+'</button>'+
+      '<div class="phase-label '+phaseAccent+'">'+phase.label+'</div>'+
+      '<div id="phase-live-'+job.id+'-'+phase.id+'" '+
+        'style="margin-left:auto;font-size:'+(isRunning?'20px':'15px')+';font-weight:'+(isRunning?'700':'500')+';font-variant-numeric:tabular-nums;color:'+(isRunning?'var(--green)':(phaseElapsed>0?'var(--gold)':'var(--text-dim)'))+';">'+
+        (isRunning?'00:00':(phaseElapsed>0?fmtMs(phaseElapsed):'\u2014'))+'</div>'+
       '</div>'+
 
-      // Quick time buttons
-      '<div style="font-size:11px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">\u0411\u044b\u0441\u0442\u0440\u043e \u0437\u0430\u043f\u0438\u0441\u0430\u0442\u044c \u0432\u0440\u0435\u043c\u044f</div>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">'+
-      qts.map(function(t){ return '<button class="phase-qt-btn" onclick="addPhaseTime(\''+job.id+'\',\''+phase.id+'\','+t.min+')">'+t.label+'</button>'; }).join('')+
-      '<button class="phase-qt-btn phase-qt-btn-custom" onclick="openPhaseCustomTime(\''+job.id+'\',\''+phase.id+'\')">&#10000;</button>'+
+      // Quick time buttons (compact, single row)
+      '<div style="display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap;">'+
+      qts.map(function(t){ return '<button class="phase-qt-btn" style="flex:1;min-width:42px;padding:7px 4px;font-size:12px;" onclick="addPhaseTime(\''+job.id+'\',\''+phase.id+'\','+t.min+')">'+t.label+'</button>'; }).join('')+
+      '<button class="phase-qt-btn phase-qt-btn-custom" style="flex:0 0 36px;padding:7px;font-size:13px;" onclick="openPhaseCustomTime(\''+job.id+'\',\''+phase.id+'\')">&#10000;</button>'+
       '</div>'+
 
-      // Note for this phase
-      '<div style="display:flex;align-items:center;gap:8px;">'+
-      '<button onclick="openPhaseNote(\''+job.id+'\',\''+phase.id+'\')" style="flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--text-dim);font-size:14px;cursor:pointer;text-align:left;">'+
-      (mainStep.notes?'<span style="color:var(--text);">'+mainStep.notes+'</span>':'&#9998; \u0417\u0430\u043c\u0435\u0442\u043a\u0430...')+
-      '</button></div>'+
-      '</div></div>';
+      // Inline note input
+      '<div style="padding:0 14px 12px;">'+
+      '<input type="text" id="phase-note-'+job.id+'-'+phase.id+'" '+
+        'placeholder="&#9998; \u0417\u0430\u043c\u0435\u0442\u043a\u0430..." '+
+        'value="'+notesEsc+'" '+
+        'onblur="savePhaseNoteInline(\''+job.id+'\',\''+phase.id+'\',this.value)" '+
+        'style="width:100%;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--text);font-size:13px;font-family:inherit;outline:none;" />'+
+      '</div>'+
+      '</div>';
   });
   container.innerHTML = html;
 
@@ -1504,8 +1506,6 @@ function startPhaseLiveTimer(jobId, phaseId, startTime, baseElapsed) {
 function stopPhaseLiveTimer(jobId, phaseId) {
   var key = jobId+'-'+phaseId;
   if (phaseTimerIntervals[key]) { clearInterval(phaseTimerIntervals[key]); delete phaseTimerIntervals[key]; }
-  var el = document.getElementById('phase-live-'+key);
-  if (el) el.textContent = '';
 }
 
 function togglePhaseTimer(jobId, phaseId) {
@@ -1525,9 +1525,14 @@ function togglePhaseTimer(jobId, phaseId) {
     save(d);
     stopPhaseLiveTimer(jobId, phaseId);
     var btn = document.getElementById('phase-timer-btn-'+jobId+'-'+phaseId);
-    if (btn) { btn.textContent = '\u25b6 \u0421\u0442\u0430\u0440\u0442'; btn.style.background='rgba(240,192,96,0.12)'; btn.style.color='var(--gold)'; btn.style.borderColor='rgba(240,192,96,0.25)'; }
-    var total = document.getElementById('phase-total-'+jobId+'-'+phaseId);
-    if (total) total.textContent = fmtMs(elapsed);
+    if (btn) { btn.textContent = '\u25b6'; btn.style.background='rgba(240,192,96,0.12)'; btn.style.color='var(--gold)'; btn.style.borderColor='rgba(240,192,96,0.3)'; btn.setAttribute('aria-label','Start'); }
+    var live = document.getElementById('phase-live-'+jobId+'-'+phaseId);
+    if (live) {
+      live.textContent = elapsed>0 ? fmtMs(elapsed) : '\u2014';
+      live.style.fontSize = '15px';
+      live.style.fontWeight = '500';
+      live.style.color = elapsed>0 ? 'var(--gold)' : 'var(--text-dim)';
+    }
   } else {
     // Start
     mainStep.running = true;
@@ -1535,8 +1540,24 @@ function togglePhaseTimer(jobId, phaseId) {
     save(d);
     startPhaseLiveTimer(jobId, phaseId, mainStep.startTime, mainStep.elapsed||0);
     var btn = document.getElementById('phase-timer-btn-'+jobId+'-'+phaseId);
-    if (btn) { btn.textContent = '\u25a0 \u0421\u0442\u043e\u043f'; btn.style.background='rgba(255,107,107,0.15)'; btn.style.color='var(--red)'; btn.style.borderColor='rgba(255,107,107,0.3)'; }
+    if (btn) { btn.textContent = '\u25a0'; btn.style.background='rgba(255,107,107,0.15)'; btn.style.color='var(--red)'; btn.style.borderColor='rgba(255,107,107,0.35)'; btn.setAttribute('aria-label','Stop'); }
+    var live = document.getElementById('phase-live-'+jobId+'-'+phaseId);
+    if (live) {
+      live.style.fontSize = '20px';
+      live.style.fontWeight = '700';
+      live.style.color = 'var(--green)';
+    }
   }
+}
+
+function savePhaseNoteInline(jobId, phaseId, value) {
+  var d = load();
+  var job = d.jobs.find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
+  if (!job) return;
+  var mainStep = job.steps.filter(function(s){ return s.phase===phaseId; })[0];
+  if (mainStep) mainStep.notes = (value||'').trim();
+  save(d);
+  // No re-render — input keeps focus, user can keep typing
 }
 
 function openPhaseNote(jobId, phaseId) {
