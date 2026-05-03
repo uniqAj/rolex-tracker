@@ -167,11 +167,31 @@
       font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
       backdrop-filter: blur(8px);
     }
-    .badge-full { background: rgba(240,192,96,0.15); color: var(--gold); border: 1px solid rgba(240,192,96,0.3); }
+    .badge-full     { background: rgba(240,192,96,0.15); color: var(--gold); border: 1px solid rgba(240,192,96,0.3); }
     .badge-assembly { background: rgba(96,160,255,0.15); color: var(--blue); border: 1px solid rgba(96,160,255,0.3); }
-    .badge-active { background: rgba(80,227,160,0.15); color: var(--green); border: 1px solid rgba(80,227,160,0.3); }
-    .badge-dorabotka { background: rgba(230,200,50,0.15); color: var(--amber); border: 1px solid rgba(230,200,50,0.3); }
-    .badge-vozvrat { background: rgba(230,130,30,0.15); color: var(--orange); border: 1px solid rgba(230,130,30,0.3); }
+    .badge-active   { background: rgba(80,227,160,0.15); color: var(--green); border: 1px solid rgba(80,227,160,0.3); }
+    .badge-dorabotka{ background: rgba(230,200,50,0.15); color: var(--amber); border: 1px solid rgba(230,200,50,0.3); }
+    .badge-vozvrat  { background: rgba(230,130,30,0.15); color: var(--orange); border: 1px solid rgba(230,130,30,0.3); }
+    .badge-part     { background: rgba(230,130,30,0.15); color: var(--orange); border: 1px solid rgba(230,130,30,0.3); }
+    .badge-dial     { background: rgba(29,158,117,0.15); color: #1D9E75; border: 1px solid rgba(29,158,117,0.3); }
+    .badge-ap       { background: rgba(127,119,221,0.15); color: #7F77DD; border: 1px solid rgba(127,119,221,0.3); }
+    .badge-rate     { background: rgba(80,227,160,0.13); color: var(--green); border: 1px solid rgba(80,227,160,0.3); }
+    .badge-misc     { background: rgba(150,150,160,0.13); color: var(--text-dim); border: 1px solid rgba(150,150,160,0.25); }
+    .phase-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 8px;
+    }
+    .phase-label-service  { color: var(--gold); background: rgba(240,192,96,0.08); border-left: 3px solid rgba(240,192,96,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-assembly { color: var(--blue); background: rgba(96,160,255,0.08); border-left: 3px solid rgba(96,160,255,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-dial     { color: #1D9E75; background: rgba(29,158,117,0.08); border-left: 3px solid rgba(29,158,117,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-ap       { color: #7F77DD; background: rgba(127,119,221,0.08); border-left: 3px solid rgba(127,119,221,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-rate     { color: var(--green); background: rgba(80,227,160,0.08); border-left: 3px solid rgba(80,227,160,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-parts    { color: var(--orange); background: rgba(230,130,30,0.08); border-left: 3px solid rgba(230,130,30,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-hands    { color: var(--amber); background: rgba(230,200,50,0.08); border-left: 3px solid rgba(230,200,50,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-axle     { color: #F09595; background: rgba(240,149,149,0.08); border-left: 3px solid rgba(240,149,149,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
+    .phase-label-spring   { color: #ED93B1; background: rgba(237,147,177,0.08); border-left: 3px solid rgba(237,147,177,0.5); border-radius: 0 8px 8px 0; padding-left: 10px; }
     .card-dorabotka { border-color: rgba(230,200,50,0.35) !important; }
     .card-vozvrat { border-color: rgba(230,130,30,0.4) !important; }
 
@@ -297,21 +317,7 @@
       border-radius: var(--r-lg); margin-bottom: 14px; overflow: hidden;
       transition: border-color 0.25s;
     }
-    .phase-block-header {
-      padding: 16px 18px; display: flex; align-items: center;
-      justify-content: space-between; cursor: pointer; user-select: none;
-    }
-    .phase-block-header:active { opacity: 0.75; }
-    .phase-block-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; color: var(--text); }
-    .phase-block-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
-    .phase-block-right { display: flex; align-items: center; gap: 10px; }
-    .phase-total { font-size: 17px; color: var(--gold); font-weight: 700; font-family: 'Syne', sans-serif; }
-    .phase-chevron { font-size: 10px; color: var(--text-dim); transition: transform 0.3s cubic-bezier(.34,1.56,.64,1); display: inline-block; }
-    .phase-chevron.open { transform: rotate(180deg); }
 
-    .phase-quick-times { padding: 0 16px 16px; border-top: 1px solid var(--glass-border); }
-    .phase-qt-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin: 14px 0 10px; }
-    .phase-qt-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .phase-qt-btn {
       padding: 10px 0; border-radius: 12px;
       border: 1px solid var(--glass-border);
@@ -634,6 +640,7 @@
   <div id="work-events-container"></div>
   <div style="padding:16px;">
     <button class="btn btn-gold" onclick="completeJob()">&#10003; &#1047;&#1072;&#1074;&#1077;&#1088;&#1096;&#1080;&#1090;&#1100; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</button>
+    <button class="btn" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);margin-top:8px;" onclick="openEditJob(currentJobId)">&#9998; &#1056;&#1077;&#1076;&#1072;&#1082;&#1090;&#1080;&#1088;&#1086;&#1074;&#1072;&#1090;&#1100;</button>
     <button class="btn" style="background:rgba(96,160,255,0.1);color:var(--blue);border:1px solid rgba(96,160,255,0.3);margin-top:8px;" onclick="navigate('home')">&#8592; &#1053;&#1072; &#1075;&#1083;&#1072;&#1074;&#1085;&#1091;&#1102; (&#1095;&#1072;&#1089;&#1099; &#1072;&#1082;&#1090;&#1080;&#1074;&#1085;&#1099;)</button>
     <button class="btn" style="background:rgba(230,200,50,0.1);color:#e6c832;border:1px solid rgba(230,200,50,0.35);margin-top:8px;" onclick="openEventModal('dorabotka')">&#8635; &#1044;&#1086;&#1088;&#1072;&#1073;&#1086;&#1090;&#1082;&#1072;</button>
     <button class="btn" style="background:rgba(230,130,30,0.1);color:#e6821e;border:1px solid rgba(230,130,30,0.35);margin-top:8px;" onclick="openEventModal('vozvrat')">&#8617; &#1042;&#1086;&#1079;&#1074;&#1088;&#1072;&#1090;</button>
@@ -986,6 +993,45 @@ function getStepsFor(type) {
   return ASSEMBLY_STEPS.map(s => ({...s, phase:'assembly'}));
 }
 
+// Map workType labels -> phase IDs (timer blocks)
+var TYPE_TO_PHASE = {
+  'Full Service':                                                 'service',
+  'Part Service':                                                 'service',
+  '\u0421\u0431\u043e\u0440\u043a\u0430':                         'assembly',
+  '\u0417\u0430\u043c\u0435\u043d\u0430 Dial':                    'dial',
+  '\u0410\u041f \u0440\u0435\u043c\u043e\u043d\u0442':            'ap',
+  '\u0412\u044b\u043a\u0430\u0447\u043a\u0430 / Rate':            'rate',
+  '\u0417\u0430\u043c\u0435\u043d\u0430 \u0434\u0435\u0442\u0430\u043b\u0435\u0439': 'parts',
+  '\u0421\u0442\u0440\u0435\u043b\u043a\u0438':                   'hands',
+  '\u0417\u0430\u043c\u0435\u043d\u0430 \u0430\u043a\u0441\u0435\u043b\u044f': 'axle',
+  '\u0417\u0430\u043c\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u044b': 'spring'
+};
+var PHASE_LABELS = {
+  service:  'Service',
+  assembly: 'Assemble',
+  dial:     '\u0417\u0430\u043c\u0435\u043d\u0430 Dial',
+  ap:       '\u0410\u041f \u0440\u0435\u043c\u043e\u043d\u0442',
+  rate:     '\u0412\u044b\u043a\u0430\u0447\u043a\u0430 / Rate',
+  parts:    '\u0417\u0430\u043c\u0435\u043d\u0430 \u0434\u0435\u0442\u0430\u043b\u0435\u0439',
+  hands:    '\u0421\u0442\u0440\u0435\u043b\u043a\u0438',
+  axle:     '\u0417\u0430\u043c\u0435\u043d\u0430 \u0430\u043a\u0441\u0435\u043b\u044f',
+  spring:   '\u0417\u0430\u043c\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u044b'
+};
+
+// Ensure each selected workType has a phase step
+function ensurePhaseSteps(job) {
+  if (!job.workTypes || job.workTypes.length === 0) return;
+  if (!job.steps) job.steps = [];
+  job.workTypes.forEach(function(t) {
+    var phase = TYPE_TO_PHASE[t];
+    if (!phase) return;
+    var has = job.steps.some(function(s){ return s.phase === phase; });
+    if (!has) {
+      job.steps.push({id:'auto-'+phase, name:PHASE_LABELS[phase]||phase, phase:phase, elapsed:0, running:false, startTime:null, notes:'', parts:''});
+    }
+  });
+}
+
 function load() {
   try {
     const raw = localStorage.getItem('rst_data');
@@ -998,6 +1044,7 @@ function load() {
       if (!j.features) j.features = '';
       if (!j.vozvrat) j.vozvrat = [];
       if (!j.steps) j.steps = [];
+      ensurePhaseSteps(j);
       j.steps.forEach(s => {
         if (!s.elapsed) s.elapsed = 0;
         if (s.running === undefined) s.running = false;
@@ -1267,11 +1314,7 @@ function jobCard(j) {
   const isRunning = j.steps && j.steps.some(function(s){ return s.running; });
   const hasDorab = j.dorabotki && j.dorabotki.length > 0;
   const hasVozvrat = j.vozvrat && j.vozvrat.length > 0;
-  var typeLabel = j.workTypes && j.workTypes.length > 0
-    ? j.workTypes.slice(0,2).join(' + ')
-    : (j.type==='full' ? 'Full Service' : j.type==='part_asm' ? 'Part + \u0421\u0431\u043e\u0440\u043a\u0430' : j.type==='part' ? 'Part Service' : '\u0421\u0431\u043e\u0440\u043a\u0430');
-  var typeBadgeClass = (j.type==='assembly') ? 'badge-assembly' : 'badge-full';
-  const typeBadge = '<span class="badge ' + typeBadgeClass + '">' + typeLabel + '</span>';
+  var typeBadge = renderTypeBadges(j.workTypes, j.type);
   const runBadge = isRunning ? '<span class="badge badge-active">\u25cf \u0412 \u0440\u0430\u0431\u043e\u0442\u0435</span>' : '';
   const dorabBadge = hasDorab ? '<span class="badge badge-dorabotka" style="font-size:13px;padding:3px 8px;">\u21bb\u00a0'+j.dorabotki.length+'</span>' : '';
   const vozvratBadge = hasVozvrat ? '<span class="badge badge-vozvrat" style="font-size:13px;padding:3px 8px;">\u21a9\u00a0'+j.vozvrat.length+'</span>' : '';
@@ -1308,11 +1351,7 @@ function openJob(id) {
   currentJobId = id;
   document.getElementById('work-ref').textContent = job.serial || job.ref;
   document.getElementById('work-model').textContent = (job.ref?'Ref '+job.ref:'')+(job.ref&&job.model?' \xb7 ':'')+( job.model||'')+'';
-  var badgeTypes = (job.workTypes && job.workTypes.length > 0)
-    ? job.workTypes.join(' + ')
-    : (job.type==='full' ? 'Full Service + \u0421\u0431\u043e\u0440\u043a\u0430' : job.type==='part_asm' ? 'Part Service + \u0421\u0431\u043e\u0440\u043a\u0430' : job.type==='part' ? 'Part Service' : '\u0421\u0431\u043e\u0440\u043a\u0430');
-  var badgeColor = (job.type==='full' || job.type==='part_asm') ? 'badge-full' : (job.type==='part' ? 'badge-full' : 'badge-assembly');
-  document.getElementById('work-badge').innerHTML = '<span class="badge ' + badgeColor + '">' + badgeTypes + '</span>';
+  document.getElementById('work-badge').innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">' + renderTypeBadges(job.workTypes, job.type) + '</div>';
   renderWorkSteps(job);
   renderJobEvents(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1324,13 +1363,27 @@ function openJob(id) {
 function renderWorkSteps(job) {
   const container = document.getElementById('work-steps-container');
   const phases = [];
-  if (job.type==='full' || job.type==='part_asm') {
-    phases.push({id:'service', label:'Service'});
-    phases.push({id:'assembly', label:'Assemble'});
-  } else if (job.type==='part') {
-    phases.push({id:'service', label:'Part Service'});
-  } else {
-    phases.push({id:'assembly', label:'Assemble'});
+  const seenPhases = {};
+  // Derive phases from workTypes (preserves user's checkbox order)
+  if (job.workTypes && job.workTypes.length > 0) {
+    job.workTypes.forEach(function(t) {
+      var pid = TYPE_TO_PHASE[t];
+      if (pid && !seenPhases[pid]) {
+        var label = (pid === 'service' && t === 'Part Service') ? 'Part Service' : (PHASE_LABELS[pid] || pid);
+        phases.push({id: pid, label: label});
+        seenPhases[pid] = true;
+      }
+    });
+  }
+  // Fallback for legacy jobs without workTypes
+  if (phases.length === 0) {
+    if (job.type==='full' || job.type==='part_asm') {
+      phases.push({id:'service', label:'Service'}, {id:'assembly', label:'Assemble'});
+    } else if (job.type==='part') {
+      phases.push({id:'service', label:'Part Service'});
+    } else {
+      phases.push({id:'assembly', label:'Assemble'});
+    }
   }
 
   let html = '';
@@ -1342,11 +1395,13 @@ function renderWorkSteps(job) {
     var isRunning = mainStep.running;
     var qts = [{label:'15\u043c',min:15},{label:'30\u043c',min:30},{label:'1\u0447',min:60},{label:'2\u0447',min:120},{label:'4\u0447',min:240},{label:'8\u0447',min:480}];
 
+    var phaseAccent = 'phase-label-' + phase.id;
     html += '<div class="phase-block" id="phase-'+job.id+'-'+phase.id+'">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'+
-      '<div class="phase-block-title">'+phase.label+'</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;">'+
+      '<div class="phase-label '+phaseAccent+'">'+phase.label+'</div>'+
       '<div id="phase-total-'+job.id+'-'+phase.id+'" style="font-size:20px;font-weight:700;color:'+(phaseElapsed>0?'var(--green)':'var(--text-dim)') + ';">'+(phaseElapsed>0?fmtMs(phaseElapsed):'\u2014')+'</div>'+
       '</div>'+
+      '<div style="padding:0 16px 16px;">'+
 
       // Live timer + start/stop button
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
@@ -1369,7 +1424,7 @@ function renderWorkSteps(job) {
       '<button onclick="openPhaseNote(\''+job.id+'\',\''+phase.id+'\')" style="flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--text-dim);font-size:14px;cursor:pointer;text-align:left;">'+
       (mainStep.notes?'<span style="color:var(--text);">'+mainStep.notes+'</span>':'&#9998; \u0417\u0430\u043c\u0435\u0442\u043a\u0430...')+
       '</button></div>'+
-      '</div>';
+      '</div></div>';
   });
   container.innerHTML = html;
 
@@ -1565,16 +1620,6 @@ function openPhaseCustomTime(jobId, phaseId) {
   document.getElementById('inp-custom-min').value = '';
   openModal('modal-custom-time');
 }
-function togglePhaseDetail(jobId, phaseId) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  job['detail_open_'+phaseId] = !job['detail_open_'+phaseId];
-  save(d);
-  const detail = document.getElementById('detail-'+jobId+'-'+phaseId);
-  const chevron = document.querySelector('#phase-'+jobId+'-'+phaseId+' .phase-chevron');
-  if (detail) detail.classList.toggle('open');
-  if (chevron) chevron.classList.toggle('open');
-}
 function addQuickTime(jobId, stepId, minutes) {
   const d = load(), job = d.jobs.find(j => j.id === jobId);
   if (!job) return;
@@ -1626,6 +1671,29 @@ function toggleExtraTypes() {
 
 function syncJobType() {
   // No auto-checking — user decides independently
+}
+
+function typeColor(label) {
+  var l = label.toLowerCase();
+  if (l.indexOf('full') !== -1)    return 'badge-full';
+  if (l.indexOf('part') !== -1)    return 'badge-part';
+  if (l.indexOf('\u0441\u0431\u043e\u0440') !== -1 || l.indexOf('assembl') !== -1) return 'badge-assembly';
+  if (l.indexOf('dial') !== -1 || l.indexOf('\u0434\u0430\u0439\u043b') !== -1)     return 'badge-dial';
+  if (l.indexOf('\u0430\u043f') !== -1 || l.indexOf('ap ') !== -1)                  return 'badge-ap';
+  if (l.indexOf('\u0432\u044b\u043a\u0430\u0447') !== -1 || l.indexOf('rate') !== -1) return 'badge-rate';
+  return 'badge-misc';
+}
+
+function renderTypeBadges(workTypes, jobType) {
+  var types = (workTypes && workTypes.length > 0) ? workTypes : (function() {
+    if (jobType === 'full')     return ['Full Service', '\u0421\u0431\u043e\u0440\u043a\u0430'];
+    if (jobType === 'part_asm') return ['Part Service', '\u0421\u0431\u043e\u0440\u043a\u0430'];
+    if (jobType === 'part')     return ['Part Service'];
+    return ['\u0421\u0431\u043e\u0440\u043a\u0430'];
+  })();
+  return types.map(function(t) {
+    return '<span class="badge ' + typeColor(t) + '" style="font-size:11px;padding:3px 9px;">' + t + '</span>';
+  }).join('');
 }
 
 function getSelectedTypes() {
@@ -1689,7 +1757,8 @@ function createJob() {
   var steps = getStepsFor(mainType).map(function(s) { return Object.assign({}, s, {startTime:null, elapsed:0, running:false, notes:'', parts:''}); });
   var model = document.getElementById('inp-model') ? document.getElementById('inp-model').value.trim() : '';
   var note  = document.getElementById('inp-note')  ? document.getElementById('inp-note').value.trim()  : '';
-  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:Date.now(), steps:steps, returns:[], dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:Date.now(), steps:steps, dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  ensurePhaseSteps(job);
   var d = load(); d.jobs.push(job); save(d);
   closeModal('modal-new'); showToast('\u0427\u0430\u0441\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b');
   renderHome(); setTimeout(function() { openJob(job.id); }, 300);
@@ -1920,10 +1989,29 @@ function openHistoryDetail(id) {
 }
 
 function openEditJob(id) {
-  const d = load(), job = (d.done||[]).find(j => j.id===id);
+  const d = load();
+  const job = (d.jobs||[]).find(j => j.id===id) || (d.done||[]).find(j => j.id===id);
   if (!job) return;
   closeModal('modal-history-detail');
-  const phases = (job.type==='full'||job.type==='part_asm')?[{id:'service',label:'Service'},{id:'assembly',label:'Assemble'}]:(job.type==='part'?[{id:'service',label:'Service'}]:[{id:'assembly',label:'Assemble'}]);
+
+  // Derive phases from workTypes (so all selected work types show time fields)
+  const phases = [];
+  const seenP = {};
+  if (job.workTypes && job.workTypes.length > 0) {
+    job.workTypes.forEach(function(t) {
+      var pid = TYPE_TO_PHASE[t];
+      if (pid && !seenP[pid]) {
+        var label = (pid === 'service' && t === 'Part Service') ? 'Part Service' : (PHASE_LABELS[pid] || pid);
+        phases.push({id: pid, label: label});
+        seenP[pid] = true;
+      }
+    });
+  }
+  if (phases.length === 0) {
+    if (job.type==='full' || job.type==='part_asm') phases.push({id:'service',label:'Service'},{id:'assembly',label:'Assemble'});
+    else if (job.type==='part') phases.push({id:'service',label:'Service'});
+    else phases.push({id:'assembly',label:'Assemble'});
+  }
 
   // Work type checkboxes
   const WORK_TYPES_MAP = [
@@ -1980,8 +2068,10 @@ function toggleFeaturesEdit() {
 }
 
 function saveEditJob(id) {
-  const d = load(), job = (d.done||[]).find(j => j.id===id);
+  const d = load();
+  const job = (d.jobs||[]).find(j => j.id===id) || (d.done||[]).find(j => j.id===id);
   if (!job) return;
+  const isActive = !!(d.jobs||[]).find(j => j.id===id);
   job.serial   = document.getElementById('edit-serial').value.trim();
   job.ref      = document.getElementById('edit-ref').value.trim();
   job.model    = document.getElementById('edit-model').value.trim();
@@ -2003,6 +2093,7 @@ function saveEditJob(id) {
   ];
   var newTypes = EDIT_TYPES_MAP.filter(function(t){ var el=document.getElementById(t.id); return el&&el.checked; }).map(function(t){ return t.label; });
   if (newTypes.length > 0) job.workTypes = newTypes;
+  ensurePhaseSteps(job);
   const stepInputs = document.querySelectorAll('.edit-step-time');
   if (stepInputs.length > 0) {
     stepInputs.forEach(inp => { const step=job.steps.find(s => s.id===inp.dataset.stepid); if(step) step.elapsed=Math.round((parseFloat(inp.value)||0)*60000); });
@@ -2012,7 +2103,10 @@ function saveEditJob(id) {
       if(ps.length>0) ps[0].elapsed=Math.round((parseFloat(inp.value)||0)*60000);
     });
   }
-  save(d); closeModal('modal-edit-job'); showToast('\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b'); renderHistory();
+  save(d);
+  closeModal('modal-edit-job');
+  showToast('\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b');
+  if (isActive) { openJob(id); renderHome(); } else { renderHistory(); }
 }
 
 function saveStatsNorms() {
