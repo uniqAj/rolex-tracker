@@ -2555,133 +2555,126 @@ function filterByPeriod(jobs) {
 function renderHeatmap(allDone) {
   var container = document.getElementById('heatmap-container');
   if (!container) return;
-  // Build counts per day for last 28 days (4 weeks of 7) ending today
-  var today = new Date();
-  today.setHours(0,0,0,0);
-  var todayMs = today.getTime();
+
   var DAY = 86400000;
-  // Grid is 7 rows x 4 cols (7 days down, 4 weeks across)
-  // We anchor end at today (top-right or bottom-right depending on weekday)
-  // Easier: 28 days back, group by day of week
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayMs = today.getTime();
+
+  // Build counts: 28 days back (4 weeks), Mon-first columns
+  var todayDow = today.getDay() === 0 ? 6 : today.getDay() - 1; // Mon=0..Sun=6
+  var monThisWeek = new Date(todayMs - todayDow * DAY);
+  var startDate = new Date(monThisWeek.getTime() - 3 * 7 * DAY); // 4 weeks total
+
+  // Day key helper
+  function dayKey(d) { return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+
   var counts = {};
-  var fastest = {};  // best time per day for color tinting
-  for (var i = 27; i >= 0; i--) {
-    var d = new Date(todayMs - i*DAY);
-    var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-    counts[key] = 0;
+  for (var i = 0; i < 28; i++) {
+    var d = new Date(startDate.getTime() + i * DAY);
+    counts[dayKey(d)] = 0;
   }
   allDone.forEach(function(job) {
     var ts = job.completedAt || job.createdAt;
     if (!ts) return;
-    var jd = new Date(ts);
-    jd.setHours(0,0,0,0);
-    if (jd.getTime() < todayMs - 27*DAY) return;
-    var key = jd.getFullYear()+'-'+(jd.getMonth()+1)+'-'+jd.getDate();
-    if (counts[key] !== undefined) counts[key]++;
+    var jd = new Date(ts); jd.setHours(0,0,0,0);
+    var k = dayKey(jd);
+    if (counts[k] !== undefined) counts[k]++;
   });
 
-  // Determine max for thresholding
-  var maxCount = 0;
-  Object.keys(counts).forEach(function(k){ if (counts[k] > maxCount) maxCount = counts[k]; });
-
+  var maxCount = Object.keys(counts).reduce(function(m, k){ return Math.max(m, counts[k]); }, 1);
   function levelOf(c) {
     if (c === 0) return 0;
-    if (maxCount <= 1) return c > 0 ? 4 : 0;
-    var ratio = c / maxCount;
-    if (ratio <= 0.25) return 1;
-    if (ratio <= 0.5)  return 2;
-    if (ratio <= 0.75) return 3;
+    var r = c / maxCount;
+    if (r <= 0.25) return 1;
+    if (r <= 0.5)  return 2;
+    if (r <= 0.75) return 3;
     return 4;
   }
 
-  // Build a 7-row x 4-col grid. We orient so today is in the last column at correct weekday.
-  // Find today's weekday (0=Sun..6=Sat). Use ISO Mon-first: 0=Mon..6=Sun
   var WEEK_LABELS = ['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u0412\u0441'];
-  // Day-of-week map: JS getDay() => 0=Sun,1=Mon,...6=Sat. Convert to Mon=0..Sun=6
-  function dowMon(d) { var n = d.getDay(); return n === 0 ? 6 : n - 1; }
+  var cellSz = 13; // px
+  var cellGap = 3; // px
 
-  // Compute the start date of the 4-week grid: 27 days back, then go back to nearest Monday
-  var endDate = new Date(todayMs);
-  // We want columns to be weeks; last column = current week (Mon..today)
-  // Find Monday of current week
-  var todayDow = dowMon(endDate);
-  var monThisWeek = new Date(todayMs - todayDow*DAY);
-  // Start = monThisWeek - 3*7 days
-  var startDate = new Date(monThisWeek.getTime() - 3*7*DAY);
-
-  // Build cells
-  var html = '';
-  // Header row with month markers (top of each week's column if 1st-of-month)
-  var monthRow = '<div class="heatmap-month-row"><span></span>';
+  // Compute month labels per column (week)
+  var monthLabels = [];
   for (var w = 0; w < 4; w++) {
-    var weekStart = new Date(startDate.getTime() + w*7*DAY);
-    var label = '';
-    // Show month abbreviation if this week contains the 1st OR if it's the first column
-    for (var dd = 0; dd < 7; dd++) {
-      var dt = new Date(weekStart.getTime() + dd*DAY);
-      if (dt.getDate() === 1 || (w === 0 && dd === 0)) {
-        label = dt.toLocaleDateString('ru', {month: 'short'});
-        break;
-      }
-    }
-    monthRow += '<span style="grid-column:span 7;">' + label + '</span>';
-  }
-  monthRow += '</div>';
-  // Wait — grid-column:span 7 doesn't work in the 28-col grid (28 cols + 1 label = 29 effective cols of equal size; weeks aren't 7-cell groups when each row is one weekday across 4 weeks).
-  // Better approach: 5 cols total = label + 4 week-cols. Each week-col contains 7 small cells stacked vertically.
-  // Let's restructure entirely.
-
-  // Override: render 7 rows (Mon..Sun) x (1 label + 4 week cells). Each cell = 1 day.
-  html = '';
-  // Month label row (above grid): 1 empty + 4 month labels
-  var monthsHTML = '<div style="display:grid;grid-template-columns:32px repeat(4,1fr);gap:4px;font-size:10px;color:var(--text-dim);margin-bottom:6px;"><span></span>';
-  for (var w2 = 0; w2 < 4; w2++) {
-    var ws = new Date(startDate.getTime() + w2*7*DAY);
+    var ws = new Date(startDate.getTime() + w * 7 * DAY);
     var lbl = '';
-    for (var ddd = 0; ddd < 7; ddd++) {
-      var dt2 = new Date(ws.getTime() + ddd*DAY);
-      if (dt2.getDate() === 1 || (w2 === 0 && ddd === 0)) {
-        lbl = dt2.toLocaleDateString('ru', {month:'short'});
-        break;
+    for (var dd = 0; dd < 7; dd++) {
+      var dt = new Date(ws.getTime() + dd * DAY);
+      if (dt.getDate() <= 7) { // first week of month
+        var prevMon = new Date(dt.getTime() - DAY);
+        if (prevMon.getMonth() !== dt.getMonth() || (w === 0 && dd === 0)) {
+          lbl = dt.toLocaleDateString('ru', {month: 'short'});
+          break;
+        }
       }
     }
-    monthsHTML += '<span style="text-align:left;">'+lbl+'</span>';
+    monthLabels.push(lbl);
   }
-  monthsHTML += '</div>';
 
-  // Grid: 7 rows × (label + 4 week cols)
-  var gridHTML = '<div style="display:grid;grid-template-columns:32px repeat(4,1fr);gap:4px;">';
+  var labelW = 22;
+  var totalW = labelW + (cellGap) + 4 * cellSz + 3 * cellGap; // label + 4 cells with gaps
+
+  // Build HTML
+  var html = '<div style="display:inline-block;max-width:100%;">';
+
+  // Month row
+  html += '<div style="display:flex;align-items:flex-end;margin-bottom:'+(cellGap)+'px;">';
+  html += '<div style="width:'+labelW+'px;flex-shrink:0;"></div>';
+  html += '<div style="width:'+cellGap+'px;flex-shrink:0;"></div>';
+  for (var w2 = 0; w2 < 4; w2++) {
+    html += '<div style="width:'+cellSz+'px;font-size:9px;color:var(--text-dim);text-overflow:clip;overflow:hidden;white-space:nowrap;">'+monthLabels[w2]+'</div>';
+    if (w2 < 3) html += '<div style="width:'+cellGap+'px;"></div>';
+  }
+  html += '</div>';
+
+  // 7 weekday rows
   for (var row = 0; row < 7; row++) {
-    // weekday label
-    gridHTML += '<div class="heatmap-day-label">'+WEEK_LABELS[row]+'</div>';
-    // 4 week columns
+    html += '<div style="display:flex;align-items:center;margin-bottom:'+cellGap+'px;">';
+    // Weekday label — only Mon/Wed/Fri
+    var showLabel = (row === 0 || row === 2 || row === 4);
+    html += '<div style="width:'+labelW+'px;font-size:9px;color:var(--text-dim);text-align:right;padding-right:5px;flex-shrink:0;">'+(showLabel ? WEEK_LABELS[row] : '')+'</div>';
+    html += '<div style="width:'+cellGap+'px;flex-shrink:0;"></div>';
     for (var col = 0; col < 4; col++) {
-      var cellDate = new Date(startDate.getTime() + (col*7 + row)*DAY);
+      var cellDate = new Date(startDate.getTime() + (col * 7 + row) * DAY);
       cellDate.setHours(0,0,0,0);
       var cellMs = cellDate.getTime();
-      var key = cellDate.getFullYear()+'-'+(cellDate.getMonth()+1)+'-'+cellDate.getDate();
-      var c = counts[key] || 0;
-      var lvl = levelOf(c);
-      var classes = ['heatmap-cell'];
-      if (lvl > 0) classes.push('lvl-'+lvl);
-      if (cellMs > todayMs) classes.push('future');
-      if (cellMs === todayMs) classes.push('today');
-      var title = cellDate.toLocaleDateString('ru', {day:'numeric', month:'short'}) + ': ' + c + ' \u0447\u0430\u0441\u043e\u0432';
-      gridHTML += '<div class="'+classes.join(' ')+'" title="'+title+'"></div>';
+      var k = dayKey(cellDate);
+      var c = counts[k] || 0;
+      var lvl = (cellMs <= todayMs) ? levelOf(c) : 0;
+      var isFuture = cellMs > todayMs;
+      var isToday = cellMs === todayMs;
+
+      var bg = 'rgba(255,255,255,0.05)';
+      if (!isFuture) {
+        if (lvl === 1) bg = 'rgba(240,192,96,0.22)';
+        else if (lvl === 2) bg = 'rgba(240,192,96,0.44)';
+        else if (lvl === 3) bg = 'rgba(240,192,96,0.70)';
+        else if (lvl === 4) bg = 'rgba(240,192,96,0.95)';
+      }
+      var border = isToday ? '1.5px solid rgba(240,192,96,0.8)' : '1px solid transparent';
+      var opacity = isFuture ? '0.25' : '1';
+      var titleTxt = cellDate.toLocaleDateString('ru', {day:'numeric',month:'short',weekday:'short'})+': '+c+(c===1?' \u0447\u0430\u0441\u044b'+(c>=2&&c<=4?'а':'')+'' : ' \u0447\u0430\u0441\u043e\u0432');
+
+      html += '<div title="'+titleTxt+'" style="width:'+cellSz+'px;height:'+cellSz+'px;border-radius:3px;background:'+bg+';border:'+border+';opacity:'+opacity+';flex-shrink:0;transition:transform 0.15s;cursor:default;" onmouseover="this.style.transform=\'scale(1.5)\';this.style.zIndex=\'10\'" onmouseout="this.style.transform=\'\';this.style.zIndex=\'\'"></div>';
+      if (col < 3) html += '<div style="width:'+cellGap+'px;flex-shrink:0;"></div>';
     }
+    html += '</div>';
   }
-  gridHTML += '</div>';
 
   // Legend
-  var legendHTML = '<div class="heatmap-legend"><span>\u041c\u0435\u043d\u044c\u0448\u0435</span>'
-    + '<span class="heatmap-legend-cell" style="background:rgba(255,255,255,0.04);"></span>'
-    + '<span class="heatmap-legend-cell lvl-1"></span>'
-    + '<span class="heatmap-legend-cell lvl-2"></span>'
-    + '<span class="heatmap-legend-cell lvl-3"></span>'
-    + '<span class="heatmap-legend-cell lvl-4"></span>'
-    + '<span>\u0411\u043e\u043b\u044c\u0448\u0435</span></div>';
+  html += '<div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:8px;font-size:9px;color:var(--text-dim);">';
+  html += '\u041c\u0435\u043d\u044c\u0448\u0435&nbsp;';
+  html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,0.05);"></div>';
+  html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,192,96,0.22);"></div>';
+  html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,192,96,0.44);"></div>';
+  html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,192,96,0.70);"></div>';
+  html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,192,96,0.95);"></div>';
+  html += '&nbsp;\u0411\u043e\u043b\u044c\u0448\u0435</div>';
+  html += '</div>';
 
-  container.innerHTML = monthsHTML + gridHTML + legendHTML;
+  container.innerHTML = html;
 }
 
 function renderStats() {
