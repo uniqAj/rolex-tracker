@@ -118,8 +118,24 @@
 
     /* ── PAGES ── */
     .page { display: none; padding: 0 0 100px; margin-top: 75px; }
-    .page.active { display: block; animation: pageIn 0.35s cubic-bezier(.25,.46,.45,.94); }
-    @keyframes pageIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .page.active { display: block; animation: pageIn 0.45s cubic-bezier(.22,1,.36,1); }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.985); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    /* parallax: nested elements slide in slightly delayed for depth */
+    .page.active > * {
+      animation: pageItemIn 0.55s cubic-bezier(.22,1,.36,1) backwards;
+    }
+    .page.active > *:nth-child(1) { animation-delay: 0.04s; }
+    .page.active > *:nth-child(2) { animation-delay: 0.08s; }
+    .page.active > *:nth-child(3) { animation-delay: 0.12s; }
+    .page.active > *:nth-child(4) { animation-delay: 0.16s; }
+    .page.active > *:nth-child(5) { animation-delay: 0.20s; }
+    @keyframes pageItemIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
     /* ── SECTION HEADER ── */
     .section-header { padding: 24px 20px 14px; display: flex; align-items: baseline; justify-content: space-between; }
@@ -215,17 +231,68 @@
     .card-action { font-size: 12px; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
 
     /* ── FAB ── */
+    /* ── ATMOSPHERE: ambient body bg ── */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(800px 600px at 85% 5%, rgba(240,192,96,0.07) 0%, transparent 60%),
+        radial-gradient(700px 500px at 5% 90%, rgba(96,160,255,0.05) 0%, transparent 60%),
+        radial-gradient(600px 400px at 50% 50%, rgba(127,119,221,0.03) 0%, transparent 70%);
+      animation: ambientDrift 28s ease-in-out infinite alternate;
+    }
+    :root.light body::before {
+      background:
+        radial-gradient(800px 600px at 85% 5%, rgba(240,192,96,0.12) 0%, transparent 60%),
+        radial-gradient(700px 500px at 5% 90%, rgba(96,160,255,0.08) 0%, transparent 60%),
+        radial-gradient(600px 400px at 50% 50%, rgba(127,119,221,0.05) 0%, transparent 70%);
+    }
+    @keyframes ambientDrift {
+      0%   { background-position: 0% 0%, 0% 100%, 50% 50%; }
+      50%  { background-position: 30% 10%, -20% 80%, 60% 40%; }
+      100% { background-position: -20% 20%, 20% 110%, 40% 60%; }
+    }
+
     .fab {
       position: fixed; bottom: calc(env(safe-area-inset-bottom,0px) + 82px); right: 20px;
       width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, var(--gold2), var(--gold));
       color: #000; border: none; cursor: pointer; z-index: 99;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 32px rgba(240,192,96,0.4), 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 32px rgba(240,192,96,0.4), 0 2px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(240,192,96,0.5);
       transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+      animation: fabBreath 3.4s ease-in-out infinite;
     }
     .fab:active { transform: scale(0.88); box-shadow: 0 4px 16px rgba(240,192,96,0.3); }
+    .fab:hover { transform: rotate(90deg) scale(1.05); }
     .fab svg { width: 24px; height: 24px; }
+    @keyframes fabBreath {
+      0%, 100% { box-shadow: 0 8px 32px rgba(240,192,96,0.4), 0 2px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(240,192,96,0.45); }
+      55%      { box-shadow: 0 8px 32px rgba(240,192,96,0.4), 0 2px 8px rgba(0,0,0,0.3), 0 0 0 14px rgba(240,192,96,0); }
+    }
+
+    /* ── SKELETON SHIMMER ── */
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.10) 50%,
+        rgba(255,255,255,0.04) 100%);
+      background-size: 200% 100%;
+      animation: skelShimmer 1.4s linear infinite;
+      border-radius: 6px;
+    }
+    :root.light .skeleton {
+      background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.10), rgba(0,0,0,0.04));
+      background-size: 200% 100%;
+    }
+    @keyframes skelShimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skel-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 16px; margin-bottom: 12px;
+    }
+    .skel-line { height: 14px; margin-bottom: 10px; }
 
     /* ── MODAL ── */
     .modal-overlay {
@@ -235,7 +302,7 @@
       -webkit-backdrop-filter: blur(8px);
       display: none; align-items: flex-end;
     }
-    .modal-overlay.open { display: flex; }
+    .modal-overlay.open { display: flex; animation: overlayFade 0.3s ease-out; }
     .modal {
       width: 100%;
       background: rgba(14,10,28,0.92);
@@ -245,10 +312,14 @@
       border-radius: 28px 28px 0 0;
       padding: 0 0 env(safe-area-inset-bottom, 24px);
       max-height: 92vh; overflow-y: auto;
-      animation: modalUp 0.35s cubic-bezier(.25,.46,.45,.94);
+      animation: modalUp 0.42s cubic-bezier(.22,1,.36,1);
     }
     :root.light .modal { background: rgba(245,242,236,0.95); }
-    @keyframes modalUp { from { transform: translateY(80px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes modalUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes overlayFade { from { opacity: 0; } to { opacity: 1; } }
     .modal-handle { width: 40px; height: 4px; background: var(--glass-border); border-radius: 2px; margin: 14px auto 0; }
 
     /* Fullscreen image viewer with pinch-to-zoom */
@@ -594,6 +665,58 @@
     .period-btn.active { background:rgba(240,192,96,0.15); color:var(--gold); border-color:rgba(240,192,96,0.4); font-weight:600; }
 
     @keyframes btnPulse { 0%{transform:scale(1)} 30%{transform:scale(0.94)} 70%{transform:scale(1.03)} 100%{transform:scale(1)} }
+
+    /* ── PULSE RING around running phase button ── */
+    .phase-btn-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
+    .phase-btn-wrap.running::before,
+    .phase-btn-wrap.running::after {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      pointer-events: none;
+      animation: phaseRingPulse 2.2s cubic-bezier(.4,0,.6,1) infinite;
+    }
+    .phase-btn-wrap.running::after { animation-delay: 1.1s; }
+    @keyframes phaseRingPulse {
+      0%   { transform: scale(1);   opacity: 0.55; }
+      80%  { transform: scale(1.7); opacity: 0; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+
+    /* ── PROGRESS RING (norm vs elapsed) ── */
+    .ring-wrap { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+    .ring-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .ring-track { stroke: rgba(255,255,255,0.06); }
+    .ring-fill {
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.7s cubic-bezier(.22,1,.36,1), stroke 0.4s;
+      filter: drop-shadow(0 0 3px currentColor);
+    }
+    .ring-center {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── TICK-ROLL digit animation ── */
+    .tick-num {
+      display: inline-flex; align-items: baseline;
+      font-variant-numeric: tabular-nums;
+    }
+    .tick-num .tick-digit {
+      display: inline-block; overflow: hidden;
+      height: 1em; line-height: 1;
+      vertical-align: baseline;
+    }
+    .tick-num .tick-digit > span {
+      display: block;
+      animation: tickRoll 0.55s cubic-bezier(.34,1.56,.64,1) backwards;
+    }
+    @keyframes tickRoll {
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
     .pulse-tap { animation: btnPulse 0.35s ease; }
 
     /* Swipe actions */
@@ -678,6 +801,19 @@
       <div style="margin-left:auto;" id="work-badge"></div>
     </div>
   </div>
+
+  <!-- Job-level note + features (editable inline) -->
+  <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px;">
+    <div>
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">&#1047;&#1072;&#1084;&#1077;&#1090;&#1082;&#1072;</div>
+      <textarea id="work-note" class="form-textarea" rows="2" placeholder="&#1054;&#1073;&#1097;&#1080;&#1077; &#1079;&#1072;&#1084;&#1077;&#1090;&#1082;&#1080; &#1087;&#1086; &#1095;&#1072;&#1089;&#1072;&#1084;..." onblur="saveWorkNote()" style="width:100%;font-size:14px;min-height:50px;"></textarea>
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">&#9881; &#1054;&#1089;&#1086;&#1073;&#1077;&#1085;&#1085;&#1086;&#1089;&#1090;&#1080;</div>
+      <textarea id="work-features" class="form-textarea" rows="2" placeholder="&#1041;&#1077;&#1079;&#1077;&#1083;&#1100;, &#1073;&#1088;&#1072;&#1089;&#1083;&#1077;&#1090;, &#1086;&#1088;&#1080;&#1075;&#1080;&#1085;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1076;&#1072;&#1081;&#1083;..." onblur="saveWorkFeatures()" style="width:100%;font-size:14px;min-height:50px;"></textarea>
+    </div>
+  </div>
+
   <div id="work-steps-container" class="steps-container"></div>
   <div id="work-events-container"></div>
   <div style="padding:16px;">
@@ -1070,9 +1206,10 @@ var PHASE_LABELS = {
 function ensurePhaseSteps(job) {
   if (!job.workTypes || job.workTypes.length === 0) return;
   if (!job.steps) job.steps = [];
+  var PRIMARY = {service:1, assembly:1, dial:1};
   job.workTypes.forEach(function(t) {
     var phase = TYPE_TO_PHASE[t];
-    if (!phase) return;
+    if (!phase || !PRIMARY[phase]) return;
     var has = job.steps.some(function(s){ return s.phase === phase; });
     if (!has) {
       job.steps.push({id:'auto-'+phase, name:PHASE_LABELS[phase]||phase, phase:phase, elapsed:0, running:false, startTime:null, notes:'', parts:''});
@@ -1140,6 +1277,44 @@ function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
 }
 function totalTime(job) { return job.steps.reduce((a, s) => a + (s.elapsed||0), 0); }
+
+// ── Tick-roll number HTML — wraps each digit so it animates in ──
+function tickNumHTML(num) {
+  var s = String(num);
+  var html = '<span class="tick-num">';
+  for (var i = 0; i < s.length; i++) {
+    var ch = s[i];
+    if (ch >= '0' && ch <= '9') {
+      html += '<span class="tick-digit"><span style="animation-delay:' + (i*0.04).toFixed(2) + 's">' + ch + '</span></span>';
+    } else {
+      html += '<span>' + ch + '</span>';
+    }
+  }
+  return html + '</span>';
+}
+
+// ── Progress ring SVG ──
+// pct: 0..1 (capped at 1). type: 'service'|'assembly' to pick norm color band
+function progressRingHTML(elapsedMs, type, sizePx) {
+  var s = loadSettings();
+  var normH = (type === 'service' ? (s.fsMid || 7) : (s.asmMid || 4));
+  var normMs = normH * 3600000;
+  var pct = Math.min(elapsedMs / normMs, 1);
+  var size = sizePx || 44;
+  var r = (size - 6) / 2;
+  var c = 2 * Math.PI * r;
+  var off = c * (1 - pct);
+  var lvl = speedLevel(elapsedMs/3600000, type);
+  var color = lvl === 'fast' ? 'var(--green)' : (lvl === 'mid' ? 'var(--gold)' : 'var(--red)');
+  return '<div class="ring-wrap" style="width:'+size+'px;height:'+size+'px;">'
+    + '<svg class="ring-svg" viewBox="0 0 '+size+' '+size+'">'
+    + '<circle class="ring-track" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" stroke-width="3" fill="none"/>'
+    + '<circle class="ring-fill" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" stroke-width="3" fill="none" '
+    + 'style="stroke:'+color+';stroke-dasharray:'+c.toFixed(2)+';stroke-dashoffset:'+off.toFixed(2)+';"/>'
+    + '</svg>'
+    + '<div class="ring-center" style="color:'+color+';">'+Math.round(pct*100)+'%</div>'
+    + '</div>';
+}
 
 function speedLevel(hours, type) {
   var s = loadSettings();
@@ -1232,9 +1407,9 @@ function renderTodayWidget() {
     + '<div class="today-stats">'
     + '<div class="today-label">\u0421\u0435\u0433\u043e\u0434\u043d\u044f</div>'
     + '<div class="today-numbers">'
-    + '<div><div class="today-num">'+todayJobs.length+'</div><div class="today-num-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'
-    + '<div><div class="today-num">'+weekJobs.length+'</div><div class="today-num-label">\u0417\u0430 \u043d\u0435\u0434\u0435\u043b\u044e</div></div>'
-    + (activeCount>0?'<div><div class="today-num" style="color:var(--blue);">'+activeCount+'</div><div class="today-num-label">\u0412 \u0440\u0430\u0431\u043e\u0442\u0435</div></div>':'')
+    + '<div><div class="today-num">'+tickNumHTML(todayJobs.length)+'</div><div class="today-num-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'
+    + '<div><div class="today-num">'+tickNumHTML(weekJobs.length)+'</div><div class="today-num-label">\u0417\u0430 \u043d\u0435\u0434\u0435\u043b\u044e</div></div>'
+    + (activeCount>0?'<div><div class="today-num" style="color:var(--blue);">'+tickNumHTML(activeCount)+'</div><div class="today-num-label">\u0412 \u0440\u0430\u0431\u043e\u0442\u0435</div></div>':'')
     + '</div></div></div>';
 }
 
@@ -1372,12 +1547,19 @@ function jobCard(j) {
   var svcTime = j.steps ? j.steps.filter(function(s){ return s.phase==='service'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0) : 0;
   var asmTime = j.steps ? j.steps.filter(function(s){ return s.phase==='assembly'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0) : 0;
   var timeInfo = '';
+  var ringHTML = '';
   if (j.type==='full' || j.type==='part_asm') {
     timeInfo = (svcTime>0?'<div class="stat"><div class="stat-val">'+fmtMs(svcTime)+'</div><div class="stat-lbl">Service</div></div>':'') +
                (asmTime>0?'<div class="stat"><div class="stat-val">'+fmtMs(asmTime)+'</div><div class="stat-lbl">Assemble</div></div>':'');
+    if (svcTime > 0) ringHTML = progressRingHTML(svcTime, 'service', 38);
+    else if (asmTime > 0) ringHTML = progressRingHTML(asmTime, 'assembly', 38);
   } else {
     timeInfo = elapsed>0 ? '<div class="stat"><div class="stat-val">'+fmtMs(elapsed)+'</div><div class="stat-lbl">\u0412\u0440\u0435\u043c\u044f</div></div>' : '';
+    if (elapsed > 0) ringHTML = progressRingHTML(elapsed, j.type==='assembly' ? 'assembly' : 'service', 38);
   }
+  var statsRow = ringHTML
+    ? '<div style="display:flex;align-items:center;gap:12px;">'+ringHTML+'<div class="card-stats" style="flex:1;">'+(timeInfo||'<div class="stat"><div class="stat-val" style="color:var(--text-dim);">\u2014</div><div class="stat-lbl">\u041d\u0435 \u043d\u0430\u0447\u0430\u0442\u043e</div></div>')+'</div></div>'
+    : '<div class="card-stats">'+(timeInfo||'<div class="stat"><div class="stat-val" style="color:var(--text-dim);">\u2014</div><div class="stat-lbl">\u041d\u0435 \u043d\u0430\u0447\u0430\u0442\u043e</div></div>')+'</div>';
 
   return '<div class="card '+borderCls+'" onclick="addPulse(this);openJob(\''+j.id+'\')">'+
     '<div class="card-header"><div>'+
@@ -1387,7 +1569,7 @@ function jobCard(j) {
     typeBadge+runBadge+dorabBadge+vozvratBadge+'</div></div>'+
     '<div class="card-body">'+
     (isRunning?'<div style="margin-bottom:8px;"><div class="card-live-timer" id="card-live-'+j.id+'">\u23f1</div><div style="font-size:10px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">\u0426\u0435\u043b\u043e\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>':'')+
-    '<div class="card-stats">'+(timeInfo||'<div class="stat"><div class="stat-val" style="color:var(--text-dim);">\u2014</div><div class="stat-lbl">\u041d\u0435 \u043d\u0430\u0447\u0430\u0442\u043e</div></div>')+'</div></div>'+
+    statsRow+'</div>'+
     '<div class="card-footer"><div class="card-date">'+fmtDate(j.createdAt)+'</div><div class="card-action">\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u2192</div></div>'+
     '</div>';
 }
@@ -1400,6 +1582,10 @@ function openJob(id) {
   document.getElementById('work-ref').textContent = job.serial || job.ref;
   document.getElementById('work-model').textContent = (job.ref?'Ref '+job.ref:'')+(job.ref&&job.model?' \xb7 ':'')+( job.model||'')+'';
   document.getElementById('work-badge').innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">' + renderTypeBadges(job.workTypes, job.type) + '</div>';
+  var noteEl = document.getElementById('work-note');
+  var featEl = document.getElementById('work-features');
+  if (noteEl) noteEl.value = job.note || '';
+  if (featEl) featEl.value = job.features || '';
   renderWorkSteps(job);
   renderJobEvents(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1408,15 +1594,38 @@ function openJob(id) {
   document.querySelector('.fab').style.display = 'none';
 }
 
+function saveWorkNote() {
+  if (!currentJobId) return;
+  var d = load();
+  var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+  if (!job) return;
+  var el = document.getElementById('work-note');
+  if (!el) return;
+  job.note = (el.value||'').trim();
+  save(d);
+}
+
+function saveWorkFeatures() {
+  if (!currentJobId) return;
+  var d = load();
+  var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+  if (!job) return;
+  var el = document.getElementById('work-features');
+  if (!el) return;
+  job.features = (el.value||'').trim();
+  save(d);
+}
+
 function renderWorkSteps(job) {
   const container = document.getElementById('work-steps-container');
   const phases = [];
   const seenPhases = {};
-  // Derive phases from workTypes (preserves user's checkbox order)
+  // Phases with timers — only PRIMARY work types (Full/Part/Сборка/Замена Dial)
+  var PRIMARY_PHASE_IDS = {service:1, assembly:1, dial:1};
   if (job.workTypes && job.workTypes.length > 0) {
     job.workTypes.forEach(function(t) {
       var pid = TYPE_TO_PHASE[t];
-      if (pid && !seenPhases[pid]) {
+      if (pid && PRIMARY_PHASE_IDS[pid] && !seenPhases[pid]) {
         var label = (pid === 'service' && t === 'Part Service') ? 'Part Service' : (PHASE_LABELS[pid] || pid);
         phases.push({id: pid, label: label});
         seenPhases[pid] = true;
@@ -1434,7 +1643,19 @@ function renderWorkSteps(job) {
     }
   }
 
-  let html = '';
+  // Extra types — shown as chips above phases (no timers)
+  var EXTRA_LABELS = ['\u0410\u041f \u0440\u0435\u043c\u043e\u043d\u0442','\u0412\u044b\u043a\u0430\u0447\u043a\u0430 / Rate','\u0417\u0430\u043c\u0435\u043d\u0430 \u0434\u0435\u0442\u0430\u043b\u0435\u0439','\u0421\u0442\u0440\u0435\u043b\u043a\u0438','\u0417\u0430\u043c\u0435\u043d\u0430 \u0430\u043a\u0441\u0435\u043b\u044f','\u0417\u0430\u043c\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u044b'];
+  var extras = (job.workTypes||[]).filter(function(t){ return EXTRA_LABELS.indexOf(t) !== -1; });
+  var extrasChipsHTML = '';
+  if (extras.length > 0) {
+    extrasChipsHTML = '<div style="margin-bottom:12px;">'
+      + '<div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0440\u0430\u0431\u043e\u0442\u044b</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+      + extras.map(function(t){ return '<span class="badge ' + typeColor(t) + '" style="font-size:11px;padding:4px 10px;">' + t + '</span>'; }).join('')
+      + '</div></div>';
+  }
+
+  let html = extrasChipsHTML;
   phases.forEach(function(phase) {
     var phaseSteps = job.steps.filter(function(s){ return s.phase===phase.id; });
     var phaseElapsed = phaseSteps.reduce(function(a,s){ return a+(s.elapsed||0); }, 0);
@@ -1448,12 +1669,14 @@ function renderWorkSteps(job) {
     html += '<div class="phase-block" id="phase-'+job.id+'-'+phase.id+'">'+
       // Compact header: round button + label + live timer
       '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;">'+
+      '<div class="phase-btn-wrap'+(isRunning?' running':'')+'" id="phase-btn-wrap-'+job.id+'-'+phase.id+'">'+
       '<button onclick="togglePhaseTimer(\''+job.id+'\',\''+phase.id+'\')" '+
         'id="phase-timer-btn-'+job.id+'-'+phase.id+'" '+
         'aria-label="'+(isRunning?'Stop':'Start')+'" '+
         'style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0;transition:transform 0.15s;'+
         (isRunning?'background:rgba(255,107,107,0.15);color:var(--red);border:1px solid rgba(255,107,107,0.35);':'background:rgba(240,192,96,0.12);color:var(--gold);border:1px solid rgba(240,192,96,0.3);')+
         '">'+(isRunning?'\u25a0':'\u25b6')+'</button>'+
+      '</div>'+
       '<div class="phase-label '+phaseAccent+'">'+phase.label+'</div>'+
       '<div id="phase-live-'+job.id+'-'+phase.id+'" '+
         'style="margin-left:auto;font-size:'+(isRunning?'20px':'15px')+';font-weight:'+(isRunning?'700':'500')+';font-variant-numeric:tabular-nums;color:'+(isRunning?'var(--green)':(phaseElapsed>0?'var(--gold)':'var(--text-dim)'))+';">'+
@@ -1524,6 +1747,8 @@ function togglePhaseTimer(jobId, phaseId) {
     mainStep.startTime = null;
     save(d);
     stopPhaseLiveTimer(jobId, phaseId);
+    var wrap = document.getElementById('phase-btn-wrap-'+jobId+'-'+phaseId);
+    if (wrap) wrap.classList.remove('running');
     var btn = document.getElementById('phase-timer-btn-'+jobId+'-'+phaseId);
     if (btn) { btn.textContent = '\u25b6'; btn.style.background='rgba(240,192,96,0.12)'; btn.style.color='var(--gold)'; btn.style.borderColor='rgba(240,192,96,0.3)'; btn.setAttribute('aria-label','Start'); }
     var live = document.getElementById('phase-live-'+jobId+'-'+phaseId);
@@ -1539,6 +1764,8 @@ function togglePhaseTimer(jobId, phaseId) {
     mainStep.startTime = Date.now();
     save(d);
     startPhaseLiveTimer(jobId, phaseId, mainStep.startTime, mainStep.elapsed||0);
+    var wrap = document.getElementById('phase-btn-wrap-'+jobId+'-'+phaseId);
+    if (wrap) wrap.classList.add('running');
     var btn = document.getElementById('phase-timer-btn-'+jobId+'-'+phaseId);
     if (btn) { btn.textContent = '\u25a0'; btn.style.background='rgba(255,107,107,0.15)'; btn.style.color='var(--red)'; btn.style.borderColor='rgba(255,107,107,0.35)'; btn.setAttribute('aria-label','Stop'); }
     var live = document.getElementById('phase-live-'+jobId+'-'+phaseId);
@@ -1732,6 +1959,15 @@ function deleteJob() {
 function toggleExtraTypes() {
   var el = document.getElementById('extra-types');
   var arr = document.getElementById('extra-arrow');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'flex';
+  if (arr) arr.textContent = open ? '\u25b6' : '\u25bc';
+}
+
+function toggleEditExtras() {
+  var el = document.getElementById('edit-extra-types');
+  var arr = document.getElementById('edit-extra-arrow');
   if (!el) return;
   var open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'flex';
@@ -2069,13 +2305,15 @@ function openEditJob(id) {
   if (!job) return;
   closeModal('modal-history-detail');
 
-  // Derive phases from workTypes (so all selected work types show time fields)
+  // Derive phases from workTypes (only primary types get time inputs)
   const phases = [];
   const seenP = {};
+  // Time inputs only for primary phases (service/assembly/dial)
+  var EDIT_PRIMARY_PIDS = {service:1, assembly:1, dial:1};
   if (job.workTypes && job.workTypes.length > 0) {
     job.workTypes.forEach(function(t) {
       var pid = TYPE_TO_PHASE[t];
-      if (pid && !seenP[pid]) {
+      if (pid && EDIT_PRIMARY_PIDS[pid] && !seenP[pid]) {
         var label = (pid === 'service' && t === 'Part Service') ? 'Part Service' : (PHASE_LABELS[pid] || pid);
         phases.push({id: pid, label: label});
         seenP[pid] = true;
@@ -2088,12 +2326,14 @@ function openEditJob(id) {
     else phases.push({id:'assembly',label:'Assemble'});
   }
 
-  // Work type checkboxes
-  const WORK_TYPES_MAP = [
+  // Work type checkboxes — primary (always visible) + extras (collapsible)
+  const PRIMARY_MAP = [
     {id:'et-full',    label:'Full Service'},
     {id:'et-part',    label:'Part Service'},
     {id:'et-assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'},
     {id:'et-dial',    label:'\u0417\u0430\u043c\u0435\u043d\u0430 Dial'},
+  ];
+  const EXTRA_MAP = [
     {id:'et-ap',      label:'\u0410\u041f \u0440\u0435\u043c\u043e\u043d\u0442'},
     {id:'et-rate',    label:'\u0412\u044b\u043a\u0430\u0447\u043a\u0430 / Rate'},
     {id:'et-parts',   label:'\u0417\u0430\u043c\u0435\u043d\u0430 \u0434\u0435\u0442\u0430\u043b\u0435\u0439'},
@@ -2102,14 +2342,26 @@ function openEditJob(id) {
     {id:'et-spring',  label:'\u0417\u0430\u043c\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u044b'},
   ];
   const curTypes = job.workTypes || [];
-  const typeCheckboxes = '<div class="form-group"><label class="form-label">\u0422\u0438\u043f \u0440\u0430\u0431\u043e\u0442\u044b</label>'+
-    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">'+
-    WORK_TYPES_MAP.map(t =>
-      '<label style="display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;cursor:pointer;font-size:14px;">'+
-      '<input type="checkbox" id="'+t.id+'" style="width:16px;height:16px;accent-color:var(--gold);"'+(curTypes.includes(t.label)?' checked':'')+'>'+
-      t.label+'</label>'
-    ).join('')+
-    '</div></div>';
+  const hasExtras = EXTRA_MAP.some(function(t){ return curTypes.indexOf(t.label) !== -1; });
+
+  const primaryHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">'+
+    PRIMARY_MAP.map(function(t) {
+      return '<label style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;cursor:pointer;font-size:14px;">'+
+        '<input type="checkbox" id="'+t.id+'" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;"'+(curTypes.indexOf(t.label)!==-1?' checked':'')+'>'+
+        '<span style="color:var(--text);">'+t.label+'</span></label>';
+    }).join('')+'</div>';
+
+  const extraHtml = '<div style="margin-top:10px;">'+
+    '<button type="button" onclick="toggleEditExtras()" style="background:none;border:none;color:var(--text-dim);font-size:13px;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:6px;">'+
+    '<span id="edit-extra-arrow">'+(hasExtras?'\u25bc':'\u25b6')+'</span> \u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u043e</button>'+
+    '<div id="edit-extra-types" style="display:'+(hasExtras?'flex':'none')+';flex-direction:column;gap:8px;margin-top:8px;">'+
+    EXTRA_MAP.map(function(t) {
+      return '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;">'+
+        '<input type="checkbox" id="'+t.id+'" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;"'+(curTypes.indexOf(t.label)!==-1?' checked':'')+'>'+
+        '<span style="font-size:14px;color:var(--text-dim);">'+t.label+'</span></label>';
+    }).join('')+'</div></div>';
+
+  const typeCheckboxes = '<div class="form-group"><label class="form-label">\u0422\u0438\u043f \u0440\u0430\u0431\u043e\u0442\u044b</label>'+primaryHtml+extraHtml+'</div>';
 
   let html = '<div class="form-group"><label class="form-label">\u0421\u0435\u0440\u0438\u0439\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440</label><input class="form-input" id="edit-serial" value="'+(job.serial||'')+'" /></div>'+
     '<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'+
@@ -2245,12 +2497,12 @@ function renderStats() {
   if (typeBlock) typeBlock.style.display = isBlockVisible('type') ? '' : 'none';
   if (speedBlock) speedBlock.style.display = isBlockVisible('speed') ? '' : 'none';
   document.getElementById('stats-grid').innerHTML =
-    '<div class="stat-card"><div class="stat-card-val">'+totalJobs+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
+    '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(totalJobs)+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+fmtMs(avgTotal)+'</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>'+
-    '<div class="stat-card"><div class="stat-card-val">'+fullJobs+'</div><div class="stat-card-lbl">Full Service</div></div>'+
-    '<div class="stat-card"><div class="stat-card-val">'+assemblyOnly+'</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>'+
-    '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+dorabCount+'</div><div class="stat-card-lbl">↻ \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>'+
-    '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+vozvratPct+'%</div><div class="stat-card-lbl">↩ % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>';
+    '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(fullJobs)+'</div><div class="stat-card-lbl">Full Service</div></div>'+
+    '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(assemblyOnly)+'</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>'+
+    '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+tickNumHTML(dorabCount)+'</div><div class="stat-card-lbl">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>'+
+    '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+tickNumHTML(vozvratPct)+'%</div><div class="stat-card-lbl">\u21a9 % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>';
   if (done.length > 0) {
     const ss = loadSettings();
     const fsFast = ss.fsFast || 5, fsMid = ss.fsMid || 7;
