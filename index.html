@@ -231,7 +231,47 @@
     .card-action { font-size: 12px; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
 
     /* ── FAB ── */
-    /* ── ATMOSPHERE: ambient body bg ── */
+    /* ── HEATMAP (GitHub-style) ── */
+    .heatmap-grid {
+      display: grid; grid-template-columns: 28px repeat(28, 1fr);
+      gap: 4px; padding: 4px 0 8px;
+    }
+    .heatmap-day-label {
+      font-size: 9px; color: var(--text-dim);
+      letter-spacing: 0.05em; display: flex; align-items: center;
+      padding-right: 4px;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1; border-radius: 3px;
+      background: rgba(255,255,255,0.04);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: default;
+      position: relative;
+    }
+    .heatmap-cell:hover { transform: scale(1.4); z-index: 2; box-shadow: 0 0 0 1px var(--gold); }
+    .heatmap-cell.lvl-1 { background: rgba(240,192,96,0.20); }
+    .heatmap-cell.lvl-2 { background: rgba(240,192,96,0.40); }
+    .heatmap-cell.lvl-3 { background: rgba(240,192,96,0.65); }
+    .heatmap-cell.lvl-4 { background: rgba(240,192,96,0.95); box-shadow: 0 0 6px rgba(240,192,96,0.4); }
+    .heatmap-cell.future { opacity: 0.25; }
+    .heatmap-cell.today { box-shadow: 0 0 0 1.5px var(--gold) inset; }
+    .heatmap-month-row {
+      display: grid; grid-template-columns: 28px repeat(28, 1fr); gap: 4px;
+      font-size: 10px; color: var(--text-dim); margin-bottom: 4px;
+    }
+    .heatmap-month-row > span { text-align: left; padding-left: 2px; }
+    .heatmap-legend {
+      display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+      font-size: 10px; color: var(--text-dim); margin-top: 8px;
+    }
+    .heatmap-legend-cell {
+      width: 12px; height: 12px; border-radius: 2px;
+      background: rgba(255,255,255,0.04);
+    }
+    .heatmap-legend-cell.lvl-1 { background: rgba(240,192,96,0.20); }
+    .heatmap-legend-cell.lvl-2 { background: rgba(240,192,96,0.40); }
+    .heatmap-legend-cell.lvl-3 { background: rgba(240,192,96,0.65); }
+    .heatmap-legend-cell.lvl-4 { background: rgba(240,192,96,0.95); }
     body::before {
       content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
       background:
@@ -841,6 +881,10 @@
     <button class="period-btn" onclick="setPeriod('all')" id="period-all">&#1042;&#1089;&#1105;</button>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
+  <div id="stats-block-heatmap" class="chart-container">
+    <div class="chart-title">&#1040;&#1082;&#1090;&#1080;&#1074;&#1085;&#1086;&#1089;&#1090;&#1100; &#1087;&#1086; &#1076;&#1085;&#1103;&#1084;</div>
+    <div id="heatmap-container"></div>
+  </div>
   <div id="stats-speed"></div>
   <div id="stats-block-stage" class="chart-container">
     <div class="chart-title">&#1057;&#1088;&#1077;&#1076;&#1085;&#1077;&#1077; &#1074;&#1088;&#1077;&#1084;&#1103; &#1087;&#1086; &#1101;&#1090;&#1072;&#1087;&#1072;&#1084;</div>
@@ -1275,6 +1319,19 @@ function fmtMsLive(ms) {
 }
 function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
+}
+
+// timestamp -> "YYYY-MM-DDTHH:MM" for datetime-local input (local tz)
+function tsToDatetimeLocal(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  var pad = function(n) { return n < 10 ? '0'+n : ''+n; };
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function datetimeLocalToTs(str) {
+  if (!str) return null;
+  var t = new Date(str).getTime();
+  return isNaN(t) ? null : t;
 }
 function totalTime(job) { return job.steps.reduce((a, s) => a + (s.elapsed||0), 0); }
 
@@ -2367,6 +2424,14 @@ function openEditJob(id) {
     '<div class="form-row"><div class="form-group"><label class="form-label">Ref</label><input class="form-input" id="edit-ref" value="'+(job.ref||'')+'" /></div>'+
     '<div class="form-group"><label class="form-label">\u041a\u0430\u043b\u0438\u0431\u0440</label><input class="form-input" id="edit-model" value="'+(job.model||'')+'" /></div></div>'+
     typeCheckboxes+
+    '<div class="form-row">'+
+    '<div class="form-group"><label class="form-label">\u041f\u0440\u0438\u043d\u044f\u0442\u043e \u0432 \u0440\u0430\u0431\u043e\u0442\u0443</label>'+
+      '<input class="form-input" id="edit-created-at" type="datetime-local" value="'+tsToDatetimeLocal(job.createdAt)+'" /></div>'+
+    '<div class="form-group"><label class="form-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</label>'+
+      '<input class="form-input" id="edit-completed-at" type="datetime-local" value="'+tsToDatetimeLocal(job.completedAt)+'"'+(job.done?'':' disabled style="opacity:0.5;"')+' />'+
+      (job.done ? '' : '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">(\u0447\u0430\u0441\u044b \u0432 \u0440\u0430\u0431\u043e\u0442\u0435)</div>')+
+      '</div>'+
+    '</div>'+
     '<div class="form-group"><label class="form-label">\u0417\u0430\u043c\u0435\u0442\u043a\u0430</label><textarea class="form-textarea" id="edit-note">'+(job.note||'')+'</textarea></div>'+
     '<div class="form-group"><label class="form-label">&#9881; \u041e\u0441\u043e\u0431\u0435\u043d\u043d\u043e\u0441\u0442\u0438</label>'+
     '<textarea class="form-textarea" id="edit-features" placeholder="\u0411\u0435\u0437\u0435\u043b\u044c, \u0431\u0440\u0430\u0441\u043b\u0435\u0442, \u043e\u0440\u0438\u0433\u0438\u043d\u0430\u043b\u044c\u043d\u044b\u0439 \u0434\u0430\u0439\u043b...">'+(job.features||'')+'</textarea></div>';
@@ -2421,6 +2486,17 @@ function saveEditJob(id) {
   var newTypes = EDIT_TYPES_MAP.filter(function(t){ var el=document.getElementById(t.id); return el&&el.checked; }).map(function(t){ return t.label; });
   if (newTypes.length > 0) job.workTypes = newTypes;
   ensurePhaseSteps(job);
+  // Save edited dates
+  var caEl = document.getElementById('edit-created-at');
+  if (caEl) {
+    var ts = datetimeLocalToTs(caEl.value);
+    if (ts) job.createdAt = ts;
+  }
+  var coEl = document.getElementById('edit-completed-at');
+  if (coEl && !coEl.disabled) {
+    var ts2 = datetimeLocalToTs(coEl.value);
+    if (ts2) job.completedAt = ts2;
+  }
   const stepInputs = document.querySelectorAll('.edit-step-time');
   if (stepInputs.length > 0) {
     stepInputs.forEach(inp => { const step=job.steps.find(s => s.id===inp.dataset.stepid); if(step) step.elapsed=Math.round((parseFloat(inp.value)||0)*60000); });
@@ -2476,6 +2552,138 @@ function filterByPeriod(jobs) {
   return jobs.filter(function(j){ return (j.completedAt || j.createdAt) >= cutoff; });
 }
 
+function renderHeatmap(allDone) {
+  var container = document.getElementById('heatmap-container');
+  if (!container) return;
+  // Build counts per day for last 28 days (4 weeks of 7) ending today
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var todayMs = today.getTime();
+  var DAY = 86400000;
+  // Grid is 7 rows x 4 cols (7 days down, 4 weeks across)
+  // We anchor end at today (top-right or bottom-right depending on weekday)
+  // Easier: 28 days back, group by day of week
+  var counts = {};
+  var fastest = {};  // best time per day for color tinting
+  for (var i = 27; i >= 0; i--) {
+    var d = new Date(todayMs - i*DAY);
+    var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    counts[key] = 0;
+  }
+  allDone.forEach(function(job) {
+    var ts = job.completedAt || job.createdAt;
+    if (!ts) return;
+    var jd = new Date(ts);
+    jd.setHours(0,0,0,0);
+    if (jd.getTime() < todayMs - 27*DAY) return;
+    var key = jd.getFullYear()+'-'+(jd.getMonth()+1)+'-'+jd.getDate();
+    if (counts[key] !== undefined) counts[key]++;
+  });
+
+  // Determine max for thresholding
+  var maxCount = 0;
+  Object.keys(counts).forEach(function(k){ if (counts[k] > maxCount) maxCount = counts[k]; });
+
+  function levelOf(c) {
+    if (c === 0) return 0;
+    if (maxCount <= 1) return c > 0 ? 4 : 0;
+    var ratio = c / maxCount;
+    if (ratio <= 0.25) return 1;
+    if (ratio <= 0.5)  return 2;
+    if (ratio <= 0.75) return 3;
+    return 4;
+  }
+
+  // Build a 7-row x 4-col grid. We orient so today is in the last column at correct weekday.
+  // Find today's weekday (0=Sun..6=Sat). Use ISO Mon-first: 0=Mon..6=Sun
+  var WEEK_LABELS = ['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u0412\u0441'];
+  // Day-of-week map: JS getDay() => 0=Sun,1=Mon,...6=Sat. Convert to Mon=0..Sun=6
+  function dowMon(d) { var n = d.getDay(); return n === 0 ? 6 : n - 1; }
+
+  // Compute the start date of the 4-week grid: 27 days back, then go back to nearest Monday
+  var endDate = new Date(todayMs);
+  // We want columns to be weeks; last column = current week (Mon..today)
+  // Find Monday of current week
+  var todayDow = dowMon(endDate);
+  var monThisWeek = new Date(todayMs - todayDow*DAY);
+  // Start = monThisWeek - 3*7 days
+  var startDate = new Date(monThisWeek.getTime() - 3*7*DAY);
+
+  // Build cells
+  var html = '';
+  // Header row with month markers (top of each week's column if 1st-of-month)
+  var monthRow = '<div class="heatmap-month-row"><span></span>';
+  for (var w = 0; w < 4; w++) {
+    var weekStart = new Date(startDate.getTime() + w*7*DAY);
+    var label = '';
+    // Show month abbreviation if this week contains the 1st OR if it's the first column
+    for (var dd = 0; dd < 7; dd++) {
+      var dt = new Date(weekStart.getTime() + dd*DAY);
+      if (dt.getDate() === 1 || (w === 0 && dd === 0)) {
+        label = dt.toLocaleDateString('ru', {month: 'short'});
+        break;
+      }
+    }
+    monthRow += '<span style="grid-column:span 7;">' + label + '</span>';
+  }
+  monthRow += '</div>';
+  // Wait — grid-column:span 7 doesn't work in the 28-col grid (28 cols + 1 label = 29 effective cols of equal size; weeks aren't 7-cell groups when each row is one weekday across 4 weeks).
+  // Better approach: 5 cols total = label + 4 week-cols. Each week-col contains 7 small cells stacked vertically.
+  // Let's restructure entirely.
+
+  // Override: render 7 rows (Mon..Sun) x (1 label + 4 week cells). Each cell = 1 day.
+  html = '';
+  // Month label row (above grid): 1 empty + 4 month labels
+  var monthsHTML = '<div style="display:grid;grid-template-columns:32px repeat(4,1fr);gap:4px;font-size:10px;color:var(--text-dim);margin-bottom:6px;"><span></span>';
+  for (var w2 = 0; w2 < 4; w2++) {
+    var ws = new Date(startDate.getTime() + w2*7*DAY);
+    var lbl = '';
+    for (var ddd = 0; ddd < 7; ddd++) {
+      var dt2 = new Date(ws.getTime() + ddd*DAY);
+      if (dt2.getDate() === 1 || (w2 === 0 && ddd === 0)) {
+        lbl = dt2.toLocaleDateString('ru', {month:'short'});
+        break;
+      }
+    }
+    monthsHTML += '<span style="text-align:left;">'+lbl+'</span>';
+  }
+  monthsHTML += '</div>';
+
+  // Grid: 7 rows × (label + 4 week cols)
+  var gridHTML = '<div style="display:grid;grid-template-columns:32px repeat(4,1fr);gap:4px;">';
+  for (var row = 0; row < 7; row++) {
+    // weekday label
+    gridHTML += '<div class="heatmap-day-label">'+WEEK_LABELS[row]+'</div>';
+    // 4 week columns
+    for (var col = 0; col < 4; col++) {
+      var cellDate = new Date(startDate.getTime() + (col*7 + row)*DAY);
+      cellDate.setHours(0,0,0,0);
+      var cellMs = cellDate.getTime();
+      var key = cellDate.getFullYear()+'-'+(cellDate.getMonth()+1)+'-'+cellDate.getDate();
+      var c = counts[key] || 0;
+      var lvl = levelOf(c);
+      var classes = ['heatmap-cell'];
+      if (lvl > 0) classes.push('lvl-'+lvl);
+      if (cellMs > todayMs) classes.push('future');
+      if (cellMs === todayMs) classes.push('today');
+      var title = cellDate.toLocaleDateString('ru', {day:'numeric', month:'short'}) + ': ' + c + ' \u0447\u0430\u0441\u043e\u0432';
+      gridHTML += '<div class="'+classes.join(' ')+'" title="'+title+'"></div>';
+    }
+  }
+  gridHTML += '</div>';
+
+  // Legend
+  var legendHTML = '<div class="heatmap-legend"><span>\u041c\u0435\u043d\u044c\u0448\u0435</span>'
+    + '<span class="heatmap-legend-cell" style="background:rgba(255,255,255,0.04);"></span>'
+    + '<span class="heatmap-legend-cell lvl-1"></span>'
+    + '<span class="heatmap-legend-cell lvl-2"></span>'
+    + '<span class="heatmap-legend-cell lvl-3"></span>'
+    + '<span class="heatmap-legend-cell lvl-4"></span>'
+    + '<span>\u0411\u043e\u043b\u044c\u0448\u0435</span></div>';
+
+  container.innerHTML = monthsHTML + gridHTML + legendHTML;
+}
+
 function renderStats() {
   const d = load();
   const allDone = d.done||[];
@@ -2493,9 +2701,12 @@ function renderStats() {
   var stageBlock = document.getElementById('stats-block-stage');
   var typeBlock = document.getElementById('stats-block-type');
   var speedBlock = document.getElementById('stats-speed');
+  var heatmapBlock = document.getElementById('stats-block-heatmap');
   if (stageBlock) stageBlock.style.display = isBlockVisible('stage') ? '' : 'none';
   if (typeBlock) typeBlock.style.display = isBlockVisible('type') ? '' : 'none';
   if (speedBlock) speedBlock.style.display = isBlockVisible('speed') ? '' : 'none';
+  if (heatmapBlock) heatmapBlock.style.display = isBlockVisible('heatmap') ? '' : 'none';
+  if (heatmapBlock && isBlockVisible('heatmap')) renderHeatmap(allDone);
   document.getElementById('stats-grid').innerHTML =
     '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(totalJobs)+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+fmtMs(avgTotal)+'</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>'+
@@ -2651,6 +2862,7 @@ window.onerror = function(msg, src, line) {
 })();
 // ── SETTINGS ──────────────────────────────────────────────────────────────────
 const STATS_BLOCKS = [
+  {id:'heatmap',  label:'\u041a\u0430\u043b\u0435\u043d\u0434\u0430\u0440\u044c \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0438'},
   {id:'speed',    label:'\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c (\u0431\u044b\u0441\u0442\u0440\u043e/\u0441\u0440\u0435\u0434\u043d\u0435/\u0434\u043e\u043b\u0433\u043e)'},
   {id:'stage',    label:'\u0413\u0440\u0430\u0444\u0438\u043a \u043f\u043e \u044d\u0442\u0430\u043f\u0430\u043c'},
   {id:'type',     label:'Full Service vs \u0421\u0431\u043e\u0440\u043a\u0430'},
