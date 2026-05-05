@@ -1445,11 +1445,12 @@ function speedBadges(job) {
   var parts = [];
   if (hasSvc && fsTime > 0) {
     var lvl = speedLevel(fsTime/3600000, svcType);
-    parts.push('<span class="speed-badge speed-'+lvl+'">'+(type==='part'||type==='part_asm'?'Part':'Full')+' Svc: '+speedLabel(lvl)+'</span>');
+    var svcLabel = (type==='part'||type==='part_asm') ? 'Part Service' : 'Full Service';
+    parts.push('<span class="speed-badge speed-'+lvl+'">'+svcLabel+': '+speedLabel(lvl)+'</span>');
   }
   if (hasAsm && asTime > 0) {
     var lvl2 = speedLevel(asTime/3600000, 'assembly');
-    parts.push('<span class="speed-badge speed-'+lvl2+'">Assemble: '+speedLabel(lvl2)+'</span>');
+    parts.push('<span class="speed-badge speed-'+lvl2+'">\u0421\u0431\u043e\u0440\u043a\u0430: '+speedLabel(lvl2)+'</span>');
   }
   // If only one phase and no time yet, show placeholder
   if (parts.length === 0) {
@@ -2354,7 +2355,26 @@ function openHistoryDetail(id) {
   const totalMs = totalTime(job);
   let html = '<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">'+speedBadges(job)+
     '<span style="font-size:13px;color:var(--text-dim);align-self:center;">\u0418\u0442\u043e\u0433\u043e: <strong style="color:var(--gold)">'+fmtMs(totalMs)+'</strong></span></div>';
-  const phases = job.type==='full'?[{id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}]:[{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}];
+  const phases = [];
+  const seenPh = {};
+  // Derive phases from workTypes (same logic as active page)
+  var PRIMARY_PIDS_H = {service:1, assembly:1, dial:1};
+  if (job.workTypes && job.workTypes.length > 0) {
+    job.workTypes.forEach(function(t) {
+      var pid = TYPE_TO_PHASE[t];
+      if (pid && PRIMARY_PIDS_H[pid] && !seenPh[pid]) {
+        seenPh[pid] = true;
+        var label = pid==='service' ? (t==='Part Service' ? 'Part Service' : 'Full Service') : (PHASE_LABELS[pid] || pid);
+        phases.push({id: pid, label: label});
+      }
+    });
+  }
+  // Fallback for legacy jobs
+  if (phases.length === 0) {
+    if (job.type==='full'||job.type==='part_asm') { phases.push({id:'service',label:'Full Service'},{id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'}); }
+    else if (job.type==='part') phases.push({id:'service',label:'Part Service'});
+    else phases.push({id:'assembly',label:'\u0421\u0431\u043e\u0440\u043a\u0430'});
+  }
   phases.forEach(phase => {
     html += '<div style="font-size:12px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin:12px 0 8px;">'+phase.label+'</div>';
     job.steps.filter(s => s.phase===phase.id).forEach(step => {
