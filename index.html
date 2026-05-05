@@ -847,7 +847,7 @@
     <div style="display:flex;gap:8px;">
       <div style="flex:1;">
         <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">&#1044;&#1072;&#1090;&#1072; &#1087;&#1088;&#1080;&#1077;&#1084;&#1072;</div>
-        <input type="datetime-local" id="work-created-at" class="form-input" style="font-size:13px;padding:8px 10px;" onblur="saveWorkCreatedAt()" />
+        <input type="date" id="work-created-at" class="form-input" style="font-size:13px;padding:8px 10px;" onblur="saveWorkCreatedAt()" />
       </div>
     </div>
     <div>
@@ -1054,7 +1054,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">&#1044;&#1072;&#1090;&#1072; &#1087;&#1088;&#1080;&#1077;&#1084;&#1072; &#1074; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</label>
-        <input class="form-input" id="inp-created-at" type="datetime-local" />
+        <input class="form-input" id="inp-created-at" type="date" />
       </div>
       <div class="form-group">
         <label class="form-label">&#1058;&#1080;&#1087; &#1088;&#1072;&#1073;&#1086;&#1090;&#1099;</label>
@@ -1331,16 +1331,20 @@ function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
 }
 
-// timestamp -> "YYYY-MM-DDTHH:MM" for datetime-local input (local tz)
+// timestamp -> "YYYY-MM-DD" for date input (local tz)
 function tsToDatetimeLocal(ts) {
   if (!ts) return '';
   var d = new Date(ts);
   var pad = function(n) { return n < 10 ? '0'+n : ''+n; };
-  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 }
+// "YYYY-MM-DD" -> timestamp (start of that day, local tz)
 function datetimeLocalToTs(str) {
   if (!str) return null;
-  var t = new Date(str).getTime();
+  var parts = str.split('-');
+  if (parts.length !== 3) return null;
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  var t = d.getTime();
   return isNaN(t) ? null : t;
 }
 function totalTime(job) { return job.steps.reduce((a, s) => a + (s.elapsed||0), 0); }
@@ -2507,9 +2511,9 @@ function openEditJob(id) {
     typeCheckboxes+
     '<div class="form-row">'+
     '<div class="form-group"><label class="form-label">\u041f\u0440\u0438\u043d\u044f\u0442\u043e \u0432 \u0440\u0430\u0431\u043e\u0442\u0443</label>'+
-      '<input class="form-input" id="edit-created-at" type="datetime-local" value="'+tsToDatetimeLocal(job.createdAt)+'" /></div>'+
+      '<input class="form-input" id="edit-created-at" type="date" value="'+tsToDatetimeLocal(job.createdAt)+'" /></div>'+
     '<div class="form-group"><label class="form-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</label>'+
-      '<input class="form-input" id="edit-completed-at" type="datetime-local" value="'+tsToDatetimeLocal(job.completedAt)+'"'+(job.done?'':' disabled style="opacity:0.5;"')+' />'+
+      '<input class="form-input" id="edit-completed-at" type="date" value="'+tsToDatetimeLocal(job.completedAt)+'"'+(job.done?'':' disabled style="opacity:0.5;"')+' />'+
       (job.done ? '' : '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">(\u0447\u0430\u0441\u044b \u0432 \u0440\u0430\u0431\u043e\u0442\u0435)</div>')+
       '</div>'+
     '</div>'+
