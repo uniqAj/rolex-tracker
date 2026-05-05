@@ -842,8 +842,14 @@
     </div>
   </div>
 
-  <!-- Job-level note + features (editable inline) -->
+  <!-- Job-level note + features + date (editable inline) -->
   <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px;">
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1;">
+        <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">&#1044;&#1072;&#1090;&#1072; &#1087;&#1088;&#1080;&#1077;&#1084;&#1072;</div>
+        <input type="datetime-local" id="work-created-at" class="form-input" style="font-size:13px;padding:8px 10px;" onblur="saveWorkCreatedAt()" />
+      </div>
+    </div>
     <div>
       <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">&#1047;&#1072;&#1084;&#1077;&#1090;&#1082;&#1072;</div>
       <textarea id="work-note" class="form-textarea" rows="2" placeholder="&#1054;&#1073;&#1097;&#1080;&#1077; &#1079;&#1072;&#1084;&#1077;&#1090;&#1082;&#1080; &#1087;&#1086; &#1095;&#1072;&#1089;&#1072;&#1084;..." onblur="saveWorkNote()" style="width:100%;font-size:14px;min-height:50px;"></textarea>
@@ -1045,6 +1051,10 @@
           <label class="form-label">&#1050;&#1072;&#1083;&#1080;&#1073;&#1088;</label>
           <input class="form-input" id="inp-model" placeholder="3135, 3235..." autocomplete="off" />
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">&#1044;&#1072;&#1090;&#1072; &#1087;&#1088;&#1080;&#1077;&#1084;&#1072; &#1074; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</label>
+        <input class="form-input" id="inp-created-at" type="datetime-local" />
       </div>
       <div class="form-group">
         <label class="form-label">&#1058;&#1080;&#1087; &#1088;&#1072;&#1073;&#1086;&#1090;&#1099;</label>
@@ -1352,24 +1362,47 @@ function tickNumHTML(num) {
 
 // ── Progress ring SVG ──
 // pct: 0..1 (capped at 1). type: 'service'|'assembly' to pick norm color band
-function progressRingHTML(elapsedMs, type, sizePx) {
-  var s = loadSettings();
-  var normH = (type === 'service' ? (s.fsMid || 7) : (s.asmMid || 4));
-  var normMs = normH * 3600000;
-  var pct = Math.min(elapsedMs / normMs, 1);
-  var size = sizePx || 44;
+// Ring shows % of primary phases that have time recorded
+function progressRingHTML(job, sizePx) {
+  var PRIMARY_PIDS = {service:1, assembly:1, dial:1};
+  var total = 0, done = 0;
+  // Count primary phases this job has (based on workTypes)
+  var seenPids = {};
+  (job.workTypes || []).forEach(function(t) {
+    var pid = TYPE_TO_PHASE[t];
+    if (pid && PRIMARY_PIDS[pid] && !seenPids[pid]) {
+      seenPids[pid] = true;
+      total++;
+      // Check if that phase has any elapsed time
+      var phaseSteps = job.steps ? job.steps.filter(function(s){ return s.phase === pid; }) : [];
+      var phaseElapsed = phaseSteps.reduce(function(a,s){ return a + (s.elapsed||0); }, 0);
+      if (phaseElapsed > 0) done++;
+    }
+  });
+  // Fallback for legacy jobs
+  if (total === 0) {
+    if (job.type==='full' || job.type==='part_asm') total = 2;
+    else total = 1;
+    var svc = job.steps ? job.steps.filter(function(s){ return s.phase==='service'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0) : 0;
+    var asm = job.steps ? job.steps.filter(function(s){ return s.phase==='assembly'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0) : 0;
+    if (svc > 0) done++;
+    if ((job.type==='full' || job.type==='part_asm') && asm > 0) done++;
+    else if (job.type==='assembly' && asm > 0) done = 1;
+  }
+  var pct = total > 0 ? done / total : 0;
+  var size = sizePx || 38;
   var r = (size - 6) / 2;
   var c = 2 * Math.PI * r;
   var off = c * (1 - pct);
-  var lvl = speedLevel(elapsedMs/3600000, type);
-  var color = lvl === 'fast' ? 'var(--green)' : (lvl === 'mid' ? 'var(--gold)' : 'var(--red)');
+  var color = pct === 0 ? 'var(--text-dim)' : (pct < 1 ? 'var(--gold)' : 'var(--green)');
+  var label = done + '/' + total;
   return '<div class="ring-wrap" style="width:'+size+'px;height:'+size+'px;">'
     + '<svg class="ring-svg" viewBox="0 0 '+size+' '+size+'">'
     + '<circle class="ring-track" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" stroke-width="3" fill="none"/>'
-    + '<circle class="ring-fill" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" stroke-width="3" fill="none" '
-    + 'style="stroke:'+color+';stroke-dasharray:'+c.toFixed(2)+';stroke-dashoffset:'+off.toFixed(2)+';"/>'
+    + (pct > 0 ? '<circle class="ring-fill" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" stroke-width="3" fill="none" '
+    + 'style="stroke:'+color+';stroke-dasharray:'+c.toFixed(2)+';stroke-dashoffset:'+off.toFixed(2)+';" />' : '')
     + '</svg>'
-    + '<div class="ring-center" style="color:'+color+';">'+Math.round(pct*100)+'%</div>'
+    + '<div class="ring-center" style="color:'+color+';font-size:'+(size<=38?'9':'11')+'px;">'+label+'</div>'
     + '</div>';
 }
 
@@ -1604,19 +1637,11 @@ function jobCard(j) {
   var svcTime = j.steps ? j.steps.filter(function(s){ return s.phase==='service'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0) : 0;
   var asmTime = j.steps ? j.steps.filter(function(s){ return s.phase==='assembly'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0) : 0;
   var timeInfo = '';
-  var ringHTML = '';
-  if (j.type==='full' || j.type==='part_asm') {
-    timeInfo = (svcTime>0?'<div class="stat"><div class="stat-val">'+fmtMs(svcTime)+'</div><div class="stat-lbl">Service</div></div>':'') +
-               (asmTime>0?'<div class="stat"><div class="stat-val">'+fmtMs(asmTime)+'</div><div class="stat-lbl">Assemble</div></div>':'');
-    if (svcTime > 0) ringHTML = progressRingHTML(svcTime, 'service', 38);
-    else if (asmTime > 0) ringHTML = progressRingHTML(asmTime, 'assembly', 38);
-  } else {
-    timeInfo = elapsed>0 ? '<div class="stat"><div class="stat-val">'+fmtMs(elapsed)+'</div><div class="stat-lbl">\u0412\u0440\u0435\u043c\u044f</div></div>' : '';
-    if (elapsed > 0) ringHTML = progressRingHTML(elapsed, j.type==='assembly' ? 'assembly' : 'service', 38);
-  }
-  var statsRow = ringHTML
-    ? '<div style="display:flex;align-items:center;gap:12px;">'+ringHTML+'<div class="card-stats" style="flex:1;">'+(timeInfo||'<div class="stat"><div class="stat-val" style="color:var(--text-dim);">\u2014</div><div class="stat-lbl">\u041d\u0435 \u043d\u0430\u0447\u0430\u0442\u043e</div></div>')+'</div></div>'
-    : '<div class="card-stats">'+(timeInfo||'<div class="stat"><div class="stat-val" style="color:var(--text-dim);">\u2014</div><div class="stat-lbl">\u041d\u0435 \u043d\u0430\u0447\u0430\u0442\u043e</div></div>')+'</div>';
+  if (svcTime > 0) timeInfo += '<div class="stat"><div class="stat-val">'+fmtMs(svcTime)+'</div><div class="stat-lbl">Service</div></div>';
+  if (asmTime > 0) timeInfo += '<div class="stat"><div class="stat-val">'+fmtMs(asmTime)+'</div><div class="stat-lbl">Assemble</div></div>';
+  if (!timeInfo && elapsed > 0) timeInfo = '<div class="stat"><div class="stat-val">'+fmtMs(elapsed)+'</div><div class="stat-lbl">\u0412\u0440\u0435\u043c\u044f</div></div>';
+  var ringHTML = progressRingHTML(j, 38);
+  var statsRow = '<div style="display:flex;align-items:center;gap:12px;">'+ringHTML+'<div class="card-stats" style="flex:1;">'+(timeInfo||'<div class="stat"><div class="stat-val" style="color:var(--text-dim);">\u2014</div><div class="stat-lbl">\u041d\u0435 \u043d\u0430\u0447\u0430\u0442\u043e</div></div>')+'</div></div>';
 
   return '<div class="card '+borderCls+'" onclick="addPulse(this);openJob(\''+j.id+'\')">'+
     '<div class="card-header"><div>'+
@@ -1641,14 +1666,27 @@ function openJob(id) {
   document.getElementById('work-badge').innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">' + renderTypeBadges(job.workTypes, job.type) + '</div>';
   var noteEl = document.getElementById('work-note');
   var featEl = document.getElementById('work-features');
+  var dateEl = document.getElementById('work-created-at');
   if (noteEl) noteEl.value = job.note || '';
   if (featEl) featEl.value = job.features || '';
+  if (dateEl) dateEl.value = tsToDatetimeLocal(job.createdAt);
   renderWorkSteps(job);
   renderJobEvents(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-work').classList.add('active');
   document.querySelector('.fab').style.display = 'none';
+}
+
+function saveWorkCreatedAt() {
+  if (!currentJobId) return;
+  var d = load();
+  var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+  if (!job) return;
+  var el = document.getElementById('work-created-at');
+  if (!el || !el.value) return;
+  var ts = datetimeLocalToTs(el.value);
+  if (ts) { job.createdAt = ts; save(d); showToast('\u0414\u0430\u0442\u0430 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0430'); }
 }
 
 function saveWorkNote() {
@@ -2098,6 +2136,8 @@ function resetTypeCheckboxes() {
 
 function openNewJobModal() {
   ['inp-serial','inp-ref','inp-model','inp-note'].forEach(function(id) { var el=document.getElementById(id); if(el) el.value=''; });
+  var dateEl = document.getElementById('inp-created-at');
+  if (dateEl) dateEl.value = tsToDatetimeLocal(Date.now());
   resetTypeCheckboxes();
   openModal('modal-new');
 }
@@ -2125,7 +2165,9 @@ function createJob() {
   var steps = getStepsFor(mainType).map(function(s) { return Object.assign({}, s, {startTime:null, elapsed:0, running:false, notes:'', parts:''}); });
   var model = document.getElementById('inp-model') ? document.getElementById('inp-model').value.trim() : '';
   var note  = document.getElementById('inp-note')  ? document.getElementById('inp-note').value.trim()  : '';
-  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:Date.now(), steps:steps, dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  var dateEl = document.getElementById('inp-created-at');
+  var createdAt = (dateEl && dateEl.value) ? (datetimeLocalToTs(dateEl.value) || Date.now()) : Date.now();
+  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:createdAt, steps:steps, dorabotki:[], vozvrat:[], done:false, completedAt:null};
   ensurePhaseSteps(job);
   var d = load(); d.jobs.push(job); save(d);
   closeModal('modal-new'); showToast('\u0427\u0430\u0441\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b');
@@ -3031,201 +3073,201 @@ function distanceBetween(t1, t2) {
 // ── TROUBLESHOOTING ───────────────────────────────────────────────────────────
 const TROUBLE_DATA = [
   {
-    problem: 'Low amplitude / \u041c\u0430\u043b\u0435\u043d\u044c\u043a\u0430\u044f \u0430\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430',
+    problem: '\u041c\u0430\u043b\u0435\u043d\u044c\u043a\u0430\u044f \u0430\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430 (Low amplitude)',
     tags: ['amplitude','low','small','\u0430\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430','\u043c\u0430\u043b\u0435\u043d\u044c\u043a\u0430\u044f'],
     causes: [
-      'Dirty escapement — pallet fork, escape wheel, impulse jewel',
-      'Insufficient lubrication on pallet stones (elivar)',
-      'Weak or old mainspring — needs replacement',
-      'Balance jewels dirty or damaged',
-      'Hairspring coils touching each other or the regulator',
-      'End shake too tight on balance staff',
-      'Barrel arbor hook worn — spring slipping',
+      '\u0417\u0430\u0433\u0440\u044f\u0437\u043d\u0451\u043d \u0430\u043d\u043a\u0435\u0440\u043d\u044b\u0439 \u0445\u043e\u0434 (escapement) \u2014 \u0432\u0438\u043b\u043a\u0430 (pallet fork), \u0441\u043f\u0443\u0441\u043a\u043e\u0432\u043e\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (escape wheel), \u0438\u043c\u043f\u0443\u043b\u044c\u0441\u043d\u044b\u0439 \u043a\u0430\u043c\u0435\u043d\u044c (impulse jewel)',
+      '\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u0430\u044f \u0441\u043c\u0430\u0437\u043a\u0430 \u043f\u0430\u043b\u043b\u0435\u0442 \u0432\u0438\u043b\u043a\u0438 (pallet stones)',
+      '\u041e\u0441\u043b\u0430\u0431\u0448\u0430\u044f \u0438\u043b\u0438 \u0441\u0442\u0430\u0440\u0430\u044f \u0433\u043b\u0430\u0432\u043d\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 (mainspring) \u2014 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0437\u0430\u043c\u0435\u043d\u044b',
+      '\u0413\u0440\u044f\u0437\u043d\u044b\u0435 \u0438\u043b\u0438 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u044b\u0435 \u043a\u0430\u043c\u043d\u0438 \u0431\u0430\u043b\u0430\u043d\u0441\u0430 (balance jewels)',
+      '\u0412\u0438\u0442\u043a\u0438 \u0432\u043e\u043b\u043e\u0441\u043a\u0430 (hairspring) \u043a\u0430\u0441\u0430\u044e\u0442\u0441\u044f \u0434\u0440\u0443\u0433 \u0434\u0440\u0443\u0433\u0430 \u0438\u043b\u0438 \u0440\u0435\u0433\u0443\u043b\u044f\u0442\u043e\u0440\u0430',
+      '\u0421\u043b\u0438\u0448\u043a\u043e\u043c \u0442\u0443\u0433\u043e\u0439 \u043e\u0441\u0435\u0432\u043e\u0439 \u043b\u044e\u0444\u0442 (end shake) \u043e\u0441\u0438 \u0431\u0430\u043b\u0430\u043d\u0441\u0430 (balance staff)',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u043a\u0440\u044e\u0447\u043e\u043a \u0431\u0430\u0440\u0430\u0431\u0430\u043d\u0430 (barrel arbor hook) \u2014 \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u043f\u0440\u043e\u0441\u043a\u0430\u043b\u044c\u0437\u044b\u0432\u0430\u0435\u0442',
     ],
     checks: [
-      'Check amplitude — target 220-250° wound / 200°+ unwound (Rolex min 200°, max 310°)',
-      'Inspect pallet fork jewels under microscope',
-      'Check mainspring tension by feel when winding',
-      'Verify balance end shake (should be 0.05-0.10mm)',
-      'Inspect hairspring for coil sticking',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0430\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0443 \u2014 \u0446\u0435\u043b\u044c 220\u2013250\u00b0 \u0437\u0430\u0432\u0435\u0434\u0451\u043d\u043d\u044b\u0435 / 200\u00b0+ \u0440\u0430\u0437\u0432\u0435\u0434\u0451\u043d\u043d\u044b\u0435 (Rolex min 200\u00b0, max 310\u00b0)',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u043a\u0430\u043c\u043d\u0438 \u0432\u0438\u043b\u043a\u0438 (pallet fork jewels) \u043f\u043e\u0434 \u043c\u0438\u043a\u0440\u043e\u0441\u043a\u043e\u043f\u043e\u043c',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u0442\u044f\u0436\u0435\u043d\u0438\u0435 \u0433\u043b\u0430\u0432\u043d\u043e\u0439 \u043f\u0440\u0443\u0436\u0438\u043d\u044b (mainspring) \u043d\u0430 \u043e\u0449\u0443\u043f\u044c',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0441\u0435\u0432\u043e\u0439 \u043b\u044e\u0444\u0442 \u0431\u0430\u043b\u0430\u043d\u0441\u0430 (balance end shake) \u2014 \u0434\u043e\u043b\u0436\u043d\u043e \u0431\u044b\u0442\u044c 0.05\u20130.10 \u043c\u043c',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0432\u043e\u043b\u043e\u0441\u043e\u043a (hairspring) \u043d\u0430 \u043f\u0440\u0438\u043b\u0438\u043f\u0430\u043d\u0438\u0435 \u0432\u0438\u0442\u043a\u043e\u0432',
     ]
   },
   {
-    problem: 'Rotor / AP noise — \u0428\u0443\u043c \u0440\u043e\u0442\u043e\u0440\u0430 / \u0410\u041f',
+    problem: '\u0428\u0443\u043c \u0440\u043e\u0442\u043e\u0440\u0430 / \u0410\u041f (Rotor/AP noise)',
     tags: ['rotor','ap','\u0410\u041f','\u0440\u043e\u0442\u043e\u0440','\u0448\u0443\u043c','\u0441\u043a\u0440\u0438\u043f\u0438\u0442','\u0445\u0440\u0443\u0441\u0442\u0438\u0442','noise','click','scratch'],
     causes: [
-      'Dirt or debris in reversing wheels',
-      'Reversing wheel jewel worn or damaged',
-      'Rotor bearing worn — lateral play',
-      'Spring-clip thickness wrong (0.160 / 0.180 / 0.200mm)',
-      'Oscillating weight axle worn',
-      'Driving wheel for ratchet dirty',
+      '\u0413\u0440\u044f\u0437\u044c \u0438\u043b\u0438 \u043c\u0443\u0441\u043e\u0440 \u0432 \u0440\u0435\u0432\u0435\u0440\u0441\u0438\u0440\u043d\u044b\u0445 \u043a\u043e\u043b\u0451\u0441\u0438\u043a\u0430\u0445 (reversing wheels)',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0438\u043b\u0438 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u044b\u0439 \u043a\u0430\u043c\u0435\u043d\u044c \u0440\u0435\u0432\u0435\u0440\u0441\u0438\u0440\u043d\u043e\u0433\u043e \u043a\u043e\u043b\u0435\u0441\u0430 (reversing wheel jewel)',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u043f\u043e\u0434\u0448\u0438\u043f\u043d\u0438\u043a \u0440\u043e\u0442\u043e\u0440\u0430 (rotor bearing) \u2014 \u0431\u043e\u043a\u043e\u0432\u043e\u0439 \u043b\u044e\u0444\u0442',
+      '\u041d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u0430\u044f \u0442\u043e\u043b\u0449\u0438\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u043d\u043e\u0433\u043e \u043a\u043e\u043b\u044c\u0446\u0430 (spring-clip) \u2014 0.160/0.180/0.200 \u043c\u043c',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u0430\u044f \u043e\u0441\u044c \u0440\u043e\u0442\u043e\u0440\u0430 (oscillating weight axle)',
+      '\u0417\u0430\u0433\u0440\u044f\u0437\u043d\u0451\u043d\u043e \u0432\u0435\u0434\u0443\u0449\u0435\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (driving wheel for ratchet)',
     ],
     checks: [
-      'Remove rotor and check reversing wheels for smooth rotation',
-      'Check rotor bearing play — lateral and vertical',
-      'Inspect reversing wheel jewels (3135-9510, 3135-9511)',
-      'Verify spring-clip size — try different thickness',
-      'Clean and re-oil reversing wheels',
+      '\u0421\u043d\u044f\u0442\u044c \u0440\u043e\u0442\u043e\u0440 \u0438 \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043f\u043b\u0430\u0432\u043d\u043e\u0441\u0442\u044c \u0432\u0440\u0430\u0449\u0435\u043d\u0438\u044f \u0440\u0435\u0432\u0435\u0440\u0441\u0438\u0440\u043d\u044b\u0445 \u043a\u043e\u043b\u0451\u0441\u0438\u043a (reversing wheels)',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0431\u043e\u043a\u043e\u0432\u043e\u0439 \u0438 \u0432\u0435\u0440\u0442\u0438\u043a\u0430\u043b\u044c\u043d\u044b\u0439 \u043b\u044e\u0444\u0442 \u043f\u043e\u0434\u0448\u0438\u043f\u043d\u0438\u043a\u0430 \u0440\u043e\u0442\u043e\u0440\u0430 (rotor bearing play)',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u043a\u0430\u043c\u043d\u0438 \u0440\u0435\u0432\u0435\u0440\u0441\u0438\u0440\u043d\u043e\u0433\u043e \u043a\u043e\u043b\u0435\u0441\u0430 (reversing wheel jewels) \u2014 3135-9510, 3135-9511',
+      '\u041f\u043e\u0434\u043e\u0431\u0440\u0430\u0442\u044c \u0442\u043e\u043b\u0449\u0438\u043d\u0443 \u043f\u0440\u0443\u0436\u0438\u043d\u043d\u043e\u0433\u043e \u043a\u043e\u043b\u044c\u0446\u0430 (spring-clip)',
+      '\u041f\u0440\u043e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u0438 \u0441\u043c\u0430\u0437\u0430\u0442\u044c \u0440\u0435\u0432\u0435\u0440\u0441\u0438\u0440\u043d\u044b\u0435 \u043a\u043e\u043b\u0451\u0441\u0438\u043a\u0430 (reversing wheels)',
     ]
   },
   {
-    problem: 'High beat error / \u0411\u043e\u043b\u044c\u0448\u043e\u0439 beat error',
+    problem: '\u0411\u043e\u043b\u044c\u0448\u043e\u0439 Beat Error',
     tags: ['beat','error','beat error','\u0431\u0438\u0442','\u043e\u0442\u043a\u043b\u043e\u043d\u0435\u043d\u0438\u0435'],
     causes: [
-      'Impulse roller (roller table) displaced on balance staff',
-      'Roller jewel not centered in pallet fork notch',
-      'Balance incorrectly installed after service',
-      'Impact damage — roller table shifted',
+      '\u0421\u043c\u0435\u0449\u0435\u043d \u0438\u043c\u043f\u0443\u043b\u044c\u0441\u043d\u044b\u0439 \u0440\u043e\u043b\u0438\u043a (roller table) \u043d\u0430 \u043e\u0441\u0438 \u0431\u0430\u043b\u0430\u043d\u0441\u0430 (balance staff)',
+      '\u041a\u0430\u043c\u0435\u043d\u044c \u0440\u043e\u043b\u0438\u043a\u0430 (roller jewel) \u043d\u0435 \u0446\u0435\u043d\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u043d \u0432 \u043f\u0430\u0437\u0443 \u0432\u0438\u043b\u043a\u0438 (pallet fork notch)',
+      '\u0411\u0430\u043b\u0430\u043d\u0441 \u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d \u043f\u043e\u0441\u043b\u0435 \u0441\u0435\u0440\u0432\u0438\u0441\u0430',
+      '\u0423\u0434\u0430\u0440 \u2014 \u0440\u043e\u043b\u0438\u043a (roller table) \u0441\u0434\u0432\u0438\u043d\u0443\u043b\u0441\u044f',
     ],
     checks: [
-      'Check beat error on timegrapher — should be under 0.3ms',
-      'Inspect roller table position on balance staff',
-      'Adjust beat by rotating roller table slightly',
-      'Re-check in 5 positions — target ≤0.2ms in all'  ,
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c beat error \u043d\u0430 \u0442\u0430\u0439\u043c\u0433\u0440\u0430\u0444\u0435\u0440\u0435 \u2014 \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u043d\u0435 \u0431\u043e\u043b\u0435\u0435 0.3 \u043c\u0441',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u0440\u043e\u043b\u0438\u043a\u0430 (roller table) \u043d\u0430 \u043e\u0441\u0438 \u0431\u0430\u043b\u0430\u043d\u0441\u0430',
+      '\u041e\u0442\u0440\u0435\u0433\u0443\u043b\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043f\u043e\u0432\u043e\u0440\u043e\u0442\u043e\u043c \u0440\u043e\u043b\u0438\u043a\u0430',
+      '\u041f\u0435\u0440\u0435\u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0432 5 \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u044f\u0445 \u2014 \u0446\u0435\u043b\u044c \u22640.2 \u043c\u0441',
     ]
   },
   {
-    problem: 'Crown not winding / \u0412\u044b\u043a\u0430\u0447\u043a\u0430 \u043d\u0435 \u0437\u0430\u0432\u043e\u0434\u0438\u0442',
+    problem: '\u0412\u044b\u043a\u0430\u0447\u043a\u0430 \u043d\u0435 \u0437\u0430\u0432\u043e\u0434\u0438\u0442 (Crown not winding)',
     tags: ['crown','winding','\u0437\u0430\u0432\u043e\u0434','\u0432\u044b\u043a\u0430\u0447\u043a\u0430','\u043d\u0435 \u0437\u0430\u0432\u043e\u0434\u0438\u0442'],
     causes: [
-      'Broken mainspring — replace (3135-311)',
-      'Click spring broken or missing (3135-301)',
-      'Click worn — not engaging ratchet wheel',
-      'Winding stem damaged or worn',
-      'Crown wheel core stripped',
+      '\u041f\u0435\u0440\u0435\u043b\u043e\u043c\u0430\u043d\u0430 \u0433\u043b\u0430\u0432\u043d\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 (mainspring) \u2014 \u0437\u0430\u043c\u0435\u043d\u0438\u0442\u044c (3135-311)',
+      '\u0421\u043b\u043e\u043c\u0430\u043d\u0430\u044f \u0438\u043b\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u0449\u0451\u043b\u043a\u0430 (click spring) \u2014 3135-301',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0449\u0451\u043b\u043a\u043e\u0432\u044b\u0439 \u0444\u0438\u043a\u0441\u0430\u0442\u043e\u0440 (click) \u2014 \u043d\u0435 \u0437\u0430\u0446\u0435\u043f\u043b\u044f\u0435\u0442\u0441\u044f \u0437\u0430 \u0445\u0440\u0430\u043f\u043e\u0432\u043e\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (ratchet wheel)',
+      '\u041f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u044b\u0439 \u0438\u043b\u0438 \u0438\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0432\u044b\u0432\u043e\u0434\u043d\u043e\u0439 \u0432\u0430\u043b (winding stem)',
+      '\u0421\u0442\u0451\u0440\u0442\u043e\u0435 \u043a\u043e\u0440\u043e\u043d\u043d\u043e\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (crown wheel core)',
     ],
     checks: [
-      'Check if mainspring is broken by resistance feel',
-      'Inspect click and click spring engagement',
-      'Verify ratchet wheel teeth are intact',
-      'Check crown wheel for damage',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430 \u043e\u0449\u0443\u043f\u044c \u2014 \u043f\u0435\u0440\u0435\u043b\u043e\u043c\u0430\u043d\u0430 \u043b\u0438 \u0433\u043b\u0430\u0432\u043d\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 (mainspring)',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0437\u0430\u0446\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u0449\u0451\u043b\u043a\u0430 (click) \u0438 \u0435\u0433\u043e \u043f\u0440\u0443\u0436\u0438\u043d\u044b (click spring)',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0437\u0443\u0431\u044c\u044f \u0445\u0440\u0430\u043f\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u043b\u0435\u0441\u0430 (ratchet wheel) \u043d\u0430 \u0446\u0435\u043b\u043e\u0441\u0442\u044c',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u043a\u043e\u0440\u043e\u043d\u043d\u043e\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (crown wheel) \u043d\u0430 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f',
     ]
   },
   {
-    problem: 'Crown not setting / \u0421\u0442\u0440\u0435\u043b\u043a\u0438 \u043d\u0435 \u0441\u0442\u0430\u0432\u044f\u0442\u0441\u044f',
+    problem: '\u0421\u0442\u0440\u0435\u043b\u043a\u0438 \u043d\u0435 \u0441\u0442\u0430\u0432\u044f\u0442\u0441\u044f (Crown not setting)',
     tags: ['crown','setting','time','\u0441\u0442\u0440\u0435\u043b\u043a\u0438','\u043f\u0435\u0440\u0435\u0432\u043e\u0434','\u043d\u0435 \u0441\u0442\u0430\u0432\u044f\u0442\u0441\u044f'],
     causes: [
-      'Setting lever not engaging properly',
-      'Setting lever spring weak or broken (3135-225)',
-      'Yoke for sliding pinion worn (3135-240)',
-      'Crown worn — not pulling stem out far enough',
-      'Setting wheel dirty or damaged',
+      '\u0420\u044b\u0447\u0430\u0433 \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0430 (setting lever) \u043d\u0435 \u0441\u0440\u0430\u0431\u0430\u0442\u044b\u0432\u0430\u0435\u0442 \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e',
+      '\u0421\u043b\u0430\u0431\u0430\u044f \u0438\u043b\u0438 \u0441\u043b\u043e\u043c\u0430\u043d\u043d\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u0440\u044b\u0447\u0430\u0433\u0430 \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0430 (setting lever spring) \u2014 3135-225',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0432\u0438\u043b\u043a\u0430\u043b\u044c (yoke for sliding pinion) \u2014 3135-240',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u0430\u044f \u0432\u044b\u043a\u0430\u0447\u043a\u0430 \u2014 \u0432\u0430\u043b \u043d\u0435 \u0432\u044b\u0442\u044f\u0433\u0438\u0432\u0430\u0435\u0442\u0441\u044f \u0434\u0430\u043b\u044c\u0448\u0435 \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u044f 1',
+      '\u0413\u0440\u044f\u0437\u043d\u043e\u0435 \u0438\u043b\u0438 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u043e\u0435 \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u043d\u043e\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (setting wheel)',
     ],
     checks: [
-      'Check setting lever engagement with stem',
-      'Inspect setting lever spring tension',
-      'Verify yoke movement is smooth',
-      'Test crown positions 1 and 2 for positive engagement',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0437\u0430\u0446\u0435\u043f\u043b\u0435\u043d\u0438\u0435 \u0440\u044b\u0447\u0430\u0433\u0430 \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0430 (setting lever) \u0441 \u0432\u0430\u043b\u043e\u043c',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u0442\u044f\u0436\u0435\u043d\u0438\u0435 \u043f\u0440\u0443\u0436\u0438\u043d\u044b \u0440\u044b\u0447\u0430\u0433\u0430 (setting lever spring)',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043f\u043b\u0430\u0432\u043d\u043e\u0441\u0442\u044c \u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u0432\u0438\u043b\u043a\u0430\u043b\u044f (yoke)',
+      '\u041f\u0440\u043e\u0442\u0435\u0441\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u044f 1 \u0438 2 \u043a\u043e\u0440\u043e\u043d\u043a\u0438 \u043d\u0430 \u043d\u0430\u0434\u0451\u0436\u043d\u043e\u0435 \u0432\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435',
     ]
   },
   {
-    problem: 'Watch stopping / \u0427\u0430\u0441\u044b \u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u044e\u0442\u0441\u044f',
-    tags: ['stopping','stops','\u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u0435\u0442\u0441\u044f','\u0441\u0442\u043e\u043f','\u0432\u0441\u0442\u0430\u0435\u0442'],
+    problem: '\u0427\u0430\u0441\u044b \u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u044e\u0442\u0441\u044f (Watch stopping)',
+    tags: ['stopping','stops','\u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u0435\u0442\u0441\u044f','\u0441\u0442\u043e\u043f','\u0432\u0441\u0442\u0430\u0451\u0442'],
     causes: [
-      'Hair or debris caught in escapement',
-      'Pallet fork jewel chipped or missing',
-      'Escape wheel tooth bent or damaged',
-      'Balance spring coil catching on anything',
-      'Oil dried on pallet stones — sticky',
-      'Mainspring fully run down',
-      'Shock absorber spring missing or damaged',
+      '\u0412\u043e\u043b\u043e\u0441\u043e\u043a \u0438\u043b\u0438 \u043c\u0443\u0441\u043e\u0440 \u043f\u043e\u043f\u0430\u043b \u0432 \u0430\u043d\u043a\u0435\u0440\u043d\u044b\u0439 \u0445\u043e\u0434 (escapement)',
+      '\u0421\u043a\u043e\u043b\u043e\u0442\u044b\u0439 \u0438\u043b\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439 \u043a\u0430\u043c\u0435\u043d\u044c \u0432\u0438\u043b\u043a\u0438 (pallet fork jewel)',
+      '\u0418\u0437\u043e\u0433\u043d\u0443\u0442\u044b\u0439 \u0438\u043b\u0438 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u044b\u0439 \u0437\u0443\u0431 \u0441\u043f\u0443\u0441\u043a\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u043b\u0435\u0441\u0430 (escape wheel tooth)',
+      '\u0412\u0438\u0442\u043e\u043a \u0432\u043e\u043b\u043e\u0441\u043a\u0430 (hairspring) \u0446\u0435\u043f\u043b\u044f\u0435\u0442\u0441\u044f \u0437\u0430 \u0447\u0442\u043e-\u043b\u0438\u0431\u043e',
+      '\u0412\u044b\u0441\u043e\u0445\u0448\u0435\u0435 \u043c\u0430\u0441\u043b\u043e \u043d\u0430 \u043a\u0430\u043c\u043d\u044f\u0445 \u0432\u0438\u043b\u043a\u0438 \u2014 \u0437\u0430\u043b\u0438\u043f\u0430\u043d\u0438\u0435',
+      '\u0413\u043b\u0430\u0432\u043d\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 (mainspring) \u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u0440\u0430\u0437\u0432\u044f\u043b\u0430\u0441\u044c',
+      '\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442 \u0438\u043b\u0438 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u0430\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440\u0430 (shock absorber spring)',
     ],
     checks: [
-      'Inspect escapement under microscope for debris',
-      'Check all pallet fork jewels intact',
-      'Spin escape wheel freely — should coast smoothly',
-      'Verify hairspring is perfectly flat and free',
-      'Check shock absorber springs on both sides',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0430\u043d\u043a\u0435\u0440\u043d\u044b\u0439 \u0445\u043e\u0434 (escapement) \u043f\u043e\u0434 \u043c\u0438\u043a\u0440\u043e\u0441\u043a\u043e\u043f\u043e\u043c \u043d\u0430 \u043c\u0443\u0441\u043e\u0440',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0446\u0435\u043b\u043e\u0441\u0442\u044c \u0432\u0441\u0435\u0445 \u043a\u0430\u043c\u043d\u0435\u0439 \u0432\u0438\u043b\u043a\u0438 (pallet fork jewels)',
+      '\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u0438\u0442\u044c \u0441\u043f\u0443\u0441\u043a\u043e\u0432\u043e\u0435 \u043a\u043e\u043b\u0435\u0441\u043e (escape wheel) \u2014 \u0434\u043e\u043b\u0436\u043d\u043e \u043f\u043b\u0430\u0432\u043d\u043e \u0437\u0430\u043c\u0435\u0434\u043b\u0438\u0442\u044c\u0441\u044f',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0447\u0442\u043e \u0432\u043e\u043b\u043e\u0441\u043e\u043a (hairspring) \u0438\u0434\u0435\u0430\u043b\u044c\u043d\u043e \u043f\u043b\u043e\u0441\u043a\u0438\u0439 \u0438 \u0441\u0432\u043e\u0431\u043e\u0434\u0435\u043d',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043f\u0440\u0443\u0436\u0438\u043d\u044b \u0430\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440\u0430 (shock absorber springs) \u0441 \u043e\u0431\u0435\u0438\u0445 \u0441\u0442\u043e\u0440\u043e\u043d',
     ]
   },
   {
-    problem: 'Rate inconsistency / \u041d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u0445\u043e\u0434',
-    tags: ['rate','inconsistent','unstable','\u0445\u043e\u0434','\u043d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439','\u043d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e'],
+    problem: '\u041d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u0445\u043e\u0434 (Rate inconsistency)',
+    tags: ['rate','inconsistent','unstable','\u0445\u043e\u0434','\u043d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439'],
     causes: [
-      'Hairspring not perfectly centered on balance',
-      'Hairspring coils not evenly spaced',
-      'Regulator pins too tight or too loose on hairspring',
-      'Balance jewels worn — eccentric rotation',
-      'Magnetized parts — especially hairspring',
-      'End shake inconsistency in train wheels',
+      '\u0412\u043e\u043b\u043e\u0441\u043e\u043a (hairspring) \u043d\u0435 \u0446\u0435\u043d\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u043d \u0438\u0434\u0435\u0430\u043b\u044c\u043d\u043e \u043d\u0430 \u0431\u0430\u043b\u0430\u043d\u0441\u0435',
+      '\u0412\u0438\u0442\u043a\u0438 \u0432\u043e\u043b\u043e\u0441\u043a\u0430 (hairspring) \u043d\u0435\u0440\u0430\u0432\u043d\u043e\u043c\u0435\u0440\u043d\u043e \u0440\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u044b',
+      '\u0428\u0442\u0438\u0444\u0442\u044b \u0440\u0435\u0433\u0443\u043b\u044f\u0442\u043e\u0440\u0430 (regulator pins) \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u0441\u0436\u0430\u0442\u044b \u0438\u043b\u0438 \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b \u043d\u0430 \u0432\u043e\u043b\u043e\u0441\u043a\u0435',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0435 \u043a\u0430\u043c\u043d\u0438 \u0431\u0430\u043b\u0430\u043d\u0441\u0430 (balance jewels) \u2014 \u044d\u043a\u0441\u0446\u0435\u043d\u0442\u0440\u0438\u0447\u043d\u043e\u0435 \u0432\u0440\u0430\u0449\u0435\u043d\u0438\u0435',
+      '\u041d\u0430\u043c\u0430\u0433\u043d\u0438\u0447\u0435\u043d\u043d\u044b\u0435 \u0434\u0435\u0442\u0430\u043b\u0438 \u2014 \u043e\u0441\u043e\u0431\u0435\u043d\u043d\u043e \u0432\u043e\u043b\u043e\u0441\u043e\u043a (hairspring)',
+      '\u041d\u0435\u0440\u0430\u0432\u043d\u043e\u043c\u0435\u0440\u043d\u044b\u0439 \u043e\u0441\u0435\u0432\u043e\u0439 \u043b\u044e\u0444\u0442 (end shake) \u043a\u043e\u043b\u0451\u0441 \u0437\u0443\u0431\u0447\u0430\u0442\u043e\u0439 \u043f\u0435\u0440\u0435\u0434\u0430\u0447\u0438',
     ],
     checks: [
-      'Demagnetize movement before diagnosis',
-      'Check rate in 6 positions on timegrapher',
-      'Inspect hairspring under microscope',
-      'Verify regulator pin spacing',
-      'Check all train wheel end shakes',
+      '\u0420\u0430\u0437\u043c\u0430\u0433\u043d\u0438\u0442\u0438\u0442\u044c \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c \u043f\u0435\u0440\u0435\u0434 \u0434\u0438\u0430\u0433\u043d\u043e\u0441\u0442\u0438\u043a\u043e\u0439',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0445\u043e\u0434 \u0432 6 \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u044f\u0445 \u043d\u0430 \u0442\u0430\u0439\u043c\u0433\u0440\u0430\u0444\u0435\u0440\u0435',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0432\u043e\u043b\u043e\u0441\u043e\u043a (hairspring) \u043f\u043e\u0434 \u043c\u0438\u043a\u0440\u043e\u0441\u043a\u043e\u043f\u043e\u043c',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0440\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u0448\u0442\u0438\u0444\u0442\u043e\u0432 \u0440\u0435\u0433\u0443\u043b\u044f\u0442\u043e\u0440\u0430 (regulator pin spacing)',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0441\u0435\u0432\u043e\u0439 \u043b\u044e\u0444\u0442 \u0432\u0441\u0435\u0445 \u043a\u043e\u043b\u0451\u0441 \u0437\u0443\u0431\u0447\u0430\u0442\u043e\u0439 \u043f\u0435\u0440\u0435\u0434\u0430\u0447\u0438 (train wheel end shakes)',
     ]
   },
   {
-    problem: 'Date not changing / \u0414\u0430\u0442\u0430 \u043d\u0435 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f',
+    problem: '\u0414\u0430\u0442\u0430 \u043d\u0435 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f (Date not changing)',
     tags: ['date','calendar','\u0434\u0430\u0442\u0430','\u043a\u0430\u043b\u0435\u043d\u0434\u0430\u0440\u044c','\u043d\u0435 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f'],
     causes: [
-      'Date jumper spring weak or bent (3135-614)',
-      'Date driving wheel not engaging date disc',
-      'Date disc teeth worn or damaged',
-      'Cam yoke not functioning (3135-633)',
-      'Insufficient lubrication on date mechanism',
+      '\u0421\u043b\u0430\u0431\u0430\u044f \u0438\u043b\u0438 \u0441\u0433\u043d\u0443\u0442\u0430\u044f \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u0444\u0438\u043a\u0441\u0430\u0442\u043e\u0440\u0430 \u0434\u0430\u0442\u044b (date jumper spring) \u2014 3135-614',
+      '\u041a\u043e\u043b\u0451\u0441\u043e \u043f\u0440\u0438\u0432\u043e\u0434\u0430 \u0434\u0430\u0442\u044b (date driving wheel) \u043d\u0435 \u0437\u0430\u0446\u0435\u043f\u043b\u044f\u0435\u0442 \u0434\u0438\u0441\u043a \u0434\u0430\u0442\u044b',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0435 \u0438\u043b\u0438 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u044b\u0435 \u0437\u0443\u0431\u044c\u044f \u0434\u0438\u0441\u043a\u0430 \u0434\u0430\u0442\u044b',
+      '\u041d\u0435\u0438\u0441\u043f\u0440\u0430\u0432\u043d\u044b\u0439 \u043a\u0443\u043b\u0430\u0447\u043e\u043a (cam yoke) \u2014 3135-633',
+      '\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u0430\u044f \u0441\u043c\u0430\u0437\u043a\u0430 \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c\u0430 \u0434\u0430\u0442\u044b',
     ],
     checks: [
-      'Check date jumper spring tension',
-      'Verify date finger advances disc by one tooth',
-      'Inspect date disc teeth for damage',
-      'Check cam yoke and its spring',
-      'Ensure date mechanism is clean and lubricated',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u0442\u044f\u0436\u0435\u043d\u0438\u0435 \u043f\u0440\u0443\u0436\u0438\u043d\u044b \u0444\u0438\u043a\u0441\u0430\u0442\u043e\u0440\u0430 \u0434\u0430\u0442\u044b (date jumper spring)',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0447\u0442\u043e \u043f\u0430\u043b\u0435\u0446 \u0434\u0430\u0442\u044b \u043f\u0440\u043e\u0434\u0432\u0438\u0433\u0430\u0435\u0442 \u0434\u0438\u0441\u043a \u0440\u043e\u0432\u043d\u043e \u043d\u0430 \u043e\u0434\u0438\u043d \u0437\u0443\u0431\u0446\u043e\u043c \u0437\u0430 \u0446\u0438\u043a\u043b',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0437\u0443\u0431\u044c\u044f \u0434\u0438\u0441\u043a\u0430 \u0434\u0430\u0442\u044b \u043d\u0430 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043a\u0443\u043b\u0430\u0447\u043e\u043a (cam yoke) \u0438 \u0435\u0433\u043e \u043f\u0440\u0443\u0436\u0438\u043d\u0443',
+      '\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u0438 \u0441\u043c\u0430\u0437\u0430\u0442\u044c \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c \u0434\u0430\u0442\u044b',
     ]
   },
   {
-    problem: 'Shock absorber issues / \u0410\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440',
+    problem: '\u0410\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440 (Shock absorber)',
     tags: ['shock','absorber','\u0430\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440','incabloc','kif'],
     causes: [
-      'Shock spring missing or displaced',
-      'Cap jewel cracked or missing',
-      'Shock spring wrong size installed',
-      'Spring not seated properly in its slot',
+      '\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442 \u0438\u043b\u0438 \u0441\u043c\u0435\u0449\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u0430\u043c\u043e\u0440\u0442\u0438\u0437\u0430\u0442\u043e\u0440\u0430 (shock spring)',
+      '\u0422\u0440\u0435\u0441\u043d\u0443\u0442\u044b\u0439 \u0438\u043b\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439 \u043d\u0430\u043a\u0440\u044b\u0432\u043d\u043e\u0439 \u043a\u0430\u043c\u0435\u043d\u044c (cap jewel)',
+      '\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u0430 \u043f\u0440\u0443\u0436\u0438\u043d\u0430 \u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e\u0433\u043e \u0440\u0430\u0437\u043c\u0435\u0440\u0430 (shock spring)',
+      '\u041f\u0440\u0443\u0436\u0438\u043d\u0430 \u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e \u0443\u0441\u0430\u0436\u0435\u043d\u0430 \u0432 \u043f\u0430\u0437',
     ],
     checks: [
-      'Verify both shock springs present (upper and lower)',
-      'Check cap jewels are not cracked',
-      'Ensure springs are properly seated',
-      'Test by gentle tap — balance should spring back',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u043b\u0438\u0447\u0438\u0435 \u043e\u0431\u0435\u0438\u0445 \u043f\u0440\u0443\u0436\u0438\u043d (shock springs) \u2014 \u0441\u0432\u0435\u0440\u0445\u0443 \u0438 \u0441\u043d\u0438\u0437\u0443',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u043a\u0440\u044b\u0432\u043d\u044b\u0435 \u043a\u0430\u043c\u043d\u0438 (cap jewels) \u043d\u0430 \u0446\u0435\u043b\u043e\u0441\u0442\u044c',
+      '\u0423\u0431\u0435\u0434\u0438\u0442\u044c\u0441\u044f \u0447\u0442\u043e \u043f\u0440\u0443\u0436\u0438\u043d\u044b \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e \u0441\u0438\u0434\u044f\u0442 \u0432 \u043f\u0430\u0437\u0430\u0445',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430: \u043b\u0451\u0433\u043a\u0438\u0439 \u0443\u0434\u0430\u0440 \u2014 \u0431\u0430\u043b\u0430\u043d\u0441 \u0434\u043e\u043b\u0436\u0435\u043d \u0432\u0435\u0440\u043d\u0443\u0442\u044c\u0441\u044f \u0432 \u043f\u043e\u0437\u0438\u0446\u0438\u044e',
     ]
   },
   {
-    problem: 'Performance specs / Технические нормативы Cal.3135',
-    tags: ['spec','norm','rate','amplitude','beat','performance','норматив','характеристики'],
+    problem: '\u0422\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043d\u043e\u0440\u043c\u0430\u0442\u0438\u0432\u044b Cal.3135 (Performance specs)',
+    tags: ['spec','norm','rate','amplitude','beat','performance','\u043d\u043e\u0440\u043c\u0430\u0442\u0438\u0432','\u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438'],
     causes: [
-      'Frequency: 28800 vib/h (4 Hz)',
-      'Lift angle: 52°',
-      'Power reserve: approx. 48h',
-      'Full winding: 40 stem rotations / 10 ratchet rotations',
-      '24h unwinding: 20 stem / 4.8 ratchet rotations',
+      '\u0427\u0430\u0441\u0442\u043e\u0442\u0430: 28800 \u043a\u043e\u043b/\u0447 (4 Hz)',
+      '\u0423\u0433\u043e\u043b \u043f\u043e\u0434\u044a\u0451\u043c\u0430 (lift angle): 52\u00b0',
+      '\u0417\u0430\u043f\u0430\u0441 \u0445\u043e\u0434\u0430: ~48 \u0447\u0430\u0441\u043e\u0432',
+      '\u041f\u043e\u043b\u043d\u044b\u0439 \u0437\u0430\u0432\u043e\u0434: 40 \u043e\u0431\u043e\u0440\u043e\u0442\u043e\u0432 \u0437\u0430\u0432\u043e\u0434\u043d\u043e\u0439 \u0433\u043e\u043b\u043e\u0432\u043a\u0438 / 10 \u0445\u0440\u0430\u043f\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u043b\u0435\u0441\u0430 (ratchet)',
+      '\u0420\u0430\u0437\u0432\u043e\u0434 \u0437\u0430 24\u0447: 20 \u043e\u0431\u043e\u0440\u043e\u0442\u043e\u0432 / 4.8 \u0445\u0440\u0430\u043f\u043e\u0432\u044b\u0445 \u043a\u043e\u043b\u0435\u0441\u0430',
     ],
     checks: [
-      'Rate (Rolex official): -2/+4 s/d average of 5 positions',
-      'Rate max variation between positions: 10 s/d',
-      'Amplitude wound: 220-250° (target), max 310°',
-      'Amplitude unwound 24h: min 200°',
-      'Beat error: ≤0.2ms (workshop target), Rolex spec max 0.8ms',
-      'Date jump: between -1 and +2 minutes before midnight',
-      'Hands sync at 12h: ±1 minute',
+      '\u0425\u043e\u0434 (Rolex \u043e\u0444\u0438\u0446.): -2/+4 \u0441/\u0441\u0443\u0442 \u0441\u0440\u0435\u0434\u043d\u0435\u0435 5 \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u0439',
+      '\u041c\u0430\u043a\u0441. \u0440\u0430\u0437\u0431\u0440\u043e\u0441 \u043c\u0435\u0436\u0434\u0443 \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u044f\u043c\u0438: 10 \u0441/\u0441\u0443\u0442',
+      '\u0410\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430 \u0437\u0430\u0432\u0435\u0434\u0451\u043d\u043d\u044b\u0435: 220\u2013250\u00b0 (\u0446\u0435\u043b\u044c), \u043c\u0430\u043a\u0441. 310\u00b0',
+      '\u0410\u043c\u043f\u043b\u0438\u0442\u0443\u0434\u0430 \u0447\u0435\u0440\u0435\u0437 24\u0447 \u0440\u0430\u0437\u0432\u043e\u0434\u0430: \u043c\u0438\u043d. 200\u00b0',
+      'Beat error: \u22640.2 \u043c\u0441 (\u0446\u0435\u043b\u044c), \u043c\u0430\u043a\u0441. 0.8 \u043c\u0441 \u043f\u043e Rolex',
+      '\u041f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u0434\u0430\u0442\u044b: \u0437\u0430 1\u20132 \u043c\u0438\u043d. \u0434\u043e \u043f\u043e\u043b\u0443\u043d\u043e\u0447\u0438',
+      '\u0421\u0438\u043d\u0445\u0440\u043e\u043d\u0438\u0437\u0430\u0446\u0438\u044f \u0441\u0442\u0440\u0435\u043b\u043e\u043a \u043d\u0430 12\u0447: \u00b11 \u043c\u0438\u043d\u0443\u0442\u0430',
     ]
   },
   {
-    problem: 'Crown worn / water ingress / \u0418\u0437\u043d\u043e\u0441 \u0437\u0430\u0432\u043e\u0434\u043d\u043e\u0439 \u0433\u043e\u043b\u043e\u0432\u043a\u0438',
+    problem: '\u0418\u0437\u043d\u043e\u0441 \u0432\u044b\u043a\u0430\u0447\u043a\u0438 / \u0432\u043e\u0434\u0430 (Crown worn / water ingress)',
     tags: ['crown','tube','gasket','water','\u0432\u043e\u0434\u0430','\u0443\u043f\u043b\u043e\u0442\u043d\u0435\u043d\u0438\u0435','\u0442\u044e\u0431'],
     causes: [
-      'Crown gasket worn — needs replacement',
-      'Tube (crown tube) damaged or cross-threaded',
-      'Crown itself worn — gasket groove damaged',
-      'Winding stem diameter worn',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u0430\u044f \u043f\u0440\u043e\u043a\u043b\u0430\u0434\u043a\u0430 \u0432\u044b\u043a\u0430\u0447\u043a\u0438 (crown gasket) \u2014 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0437\u0430\u043c\u0435\u043d\u044b',
+      '\u041f\u043e\u0432\u0440\u0435\u0436\u0434\u0451\u043d\u043d\u044b\u0439 \u0438\u043b\u0438 \u0441\u043e\u0440\u0432\u0430\u043d\u043d\u044b\u0439 \u0442\u044e\u0431 (crown tube)',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u0438\u0435 \u0441\u0430\u043c\u043e\u0439 \u0432\u044b\u043a\u0430\u0447\u043a\u0438 \u2014 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u0430 \u043a\u0430\u043d\u0430\u0432\u043a\u0430 \u043f\u043e\u0434 \u043f\u0440\u043e\u043a\u043b\u0430\u0434\u043a\u0443',
+      '\u0418\u0437\u043d\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0432\u044b\u0432\u043e\u0434\u043d\u043e\u0439 \u0432\u0430\u043b (winding stem) \u2014 \u043d\u0435\u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043d\u044b\u0439 \u0434\u0438\u0430\u043c\u0435\u0442\u0440',
     ],
     checks: [
-      'Pressure test after assembly (waterproof test)',
-      'Inspect crown gasket condition',
-      'Check tube for damage before assembly',
-      'Measure winding stem diameter',
+      '\u0422\u0435\u0441\u0442 \u043d\u0430 \u0432\u043e\u0434\u043e\u043d\u0435\u043f\u0440\u043e\u043d\u0438\u0446\u0430\u0435\u043c\u043e\u0441\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u0441\u0431\u043e\u0440\u043a\u0438',
+      '\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u043f\u0440\u043e\u043a\u043b\u0430\u0434\u043a\u0438 \u0432\u044b\u043a\u0430\u0447\u043a\u0438 (crown gasket)',
+      '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0442\u044e\u0431 (crown tube) \u0434\u043e \u0441\u0431\u043e\u0440\u043a\u0438',
+      '\u0418\u0437\u043c\u0435\u0440\u0438\u0442\u044c \u0434\u0438\u0430\u043c\u0435\u0442\u0440 \u0432\u044b\u0432\u043e\u0434\u043d\u043e\u0433\u043e \u0432\u0430\u043b\u0430 (winding stem)',
     ]
   },
 ];
