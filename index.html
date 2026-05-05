@@ -1414,6 +1414,13 @@ function speedLevel(hours, type) {
     if (hours <= fast) return 'fast';
     if (hours <= mid)  return 'mid';
     return 'slow';
+  } else if (type === 'part') {
+    // Part Service norms: Full norms minus 4h (min 1h floor)
+    var fast = Math.max(1, (s.fsFast || 5) - 2);
+    var mid  = Math.max(2, (s.fsMid  || 7) - 4);
+    if (hours <= fast) return 'fast';
+    if (hours <= mid)  return 'mid';
+    return 'slow';
   } else {
     var fast = s.asmFast || 3;
     var mid  = s.asmMid  || 4;
@@ -1428,16 +1435,28 @@ function speedLabel(level) {
   return '\ud83d\udc22';
 }
 function speedBadges(job) {
-  const fsTime = job.steps.filter(s => s.phase==='service').reduce((a,s) => a+(s.elapsed||0), 0);
-  const asTime = job.steps.filter(s => s.phase==='assembly').reduce((a,s) => a+(s.elapsed||0), 0);
-  if (job.type === 'full') {
-    const fsLevel = speedLevel(fsTime/3600000, 'service');
-    const asLevel = speedLevel(asTime/3600000, 'assembly');
-    return '<span class="speed-badge speed-'+fsLevel+'">Service: '+speedLabel(fsLevel)+'</span> <span class="speed-badge speed-'+asLevel+'">'+'Assemble: '+speedLabel(asLevel)+'</span>';
-  } else {
-    const asLevel = speedLevel(asTime/3600000, 'assembly');
-    return '<span class="speed-badge speed-'+asLevel+'">'+speedLabel(asLevel)+'</span>';
+  var fsTime = job.steps.filter(function(s){ return s.phase==='service'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0);
+  var asTime = job.steps.filter(function(s){ return s.phase==='assembly'; }).reduce(function(a,s){ return a+(s.elapsed||0); }, 0);
+  var type = job.type;
+  // Determine what phases this job actually has
+  var hasSvc = fsTime > 0 || (job.workTypes||[]).some(function(t){ return t==='Full Service'||t==='Part Service'; }) || type==='full'||type==='part'||type==='part_asm';
+  var hasAsm = asTime > 0 || (job.workTypes||[]).some(function(t){ return t==='\u0421\u0431\u043e\u0440\u043a\u0430'; }) || type==='full'||type==='assembly'||type==='part_asm';
+  var svcType = (type==='part'||type==='part_asm') ? 'part' : 'service';
+  var parts = [];
+  if (hasSvc && fsTime > 0) {
+    var lvl = speedLevel(fsTime/3600000, svcType);
+    parts.push('<span class="speed-badge speed-'+lvl+'">'+(type==='part'||type==='part_asm'?'Part':'Full')+' Svc: '+speedLabel(lvl)+'</span>');
   }
+  if (hasAsm && asTime > 0) {
+    var lvl2 = speedLevel(asTime/3600000, 'assembly');
+    parts.push('<span class="speed-badge speed-'+lvl2+'">Assemble: '+speedLabel(lvl2)+'</span>');
+  }
+  // If only one phase and no time yet, show placeholder
+  if (parts.length === 0) {
+    if (hasSvc && hasAsm) return '';
+    return '';
+  }
+  return parts.join(' ');
 }
 
 function navigate(page) {
