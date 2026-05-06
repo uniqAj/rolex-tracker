@@ -232,46 +232,6 @@
 
     /* ── FAB ── */
     /* ── HEATMAP (GitHub-style) ── */
-    .heatmap-grid {
-      display: grid; grid-template-columns: 28px repeat(28, 1fr);
-      gap: 4px; padding: 4px 0 8px;
-    }
-    .heatmap-day-label {
-      font-size: 9px; color: var(--text-dim);
-      letter-spacing: 0.05em; display: flex; align-items: center;
-      padding-right: 4px;
-    }
-    .heatmap-cell {
-      aspect-ratio: 1; border-radius: 3px;
-      background: rgba(255,255,255,0.04);
-      transition: transform 0.15s, box-shadow 0.15s;
-      cursor: default;
-      position: relative;
-    }
-    .heatmap-cell:hover { transform: scale(1.4); z-index: 2; box-shadow: 0 0 0 1px var(--gold); }
-    .heatmap-cell.lvl-1 { background: rgba(240,192,96,0.20); }
-    .heatmap-cell.lvl-2 { background: rgba(240,192,96,0.40); }
-    .heatmap-cell.lvl-3 { background: rgba(240,192,96,0.65); }
-    .heatmap-cell.lvl-4 { background: rgba(240,192,96,0.95); box-shadow: 0 0 6px rgba(240,192,96,0.4); }
-    .heatmap-cell.future { opacity: 0.25; }
-    .heatmap-cell.today { box-shadow: 0 0 0 1.5px var(--gold) inset; }
-    .heatmap-month-row {
-      display: grid; grid-template-columns: 28px repeat(28, 1fr); gap: 4px;
-      font-size: 10px; color: var(--text-dim); margin-bottom: 4px;
-    }
-    .heatmap-month-row > span { text-align: left; padding-left: 2px; }
-    .heatmap-legend {
-      display: flex; align-items: center; gap: 6px; justify-content: flex-end;
-      font-size: 10px; color: var(--text-dim); margin-top: 8px;
-    }
-    .heatmap-legend-cell {
-      width: 12px; height: 12px; border-radius: 2px;
-      background: rgba(255,255,255,0.04);
-    }
-    .heatmap-legend-cell.lvl-1 { background: rgba(240,192,96,0.20); }
-    .heatmap-legend-cell.lvl-2 { background: rgba(240,192,96,0.40); }
-    .heatmap-legend-cell.lvl-3 { background: rgba(240,192,96,0.65); }
-    .heatmap-legend-cell.lvl-4 { background: rgba(240,192,96,0.95); }
     body::before {
       content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
       background:
@@ -1119,25 +1079,6 @@
 </div>
 
 <!-- MODAL: Step Note -->
-<div class="modal-overlay" id="modal-note">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="note-modal-title">&#1047;&#1072;&#1084;&#1077;&#1090;&#1082;&#1072; &#1082; &#1101;&#1090;&#1072;&#1087;&#1091;</div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">&#1055;&#1088;&#1086;&#1073;&#1083;&#1077;&#1084;&#1099; / &#1085;&#1072;&#1073;&#1083;&#1102;&#1076;&#1077;&#1085;&#1080;&#1103;</label>
-        <textarea class="form-textarea" id="note-problems" placeholder="&#1063;&#1090;&#1086; &#1086;&#1073;&#1085;&#1072;&#1088;&#1091;&#1078;&#1080;&#1083;&#1080;..."></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">&#1048;&#1089;&#1087;&#1086;&#1083;&#1100;&#1079;&#1086;&#1074;&#1072;&#1085;&#1085;&#1099;&#1077; &#1076;&#1077;&#1090;&#1072;&#1083;&#1080;</label>
-        <input class="form-input" id="note-parts" placeholder="&#1085;&#1072;&#1087;&#1088;. &#1085;&#1086;&#1074;&#1099;&#1081; &#1073;&#1072;&#1083;&#1072;&#1085;&#1089;..." autocomplete="off" />
-      </div>
-      <button class="btn btn-gold" onclick="saveStepNote()">&#1057;&#1086;&#1093;&#1088;&#1072;&#1085;&#1080;&#1090;&#1100;</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-note')">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL: History Detail -->
 <div class="modal-overlay" id="modal-history-detail">
   <div class="modal">
@@ -1302,12 +1243,9 @@ function save(d) {
 }
 
 let currentJobId = null;
-let noteTargetStep = null;
-let customTimeTarget = null;
 let phaseCustomTarget = null;
 let currentEventType = null;
 let editingEventId = null;
-let timers = {};
 
 function updateClock() {
   const el = document.getElementById('topbar-clock');
@@ -1322,10 +1260,6 @@ function fmtMs(ms) {
   if (h > 0) return h+'\u0447 '+(m%60)+'\u043c';
   if (m > 0) return m+'\u043c '+(s%60)+'\u0441';
   return s+'\u0441';
-}
-function fmtMsLive(ms) {
-  const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
-  return (h>0 ? h+':' : '') + String(m%60).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
 }
 function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('ru', {day:'numeric', month:'short', year:'numeric'});
@@ -1802,8 +1736,9 @@ function renderWorkSteps(job) {
         (isRunning?'00:00':(phaseElapsed>0?fmtMs(phaseElapsed):'\u2014'))+'</div>'+
       '</div>'+
 
-      // Quick time buttons (compact, single row)
-      '<div style="display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap;">'+
+      // Quick time buttons (compact, single row) with +/- mode toggle
+      '<div style="display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap;align-items:center;">'+
+      '<button class="phase-qt-btn phase-qt-sign" id="phase-sign-'+job.id+'-'+phase.id+'" data-sign="1" onclick="togglePhaseSign(\''+job.id+'\',\''+phase.id+'\')" style="flex:0 0 36px;padding:7px;font-size:14px;font-weight:700;">+</button>'+
       qts.map(function(t){ return '<button class="phase-qt-btn" style="flex:1;min-width:42px;padding:7px 4px;font-size:12px;" onclick="addPhaseTime(\''+job.id+'\',\''+phase.id+'\','+t.min+')">'+t.label+'</button>'; }).join('')+
       '<button class="phase-qt-btn phase-qt-btn-custom" style="flex:0 0 36px;padding:7px;font-size:13px;" onclick="openPhaseCustomTime(\''+job.id+'\',\''+phase.id+'\')">&#10000;</button>'+
       '</div>'+
@@ -1819,6 +1754,11 @@ function renderWorkSteps(job) {
       '</div>';
   });
   container.innerHTML = html;
+
+  // Restore +/- sign button state for each phase
+  phases.forEach(function(phase) {
+    applyPhaseSignToBtn(job.id, phase.id);
+  });
 
   // Restart live timers
   phases.forEach(function(phase) {
@@ -1906,19 +1846,6 @@ function savePhaseNoteInline(jobId, phaseId, value) {
   // No re-render — input keeps focus, user can keep typing
 }
 
-function openPhaseNote(jobId, phaseId) {
-  var d = load();
-  var job = d.jobs.find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
-  if (!job) return;
-  var mainStep = job.steps.filter(function(s){ return s.phase===phaseId; })[0];
-  var cur = mainStep ? (mainStep.notes||'') : '';
-  var txt = prompt('\u0417\u0430\u043c\u0435\u0442\u043a\u0430 (' + phaseId + '):', cur);
-  if (txt === null) return;
-  if (mainStep) mainStep.notes = txt;
-  save(d);
-  openJob(jobId);
-}
-
 function renderJobEvents(job) {
   const container = document.getElementById('work-events-container');
   if (!container) return;
@@ -1965,86 +1892,60 @@ function renderJobEvents(job) {
   container.innerHTML = html;
 }
 
-function startStep(jobId, stepId) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  const step = job.steps.find(s => s.id === stepId);
-  if (!step) return;
-  step.running = true; step.startTime = Date.now();
-  save(d); openJob(jobId); showToast('\u042d\u0442\u0430\u043f \u043d\u0430\u0447\u0430\u0442');
-}
-function stopStep(jobId, stepId) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  const step = job.steps.find(s => s.id === stepId);
-  if (!step) return;
-  step.elapsed = (step.elapsed||0) + (Date.now() - step.startTime);
-  step.running = false; step.startTime = null;
-  save(d); clearInterval(timers[jobId+'_'+stepId]); delete timers[jobId+'_'+stepId];
-  openJob(jobId); showToast('\u042d\u0442\u0430\u043f \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d: '+fmtMs(step.elapsed));
-}
-function restartStep(jobId, stepId) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  const step = job && job.steps.find(s => s.id === stepId);
-  if (!step) return;
-  step.running = true; step.startTime = Date.now();
-  save(d); openJob(jobId);
-}
-function startTimerDisplay(jobId, stepId, startTime, prevElapsed) {
-  const key = jobId+'_'+stepId;
-  clearInterval(timers[key]);
-  timers[key] = setInterval(() => {
-    const el = document.getElementById('timer-'+jobId+'-'+stepId);
-    if (!el) { clearInterval(timers[key]); return; }
-    el.textContent = fmtMsLive(prevElapsed + (Date.now() - startTime));
-  }, 500);
+// Persist sign state so re-render of openJob doesn't reset to +
+var phaseSignState = {};
+
+function togglePhaseSign(jobId, phaseId) {
+  var key = jobId+'-'+phaseId;
+  var newSign = (phaseSignState[key] === -1) ? 1 : -1;
+  phaseSignState[key] = newSign;
+  applyPhaseSignToBtn(jobId, phaseId);
 }
 
-function openStepNote(jobId, stepId) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  const step = job && job.steps.find(s => s.id === stepId);
-  if (!step) return;
-  noteTargetStep = {jobId, stepId};
-  document.getElementById('note-modal-title').textContent = step.name;
-  document.getElementById('note-problems').value = step.notes||'  ';
-  document.getElementById('note-parts').value = step.parts||'  ';
-  openModal('modal-note');
-}
-function saveStepNote() {
-  if (!noteTargetStep) return;
-  const {jobId, stepId} = noteTargetStep;
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  const step = job && job.steps.find(s => s.id === stepId);
-  if (!step) return;
-  step.notes = document.getElementById('note-problems').value.trim();
-  step.parts = document.getElementById('note-parts').value.trim();
-  save(d); closeModal('modal-note'); openJob(jobId); showToast('\u0417\u0430\u043c\u0435\u0442\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0430');
+function applyPhaseSignToBtn(jobId, phaseId) {
+  var btn = document.getElementById('phase-sign-'+jobId+'-'+phaseId);
+  if (!btn) return;
+  var key = jobId+'-'+phaseId;
+  var sign = phaseSignState[key] === -1 ? -1 : 1;
+  if (sign === -1) {
+    btn.setAttribute('data-sign', '-1');
+    btn.textContent = '\u2212';
+    btn.style.background = 'rgba(255,107,107,0.18)';
+    btn.style.borderColor = 'rgba(255,107,107,0.4)';
+    btn.style.color = 'var(--red)';
+  } else {
+    btn.setAttribute('data-sign', '1');
+    btn.textContent = '+';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
 }
 
 function addPhaseTime(jobId, phaseId, minutes) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
+  const d = load(), job = d.jobs.find(j => j.id === jobId) || (d.done||[]).find(j => j.id === jobId);
   if (!job) return;
   const ps = job.steps.filter(s => s.phase === phaseId);
   if (ps.length === 0) return;
-  ps[0].elapsed = (ps[0].elapsed||0) + minutes*60000;
+  var sign = phaseSignState[jobId+'-'+phaseId] === -1 ? -1 : 1;
+  var deltaMs = sign * minutes * 60000;
+  var prev = ps[0].elapsed || 0;
+  var next = prev + deltaMs;
+  if (next < 0) next = 0;
+  var actualDelta = next - prev;
+  ps[0].elapsed = next;
   save(d); openJob(jobId);
-  showToast('+'+(minutes<60?minutes+'\u043c':(minutes/60)+'\u0447')+' \u2192 '+(phaseId==='service'?'Full Service':'\u0421\u0431\u043e\u0440\u043a\u0430'));
+  var phaseLabel = phaseId==='service' ? 'Service' : (phaseId==='assembly' ? '\u0421\u0431\u043e\u0440\u043a\u0430' : (PHASE_LABELS[phaseId]||phaseId));
+  if (actualDelta === 0) {
+    showToast('\u0423\u0436\u0435 0 \u2014 \u043d\u0435\u043b\u044c\u0437\u044f \u043c\u0435\u043d\u044c\u0448\u0435');
+  } else {
+    var absMin = Math.abs(actualDelta) / 60000;
+    var prefix = actualDelta > 0 ? '+' : '\u2212';
+    showToast(prefix + (absMin<60?absMin+'\u043c':(absMin/60)+'\u0447') + ' \u2192 ' + phaseLabel);
+  }
 }
 function openPhaseCustomTime(jobId, phaseId) {
   phaseCustomTarget = {jobId, phaseId};
-  document.getElementById('inp-custom-min').value = '';
-  openModal('modal-custom-time');
-}
-function addQuickTime(jobId, stepId, minutes) {
-  const d = load(), job = d.jobs.find(j => j.id === jobId);
-  if (!job) return;
-  const step = job.steps.find(s => s.id === stepId);
-  if (!step) return;
-  step.elapsed = (step.elapsed||0) + minutes*60000;
-  save(d); openJob(jobId); showToast('+'+minutes+'\u043c \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
-}
-function openCustomTime(jobId, stepId) {
-  customTimeTarget = {jobId, stepId};
   document.getElementById('inp-custom-min').value = '';
   openModal('modal-custom-time');
 }
@@ -2053,7 +1954,6 @@ function applyCustomTime() {
   if (!val || val <= 0) { showToast('\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0447\u0438\u0441\u043b\u043e \u043c\u0438\u043d\u0443\u0442'); return; }
   closeModal('modal-custom-time');
   if (phaseCustomTarget) { addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val); phaseCustomTarget = null; }
-  else if (customTimeTarget) { addQuickTime(customTimeTarget.jobId, customTimeTarget.stepId, val); customTimeTarget = null; }
 }
 
 function completeJob() {
@@ -2298,18 +2198,23 @@ function historyCard(j, compact) {
   const hasVozvrat = j.vozvrat && j.vozvrat.length > 0;
   const borderCls = hasVozvrat?'card-vozvrat':(hasDorab?'card-dorabotka':'');
   const swipeId = 'swipe-'+j.id;
+  const speedB = speedBadges(j);
+  const dorabB = hasDorab?'<span class="badge badge-dorabotka" style="font-size:13px;padding:3px 8px;">\u21bb\u00a0'+j.dorabotki.length+'</span>':'';
+  const vozvratB = hasVozvrat?'<span class="badge badge-vozvrat" style="font-size:13px;padding:3px 8px;">\u21a9\u00a0'+j.vozvrat.length+'</span>':'';
+  const badgeRow = (speedB || dorabB || vozvratB)
+    ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">'+speedB+dorabB+vozvratB+'</div>'
+    : '';
   const inner = '<div class="history-item '+borderCls+'" onclick="openHistoryDetail(\''+ j.id+'\')" style="transition:transform 0.25s ease;position:relative;z-index:1;">'+
     '<div class="history-header"><div class="history-ref">'+(j.serial||j.ref)+'</div>'+
     '<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div></div>'+
     '<div class="history-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' \xb7 ':'')+( j.model||'')+'</div>'+
     '<div class="history-times">'+
     '<div class="history-time">\u0418\u0442\u043e\u0433\u043e: <span>'+fmtMs(total)+'</span></div>'+
-    (j.type==='full'?'<div class="history-time">Service: <span>'+fmtMs(fsTime)+'</span></div>':'')+
-    '<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>'+
-    speedBadges(j)+
-    (hasDorab?'<span class="badge badge-dorabotka" style="font-size:13px;padding:3px 8px;">\u21bb\u00a0'+j.dorabotki.length+'</span>':'')+
-    (hasVozvrat?'<span class="badge badge-vozvrat" style="font-size:13px;padding:3px 8px;">\u21a9\u00a0'+j.vozvrat.length+'</span>':'')+
-    '</div></div>';
+    (fsTime>0?'<div class="history-time">'+(j.type==='part'||j.type==='part_asm'?'Part Service':'Service')+': <span>'+fmtMs(fsTime)+'</span></div>':'')+
+    (asTime>0?'<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>':'')+
+    '</div>'+
+    badgeRow+
+    '</div>';
   if (compact) return inner;
   return '<div class="swipe-wrap" id="'+swipeId+'">'+inner+
     '<div class="swipe-actions">'+
@@ -2534,15 +2439,6 @@ function openEditJob(id) {
   document.getElementById('edit-job-body').innerHTML = html;
   openModal('modal-edit-job');
 }
-function toggleEditDetails(id) { const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
-function toggleFeaturesEdit() {
-  var ta = document.getElementById('edit-features');
-  var prev = document.getElementById('features-preview');
-  if (!ta) return;
-  var open = ta.style.display !== 'none';
-  ta.style.display = open ? 'none' : 'block';
-  if (!open) ta.focus();
-}
 
 function saveEditJob(id) {
   const d = load();
@@ -2740,7 +2636,7 @@ function renderHeatmap(allDone) {
       }
       var border = isToday ? '1.5px solid rgba(240,192,96,0.8)' : '1px solid transparent';
       var opacity = isFuture ? '0.25' : '1';
-      var titleTxt = cellDate.toLocaleDateString('ru', {day:'numeric',month:'short',weekday:'short'})+': '+c+(c===1?' \u0447\u0430\u0441\u044b'+(c>=2&&c<=4?'а':'')+'' : ' \u0447\u0430\u0441\u043e\u0432');
+      var titleTxt = cellDate.toLocaleDateString('ru', {day:'numeric',month:'short',weekday:'short'})+': '+c+' \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e';
 
       html += '<div title="'+titleTxt+'" style="width:'+cellSz+'px;height:'+cellSz+'px;border-radius:3px;background:'+bg+';border:'+border+';opacity:'+opacity+';flex-shrink:0;transition:transform 0.15s;cursor:default;" onmouseover="this.style.transform=\'scale(1.5)\';this.style.zIndex=\'10\'" onmouseout="this.style.transform=\'\';this.style.zIndex=\'\'"></div>';
       if (col < 3) html += '<div style="width:'+cellGap+'px;flex-shrink:0;"></div>';
@@ -3663,10 +3559,6 @@ function filterCatalogParts() {
       + '<div class="part-desc">' + p.desc + '</div>'
       + '</div>';
   }).join('');
-}
-
-function setCatalogMech(key) {
-  openMechCatalog(key);
 }
 
 function filterGlobalCatalog() {
