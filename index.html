@@ -731,13 +731,49 @@
     .card-live-timer { font-size:22px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; letter-spacing:-0.02em; }
 
     /* Today widget */
-    .today-widget { margin:0 16px 16px; padding:14px 16px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; backdrop-filter:blur(12px); display:flex; gap:0; }
-    .today-ring { width:52px; height:52px; flex-shrink:0; margin-right:14px; }
-    .today-stats { flex:1; display:flex; flex-direction:column; justify-content:center; gap:4px; }
-    .today-label { font-size:10px; color:var(--text-dim); letter-spacing:0.15em; text-transform:uppercase; }
-    .today-numbers { display:flex; gap:16px; }
-    .today-num { font-size:20px; font-weight:700; color:var(--gold); }
-    .today-num-label { font-size:10px; color:var(--text-dim); margin-top:1px; }
+    .today-widget {
+      margin: 0 16px 16px;
+      padding: 18px 18px;
+      background: linear-gradient(135deg, rgba(240,192,96,0.08), rgba(96,160,255,0.06));
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      gap: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .today-widget::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0% 0%, rgba(240,192,96,0.15), transparent 60%);
+      pointer-events: none;
+    }
+    .today-ring { width: 56px; height: 56px; flex-shrink: 0; margin-right: 16px; position: relative; z-index: 1; }
+    .today-stats { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; position: relative; z-index: 1; }
+    .today-label {
+      font-size: 11px; color: var(--gold);
+      letter-spacing: 0.2em; text-transform: uppercase;
+      font-weight: 600;
+    }
+    .today-numbers { display: flex; gap: 18px; }
+    .today-num-block { display: flex; flex-direction: column; align-items: flex-start; }
+    .today-num {
+      font-size: 26px; font-weight: 800;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .today-num-gold  { color: var(--gold); }
+    .today-num-green { color: var(--green); }
+    .today-num-blue  { color: var(--blue); }
+    .today-num-label {
+      font-size: 10px; color: var(--text-dim);
+      margin-top: 4px; letter-spacing: 0.05em;
+      text-transform: uppercase; font-weight: 500;
+    }
     ::-webkit-scrollbar { width: 2px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 1px; }
@@ -1438,26 +1474,26 @@ function renderTodayWidget() {
   // SVG ring for today count (max 8 for full ring)
   var maxDay = 4; // typical day target
   var pct = Math.min(todayJobs.length / maxDay, 1);
-  var r = 20; var circ = 2 * Math.PI * r;
+  var r = 22; var circ = 2 * Math.PI * r;
   var dash = pct * circ;
 
   var ringColor = pct >= 1 ? 'var(--green)' : 'var(--gold)';
-  var svg = '<svg class="today-ring" viewBox="0 0 52 52">'
-    + '<circle cx="26" cy="26" r="'+r+'" fill="none" stroke="rgba(240,192,96,0.12)" stroke-width="5"/>'
-    + '<circle cx="26" cy="26" r="'+r+'" fill="none" stroke="'+ringColor+'" stroke-width="5"'
+  var svg = '<svg class="today-ring" viewBox="0 0 56 56">'
+    + '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="rgba(240,192,96,0.12)" stroke-width="5"/>'
+    + '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="'+ringColor+'" stroke-width="5"'
     + ' stroke-dasharray="'+dash+' '+circ+'" stroke-linecap="round"'
-    + ' transform="rotate(-90 26 26)" style="transition:stroke-dasharray 0.6s ease;"/>'
-    + '<text x="26" y="31" text-anchor="middle" font-size="14" font-weight="700" fill="'+ringColor+'">'+todayJobs.length+'</text>'
+    + ' transform="rotate(-90 28 28)" style="transition:stroke-dasharray 0.6s ease;filter:drop-shadow(0 0 4px '+ringColor+');"/>'
+    + '<text x="28" y="33" text-anchor="middle" font-size="16" font-weight="800" fill="'+ringColor+'" font-family="Syne">'+todayJobs.length+'</text>'
     + '</svg>';
 
   el.innerHTML = '<div class="today-widget">'
     + svg
     + '<div class="today-stats">'
-    + '<div class="today-label">\u0421\u0435\u0433\u043e\u0434\u043d\u044f</div>'
+    + '<div class="today-label">\u2728 \u0421\u0435\u0433\u043e\u0434\u043d\u044f</div>'
     + '<div class="today-numbers">'
-    + '<div><div class="today-num">'+tickNumHTML(todayJobs.length)+'</div><div class="today-num-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'
-    + '<div><div class="today-num">'+tickNumHTML(weekJobs.length)+'</div><div class="today-num-label">\u0417\u0430 \u043d\u0435\u0434\u0435\u043b\u044e</div></div>'
-    + (activeCount>0?'<div><div class="today-num" style="color:var(--blue);">'+tickNumHTML(activeCount)+'</div><div class="today-num-label">\u0412 \u0440\u0430\u0431\u043e\u0442\u0435</div></div>':'')
+    + '<div class="today-num-block"><div class="today-num today-num-green">'+tickNumHTML(todayJobs.length)+'</div><div class="today-num-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'
+    + '<div class="today-num-block"><div class="today-num today-num-gold">'+tickNumHTML(weekJobs.length)+'</div><div class="today-num-label">\u0417\u0430 \u043d\u0435\u0434\u0435\u043b\u044e</div></div>'
+    + (activeCount>0?'<div class="today-num-block"><div class="today-num today-num-blue">'+tickNumHTML(activeCount)+'</div><div class="today-num-label">\u0412 \u0440\u0430\u0431\u043e\u0442\u0435</div></div>':'')
     + '</div></div></div>';
 }
 
@@ -2262,7 +2298,11 @@ function openHistoryDetail(id) {
   currentJobId = id;
   document.getElementById('hd-ref').textContent = (job.serial||job.ref)+(job.model?' \xb7 '+job.model:'');
   const totalMs = totalTime(job);
-  let html = '<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">'+speedBadges(job)+
+  let html = '<div style="margin-bottom:10px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text-dim);">'
+    + '<div>\u041f\u0440\u0438\u043d\u044f\u0442\u043e: <strong style="color:var(--text);">'+fmtDate(job.createdAt)+'</strong></div>'
+    + (job.completedAt?'<div>\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e: <strong style="color:var(--green);">'+fmtDate(job.completedAt)+'</strong></div>':'')
+    + '</div>'
+    + '<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">'+speedBadges(job)+
     '<span style="font-size:13px;color:var(--text-dim);align-self:center;">\u0418\u0442\u043e\u0433\u043e: <strong style="color:var(--gold)">'+fmtMs(totalMs)+'</strong></span></div>';
   const phases = [];
   const seenPh = {};
@@ -2527,9 +2567,27 @@ function setPeriod(period) {
 
 function filterByPeriod(jobs) {
   if (currentPeriod === 'all') return jobs;
-  var now = Date.now();
-  var ms = {day:86400000, week:604800000, month:30*86400000, '3months':90*86400000, '6months':180*86400000, year:365*86400000};
-  var cutoff = now - (ms[currentPeriod] || ms.month);
+  var now = new Date();
+  var cutoff;
+  if (currentPeriod === 'month') {
+    // Current calendar month — from 1st of this month
+    cutoff = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  } else if (currentPeriod === 'year') {
+    // Current calendar year — from Jan 1st
+    cutoff = new Date(now.getFullYear(), 0, 1).getTime();
+  } else if (currentPeriod === 'week') {
+    // Current week — from Monday 00:00
+    var dow = now.getDay() === 0 ? 6 : now.getDay() - 1; // Mon=0..Sun=6
+    var mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+    cutoff = mon.getTime();
+  } else if (currentPeriod === 'day') {
+    // Today only — from 00:00
+    cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  } else {
+    // Rolling window for 3months / 6months
+    var ms = {'3months':90*86400000, '6months':180*86400000};
+    cutoff = now.getTime() - (ms[currentPeriod] || ms['3months']);
+  }
   return jobs.filter(function(j){ return (j.completedAt || j.createdAt) >= cutoff; });
 }
 
