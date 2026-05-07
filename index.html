@@ -854,8 +854,17 @@
       <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">&#9881; &#1054;&#1089;&#1086;&#1073;&#1077;&#1085;&#1085;&#1086;&#1089;&#1090;&#1080;</div>
       <textarea id="work-features" class="form-textarea" rows="2" placeholder="&#1041;&#1077;&#1079;&#1077;&#1083;&#1100;, &#1073;&#1088;&#1072;&#1089;&#1083;&#1077;&#1090;, &#1086;&#1088;&#1080;&#1075;&#1080;&#1085;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1076;&#1072;&#1081;&#1083;..." onblur="saveWorkFeatures()" style="width:100%;font-size:14px;min-height:50px;"></textarea>
     </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;">&#128247; &#1060;&#1086;&#1090;&#1086;</div>
+        <button onclick="document.getElementById('work-photo-input').click()" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);border-radius:6px;font-size:11px;padding:4px 10px;cursor:pointer;">+ &#1044;&#1086;&#1073;&#1072;&#1074;&#1080;&#1090;&#1100;</button>
+        <input type="file" id="work-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="addWorkPhoto(this)" />
+      </div>
+      <div id="work-photos" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
   </div>
 
+  <div id="calibre-stats-container" style="padding:0 16px 12px;"></div>
   <div id="work-steps-container" class="steps-container"></div>
   <div id="work-events-container"></div>
   <div style="padding:16px;">
@@ -1664,6 +1673,8 @@ function openJob(id) {
   if (noteEl) noteEl.value = job.note || '';
   if (featEl) featEl.value = job.features || '';
   if (dateEl) dateEl.value = tsToDatetimeLocal(job.createdAt);
+  renderCalibreStats(job);
+  renderWorkPhotos(job);
   renderWorkSteps(job);
   renderJobEvents(job);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1703,6 +1714,143 @@ function saveWorkFeatures() {
   if (!el) return;
   job.features = (el.value||'').trim();
   save(d);
+}
+
+// ── PHOTOS ────────────────────────────────────────────────────────────────────
+function renderCalibreStats(job) {
+  var el = document.getElementById('calibre-stats-container');
+  if (!el) return;
+  if (!job.model) { el.innerHTML = ''; return; }
+  var d = load();
+  var sameCal = (d.done||[]).filter(function(j){
+    return j.model === job.model && j.id !== job.id;
+  });
+  if (sameCal.length === 0) { el.innerHTML = ''; return; }
+
+  // Aggregate
+  var totalCount = sameCal.length;
+  var totalMs = 0;
+  var dorabCount = 0;
+  var vozvratCount = 0;
+  sameCal.forEach(function(j) {
+    totalMs += totalTime(j);
+    if ((j.dorabotki||[]).length > 0) dorabCount++;
+    if ((j.vozvrat||[]).length > 0) vozvratCount++;
+  });
+  var avgMs = Math.round(totalMs / totalCount);
+  var avgH = avgMs / 3600000;
+
+  // Compare current job to average
+  var currentTotal = totalTime(job);
+  var deltaPct = currentTotal > 0 && avgMs > 0
+    ? Math.round((currentTotal - avgMs) / avgMs * 100) : null;
+  var deltaTxt = '';
+  if (deltaPct !== null && currentTotal > 0) {
+    if (deltaPct > 15) deltaTxt = '<span style="color:var(--red);">+'+deltaPct+'% \u043e\u0442 \u0441\u0440\u0435\u0434\u043d\u0435\u0433\u043e</span>';
+    else if (deltaPct < -15) deltaTxt = '<span style="color:var(--green);">'+deltaPct+'% \u043e\u0442 \u0441\u0440\u0435\u0434\u043d\u0435\u0433\u043e</span>';
+    else deltaTxt = '<span style="color:var(--text-dim);">~\u0432 \u043d\u043e\u0440\u043c\u0435 ('+(deltaPct>=0?'+':'')+deltaPct+'%)</span>';
+  }
+
+  el.innerHTML = '<div style="background:linear-gradient(135deg,rgba(127,119,221,0.08),rgba(96,160,255,0.06));border:1px solid var(--glass-border);border-radius:12px;padding:12px 14px;">'
+    + '<div style="font-size:10px;color:#7F77DD;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;font-weight:600;">\ud83d\udcca \u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043a\u0430\u043b\u0438\u0431\u0440\u0430 ' + job.model + '</div>'
+    + '<div style="display:flex;gap:14px;flex-wrap:wrap;">'
+    + '<div><div style="font-size:18px;font-weight:700;color:var(--text);font-family:\'Syne\',sans-serif;">'+totalCount+'</div><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;">\u0432\u0441\u0435\u0433\u043e</div></div>'
+    + '<div><div style="font-size:18px;font-weight:700;color:var(--gold);font-family:\'Syne\',sans-serif;">'+fmtMs(avgMs)+'</div><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;">\u0441\u0440\u0435\u0434\u043d\u0435\u0435</div></div>'
+    + (dorabCount>0?'<div><div style="font-size:18px;font-weight:700;color:#e6c832;font-family:\'Syne\',sans-serif;">'+dorabCount+'</div><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;">\u0441 \u0434\u043e\u0440\u0430\u0431.</div></div>':'')
+    + (vozvratCount>0?'<div><div style="font-size:18px;font-weight:700;color:#e6821e;font-family:\'Syne\',sans-serif;">'+vozvratCount+'</div><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;">\u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>':'')
+    + '</div>'
+    + (deltaTxt ? '<div style="margin-top:8px;font-size:12px;">\u0421\u0435\u0439\u0447\u0430\u0441: <strong style="color:var(--text);">'+fmtMs(currentTotal)+'</strong> \u00b7 '+deltaTxt+'</div>' : '')
+    + '</div>';
+}
+
+function compressImageToDataURL(file, maxDim, quality) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var ratio = Math.min(maxDim/img.width, maxDim/img.height, 1);
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function addWorkPhoto(input) {
+  if (!input.files || !input.files[0] || !currentJobId) return;
+  var file = input.files[0];
+  showToast('\u0421\u0436\u0438\u043c\u0430\u044e \u0444\u043e\u0442\u043e...');
+  compressImageToDataURL(file, 1200, 0.7).then(function(dataUrl) {
+    var d = load();
+    var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+    if (!job) return;
+    if (!job.photos) job.photos = [];
+    if (job.photos.length >= 8) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c 8 \u0444\u043e\u0442\u043e'); return; }
+    job.photos.push({id: Date.now().toString(), data: dataUrl, ts: Date.now()});
+    try {
+      save(d);
+      input.value = '';
+      renderWorkPhotos(job);
+      showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
+    } catch(e) {
+      showToast('\u041d\u0435 \u0445\u0432\u0430\u0442\u0430\u0435\u0442 \u043c\u0435\u0441\u0442\u0430 \u0432 \u043f\u0430\u043c\u044f\u0442\u0438');
+    }
+  }).catch(function() {
+    showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438');
+  });
+}
+
+function deleteWorkPhoto(photoId) {
+  if (!currentJobId) return;
+  if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0444\u043e\u0442\u043e?')) return;
+  var d = load();
+  var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+  if (!job || !job.photos) return;
+  job.photos = job.photos.filter(function(p){ return p.id !== photoId; });
+  save(d);
+  renderWorkPhotos(job);
+  showToast('\u0424\u043e\u0442\u043e \u0443\u0434\u0430\u043b\u0435\u043d\u043e');
+}
+
+function renderWorkPhotos(job) {
+  var el = document.getElementById('work-photos');
+  if (!el) return;
+  var photos = job.photos || [];
+  if (photos.length === 0) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-dim);padding:6px 0;">\u0424\u043e\u0442\u043e \u0435\u0449\u0451 \u043d\u0435\u0442</div>';
+    return;
+  }
+  el.innerHTML = photos.map(function(p) {
+    return '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid var(--glass-border);cursor:pointer;flex-shrink:0;" onclick="openPhotoViewer(\''+p.id+'\')">'
+      + '<img src="'+p.data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
+      + '<button onclick="event.stopPropagation();deleteWorkPhoto(\''+p.id+'\')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.65);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">\u00d7</button>'
+      + '</div>';
+  }).join('');
+}
+
+function openPhotoViewer(photoId) {
+  if (!currentJobId) return;
+  var d = load();
+  var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+  if (!job || !job.photos) return;
+  var photo = job.photos.find(function(p){ return p.id === photoId; });
+  if (!photo) return;
+  // Reuse existing img-viewer
+  document.getElementById('part-img-title').textContent = '\u0424\u043e\u0442\u043e \u00b7 ' + (job.serial||job.ref||'');
+  document.getElementById('part-img-src').src = photo.data;
+  document.getElementById('part-img-hint').textContent = new Date(photo.ts).toLocaleString('ru');
+  resetImgTransform();
+  document.getElementById('img-viewer').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function renderWorkSteps(job) {
@@ -2006,9 +2154,18 @@ function completeJob() {
 }
 function deleteJob() {
   if (!currentJobId) return;
-  if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u044d\u0442\u0443 \u0437\u0430\u043f\u0438\u0441\u044c?')) return;
-  const d = load(); d.jobs = d.jobs.filter(j => j.id !== currentJobId);
-  save(d); showToast('\u0423\u0434\u0430\u043b\u0435\u043d\u043e'); navigate('home');
+  if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u044d\u0442\u0443 \u0437\u0430\u043f\u0438\u0441\u044c \u043d\u0430\u0432\u0441\u0435\u0433\u0434\u0430?')) return;
+  const d = load();
+  var wasActive = (d.jobs||[]).some(function(j){ return j.id === currentJobId; });
+  d.jobs = (d.jobs||[]).filter(function(j){ return j.id !== currentJobId; });
+  d.done = (d.done||[]).filter(function(j){ return j.id !== currentJobId; });
+  save(d);
+  showToast('\u0423\u0434\u0430\u043b\u0435\u043d\u043e');
+  closeModal('modal-history-detail');
+  closeModal('modal-edit-job');
+  currentJobId = null;
+  if (wasActive) navigate('home');
+  else renderHistory();
 }
 
 function toggleExtraTypes() {
@@ -2336,6 +2493,14 @@ function openHistoryDetail(id) {
   });
   if (job.features) html += '<div style="margin-top:8px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;font-size:13px;"><span style="color:var(--text-dim);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;">&#9881; \u041e\u0441\u043e\u0431\u0435\u043d\u043d\u043e\u0441\u0442\u0438</span><div style="color:var(--text);margin-top:4px;">'+job.features+'</div></div>';
   if (job.note) html += '<div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text-dim);">'+job.note+'</div>';
+  if (job.photos && job.photos.length > 0) {
+    html += '<div style="margin-top:10px;"><div style="font-size:11px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">\u0444\u043e\u0442\u043e ('+job.photos.length+')</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+      + job.photos.map(function(p) {
+          return '<div style="width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid var(--glass-border);cursor:pointer;" onclick="openPhotoViewer(\''+p.id+'\')"><img src="'+p.data+'" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>';
+        }).join('')
+      + '</div></div>';
+  }
 
   const vozvrat = job.vozvrat || [];
   if (vozvrat.length > 0) {
