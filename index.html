@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Service Tracker" />
   <meta name="theme-color" content="#0a0612" />
   <title>Service Tracker</title>
@@ -3056,13 +3056,20 @@ function importData(input) {
   reader.readAsText(file);
 }
 
+function applyMetaThemeColor(isLight) {
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', isLight ? '#e8e4dc' : '#0a0612');
+}
+
 function toggleTheme() {
   const isLight = document.documentElement.classList.toggle('light');
   localStorage.setItem('rst_theme', isLight?'light':'dark');
   document.getElementById('theme-btn').textContent = isLight?'🌙 \u0422\u0451\u043c\u043d\u0430\u044f':'☀️ \u0421\u0432\u0435\u0442\u043b\u0430\u044f';
+  applyMetaThemeColor(isLight);
 }
 if (localStorage.getItem('rst_theme')==='light') {
   document.documentElement.classList.add('light');
+  applyMetaThemeColor(true);
   window.addEventListener('load', () => {
     const btn=document.getElementById('theme-btn');
     if(btn) btn.textContent='🌙 \u0422\u0451\u043c\u043d\u0430\u044f';
