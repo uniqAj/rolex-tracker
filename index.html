@@ -1587,27 +1587,37 @@ function initDragToDismiss(modalId) {
   if (!overlay) return;
   var modal = overlay.querySelector('.modal');
   if (!modal) return;
-  var startY = 0, dy = 0;
+  var startY = 0, startModalTop = 0, dy = 0, active = false;
 
   modal.addEventListener('touchstart', function(e) {
-    startY = e.touches[0].clientY; dy = 0;
-  }, {passive:true});
+    var touch = e.touches[0];
+    var rect = modal.getBoundingClientRect();
+    var touchY = touch.clientY - rect.top;
+    // Only activate if touch starts in top 60px (handle area) OR modal is scrolled to top
+    active = (touchY < 60) || (modal.scrollTop <= 0);
+    startY = touch.clientY;
+    dy = 0;
+  }, {passive: true});
 
   modal.addEventListener('touchmove', function(e) {
-    dy = Math.max(0, e.touches[0].clientY - startY);
+    if (!active) return;
+    var newDy = e.touches[0].clientY - startY;
+    // Only dismiss on downward drag, and stop upward-scroll from triggering
+    if (newDy < 0) { active = false; return; }
+    // If scrollable content isn't at top, let it scroll naturally
+    if (modal.scrollTop > 0) { active = false; return; }
+    dy = newDy;
     modal.style.transform = 'translateY('+dy+'px)';
-    modal.style.opacity = String(1 - dy/400);
-  }, {passive:true});
+    modal.style.opacity = String(Math.max(0.4, 1 - dy/400));
+  }, {passive: true});
 
   modal.addEventListener('touchend', function() {
-    if (dy > 100) {
+    if (active && dy > 80) {
       closeModal(modalId);
-      modal.style.transform = '';
-      modal.style.opacity = '';
-    } else {
-      modal.style.transform = '';
-      modal.style.opacity = '';
     }
+    modal.style.transform = '';
+    modal.style.opacity = '';
+    dy = 0; active = false;
   });
 }
 
