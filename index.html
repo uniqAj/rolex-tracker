@@ -1663,19 +1663,21 @@ function jobCard(j) {
   var coverThumb = '';
   if (j.photos && j.photos.length > 0) {
     coverThumb = '<div onclick="event.stopPropagation();openPhotoViewerForJob(\''+j.id+'\',\''+j.photos[0].id+'\')" '
-      + 'style="width:48px;height:48px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);">'
+      + 'style="width:56px;height:76px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);">'
       + '<img src="'+j.photos[0].data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
       + '</div>';
   }
 
   return '<div class="card '+borderCls+'" onclick="addPulse(this);openJob(\''+j.id+'\')">'+
     '<div class="card-header" style="display:flex;align-items:flex-start;gap:12px;">'+
-    coverThumb+
     '<div style="flex:1;min-width:0;">'+
     '<div class="card-ref">'+(j.serial||j.ref)+'</div>'+
     '<div class="card-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' \xb7 ':'')+( j.model||'')+'</div>'+
-    '</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+
-    typeBadge+runBadge+dorabBadge+vozvratBadge+'</div></div>'+
+    '</div>'+
+    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'+
+    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+typeBadge+runBadge+dorabBadge+vozvratBadge+'</div>'+
+    coverThumb+
+    '</div></div>'+
     '<div class="card-body">'+
     (isRunning?'<div style="margin-bottom:8px;"><div class="card-live-timer" id="card-live-'+j.id+'">\u23f1</div><div style="font-size:10px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">\u0426\u0435\u043b\u043e\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>':'')+
     statsRow+'</div>'+
@@ -1981,10 +1983,13 @@ function openPhotoViewerForJob(jobId, photoId) {
   if (!job || !job.photos) return;
   var photo = job.photos.find(function(p){ return p.id === photoId; });
   if (!photo) return;
-  // Reuse existing img-viewer
   document.getElementById('part-img-title').textContent = '\u0424\u043e\u0442\u043e \u00b7 ' + (job.serial||job.ref||'');
   document.getElementById('part-img-src').src = photo.data;
-  document.getElementById('part-img-hint').textContent = new Date(photo.ts).toLocaleString('ru');
+  // Build date string manually to avoid Safari PWA locale bugs
+  var d = new Date(photo.ts);
+  var pad = function(n){ return n<10?'0'+n:n; };
+  var hint = pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+', '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  document.getElementById('part-img-hint').textContent = hint;
   resetImgTransform();
   document.getElementById('img-viewer').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2560,18 +2565,18 @@ function historyCard(j, compact) {
   const badgeRow = (speedB || dorabB || vozvratB)
     ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">'+speedB+dorabB+vozvratB+'</div>'
     : '';
-  // Cover photo thumbnail (first photo if exists)
+  // Cover photo thumbnail — right side, vertical
   var coverThumb = '';
   if (j.photos && j.photos.length > 0) {
     coverThumb = '<div onclick="event.stopPropagation();openPhotoViewerForJob(\''+j.id+'\',\''+j.photos[0].id+'\')" '
-      + 'style="width:54px;height:54px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);float:left;margin-right:12px;">'
+      + 'style="width:56px;height:76px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);align-self:center;">'
       + '<img src="'+j.photos[0].data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
       + '</div>';
   }
 
   const inner = '<div class="history-item '+borderCls+'" onclick="openHistoryDetail(\''+ j.id+'\')" style="transition:transform 0.25s ease;position:relative;z-index:1;'+(j.excludeFromStats?'opacity:0.75;':'')+'">'+
-    coverThumb+
-    '<div style="overflow:hidden;">'+
+    '<div style="display:flex;gap:12px;align-items:flex-start;">'+
+    '<div style="flex:1;min-width:0;">'+
     '<div class="history-header"><div class="history-ref">'+(j.serial||j.ref)+(j.excludeFromStats?' <span style="font-size:9px;color:#7F77DD;background:rgba(127,119,221,0.12);padding:2px 6px;border-radius:8px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;vertical-align:middle;">\u0432\u043d\u0435 \u0441\u0442\u0430\u0442.</span>':'')+'</div>'+
     '<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div></div>'+
     '<div class="history-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' \xb7 ':'')+( j.model||'')+'</div>'+
@@ -2581,6 +2586,8 @@ function historyCard(j, compact) {
     (asTime>0?'<div class="history-time">\u0421\u0431\u043e\u0440\u043a\u0430: <span>'+fmtMs(asTime)+'</span></div>':'')+
     '</div>'+
     badgeRow+
+    '</div>'+
+    coverThumb+
     '</div>'+
     '</div>';
   if (compact) return inner;
@@ -3333,7 +3340,7 @@ function closeImgViewer() {
 
 // ── IMAGE VIEWER: pinch-zoom, pan, double-tap ─────────────────────────────────
 var imgState = { scale: 1, tx: 0, ty: 0, minScale: 1, maxScale: 5 };
-var imgTouch = { mode: null, startDist: 0, startScale: 1, startTx: 0, startTy: 0, startX: 0, startY: 0, lastTap: 0 };
+var imgTouch = { mode: null, startDist: 0, startScale: 1, startTx: 0, startTy: 0, startX: 0, startY: 0, lastTap: 0, pinchCx: 0, pinchCy: 0 };
 
 function resetImgTransform() {
   imgState.scale = 1; imgState.tx = 0; imgState.ty = 0;
@@ -3373,6 +3380,12 @@ function initImgViewerGestures() {
       imgTouch.mode = 'pinch';
       imgTouch.startDist = distanceBetween(e.touches[0], e.touches[1]);
       imgTouch.startScale = imgState.scale;
+      imgTouch.startTx = imgState.tx;
+      imgTouch.startTy = imgState.ty;
+      // Center of pinch in stage coordinates
+      var rect = stage.getBoundingClientRect();
+      imgTouch.pinchCx = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left - rect.width / 2;
+      imgTouch.pinchCy = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top - rect.height / 2;
     } else if (e.touches.length === 1) {
       // Double-tap
       var now = Date.now();
@@ -3408,6 +3421,11 @@ function initImgViewerGestures() {
       var ns = imgTouch.startScale * ratio;
       if (ns < imgState.minScale) ns = imgState.minScale;
       if (ns > imgState.maxScale) ns = imgState.maxScale;
+      // Adjust tx/ty so the pinch center stays fixed on screen
+      // Formula: newTx = pinchCx + (startTx - pinchCx) * (ns / startScale)
+      var scaleRatio = ns / imgTouch.startScale;
+      imgState.tx = imgTouch.pinchCx + (imgTouch.startTx - imgTouch.pinchCx) * scaleRatio;
+      imgState.ty = imgTouch.pinchCy + (imgTouch.startTy - imgTouch.pinchCy) * scaleRatio;
       imgState.scale = ns;
       clampPan();
       applyImgTransform(true);
