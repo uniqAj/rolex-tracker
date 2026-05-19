@@ -2575,11 +2575,11 @@ function historyCard(j, compact) {
   const badgeRow = (speedB || dorabB || vozvratB)
     ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">'+speedB+dorabB+vozvratB+'</div>'
     : '';
-  // Cover photo thumbnail — right side, vertical
+  // Cover photo thumbnail — right side, below date
   var coverThumb = '';
   if (j.photos && j.photos.length > 0) {
     coverThumb = '<div onclick="event.stopPropagation();openPhotoViewerForJob(\''+j.id+'\',\''+j.photos[0].id+'\')" '
-      + 'style="width:56px;height:76px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);align-self:center;">'
+      + 'style="width:62px;height:82px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);">'
       + '<img src="'+j.photos[0].data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
       + '</div>';
   }
@@ -2587,8 +2587,7 @@ function historyCard(j, compact) {
   const inner = '<div class="history-item '+borderCls+'" onclick="openHistoryDetail(\''+ j.id+'\')" style="transition:transform 0.25s ease;position:relative;z-index:1;'+(j.excludeFromStats?'opacity:0.75;':'')+'">'+
     '<div style="display:flex;gap:12px;align-items:flex-start;">'+
     '<div style="flex:1;min-width:0;">'+
-    '<div class="history-header"><div class="history-ref">'+(j.serial||j.ref)+(j.excludeFromStats?' <span style="font-size:9px;color:#7F77DD;background:rgba(127,119,221,0.12);padding:2px 6px;border-radius:8px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;vertical-align:middle;">\u0432\u043d\u0435 \u0441\u0442\u0430\u0442.</span>':'')+'</div>'+
-    '<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div></div>'+
+    '<div class="history-ref" style="margin-bottom:6px;">'+(j.serial||j.ref)+(j.excludeFromStats?' <span style="font-size:9px;color:#7F77DD;background:rgba(127,119,221,0.12);padding:2px 6px;border-radius:8px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;vertical-align:middle;">\u0432\u043d\u0435 \u0441\u0442\u0430\u0442.</span>':'')+'</div>'+
     '<div class="history-model">'+(j.ref?'Ref '+j.ref:'')+(j.ref&&j.model?' \xb7 ':'')+( j.model||'')+'</div>'+
     '<div class="history-times">'+
     '<div class="history-time">\u0418\u0442\u043e\u0433\u043e: <span>'+fmtMs(total)+'</span></div>'+
@@ -2597,7 +2596,10 @@ function historyCard(j, compact) {
     '</div>'+
     badgeRow+
     '</div>'+
+    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">'+
+    '<div class="history-date">'+fmtDate(j.completedAt||j.createdAt)+'</div>'+
     coverThumb+
+    '</div>'+
     '</div>'+
     '</div>';
   if (compact) return inner;
