@@ -1896,6 +1896,42 @@ function addWorkPhoto(input) {
   });
 }
 
+function addPhotoFromHistory(input, jobId) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > MAX_INPUT_FILE_SIZE) {
+    showToast('\u0424\u0430\u0439\u043b \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u0431\u043e\u043b\u044c\u0448\u043e\u0439');
+    input.value = ''; return;
+  }
+  showToast('\u0421\u0436\u0438\u043c\u0430\u044e...');
+  compressImageToDataURL(file, 1400, 0.75).then(function(dataUrl) {
+    var d = load();
+    var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
+    if (!job) return;
+    if (!job.photos) job.photos = [];
+    if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c '+MAX_PHOTOS_PER_JOB+' \u0444\u043e\u0442\u043e'); return; }
+    job.photos.push({id: Date.now().toString(), data: dataUrl, ts: Date.now()});
+    var ok = save(d);
+    if (ok) {
+      input.value = '';
+      showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
+      // Re-open to refresh
+      openHistoryDetail(jobId);
+    }
+  }).catch(function(){ showToast('\u041e\u0448\u0438\u0431\u043a\u0430'); });
+}
+
+function deletePhotoFromHistory(jobId, photoId) {
+  if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0444\u043e\u0442\u043e?')) return;
+  var d = load();
+  var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
+  if (!job || !job.photos) return;
+  job.photos = job.photos.filter(function(p){ return p.id !== photoId; });
+  save(d);
+  showToast('\u0424\u043e\u0442\u043e \u0443\u0434\u0430\u043b\u0435\u043d\u043e');
+  openHistoryDetail(jobId);
+}
+
 function deleteWorkPhoto(photoId) {
   if (!currentJobId) return;
   if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0444\u043e\u0442\u043e?')) return;
@@ -2639,14 +2675,24 @@ function openHistoryDetail(id) {
   });
   if (job.features) html += '<div style="margin-top:8px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;font-size:13px;"><span style="color:var(--text-dim);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;">&#9881; \u041e\u0441\u043e\u0431\u0435\u043d\u043d\u043e\u0441\u0442\u0438</span><div style="color:var(--text);margin-top:4px;">'+job.features+'</div></div>';
   if (job.note) html += '<div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text-dim);">'+job.note+'</div>';
-  if (job.photos && job.photos.length > 0) {
-    html += '<div style="margin-top:10px;"><div style="font-size:11px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">\u0444\u043e\u0442\u043e ('+job.photos.length+')</div>'
-      + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
-      + job.photos.map(function(p) {
-          return '<div style="width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid var(--glass-border);cursor:pointer;" onclick="openPhotoViewer(\''+p.id+'\')"><img src="'+p.data+'" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>';
-        }).join('')
-      + '</div></div>';
-  }
+  // Photos section — show existing + add button
+  var photos = job.photos || [];
+  var canAddMore = photos.length < MAX_PHOTOS_PER_JOB;
+  html += '<div style="margin-top:10px;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+    + '<div style="font-size:11px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;">\ud83d\udcf7 \u0424\u043e\u0442\u043e ('+photos.length+'/'+MAX_PHOTOS_PER_JOB+')</div>'
+    + (canAddMore ? '<button onclick="document.getElementById(\'hd-photo-input\').click()" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);border-radius:6px;font-size:11px;padding:4px 10px;cursor:pointer;">+ \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c</button>' : '')
+    + '</div>'
+    + '<input type="file" id="hd-photo-input" accept="image/*" style="display:none;" onchange="addPhotoFromHistory(this,\''+id+'\')" />'
+    + '<div id="hd-photos-grid" style="display:flex;flex-wrap:wrap;gap:6px;">'
+    + photos.map(function(p) {
+        return '<div style="position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--glass-border);cursor:pointer;flex-shrink:0;" onclick="openPhotoViewerForJob(\''+id+'\',\''+p.id+'\')">'
+          + '<img src="'+p.data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
+          + '<button onclick="event.stopPropagation();deletePhotoFromHistory(\''+id+'\',\''+p.id+'\')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.65);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">\u00d7</button>'
+          + '</div>';
+      }).join('')
+    + (photos.length === 0 ? '<div style="font-size:12px;color:var(--text-dim);padding:4px 0;">\u0424\u043e\u0442\u043e \u043d\u0435\u0442</div>' : '')
+    + '</div></div>';
 
   const vozvrat = job.vozvrat || [];
   if (vozvrat.length > 0) {
