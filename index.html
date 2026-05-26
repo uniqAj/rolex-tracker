@@ -853,7 +853,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;">&#128247; &#1060;&#1086;&#1090;&#1086;</div>
         <button onclick="document.getElementById('work-photo-input').click()" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);border-radius:6px;font-size:11px;padding:4px 10px;cursor:pointer;">+ &#1044;&#1086;&#1073;&#1072;&#1074;&#1080;&#1090;&#1100;</button>
-        <input type="file" id="work-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="addWorkPhoto(this)" />
+        <input type="file" id="work-photo-input" accept="image/*" style="display:none;" onchange="addWorkPhoto(this)" />
       </div>
       <div id="work-photos" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
@@ -1869,13 +1869,11 @@ var MAX_INPUT_FILE_SIZE = 20 * 1024 * 1024; // 20MB raw input limit
 function addWorkPhoto(input) {
   if (!input.files || !input.files[0] || !currentJobId) return;
   var file = input.files[0];
-  // Pre-check file size
   if (file.size > MAX_INPUT_FILE_SIZE) {
     showToast('\u0424\u0430\u0439\u043b \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u0431\u043e\u043b\u044c\u0448\u043e\u0439 ('+(file.size/1024/1024).toFixed(1)+'MB)');
     input.value = '';
     return;
   }
-  // Pre-check photo count
   var dPre = load();
   var jobPre = (dPre.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (dPre.done||[]).find(function(j){ return j.id===currentJobId; });
   if (jobPre && jobPre.photos && jobPre.photos.length >= MAX_PHOTOS_PER_JOB) {
@@ -1884,7 +1882,8 @@ function addWorkPhoto(input) {
     return;
   }
   showToast('\u0421\u0436\u0438\u043c\u0430\u044e \u0444\u043e\u0442\u043e...');
-  compressImageToDataURL(file, 1400, 0.75).then(function(dataUrl) {
+  var ps = getPhotoSettings();
+  compressImageToDataURL(file, ps.dim, ps.q).then(function(dataUrl) {
     var d = load();
     var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
     if (!job) return;
@@ -1898,10 +1897,25 @@ function addWorkPhoto(input) {
     if (ok) {
       input.value = '';
       renderWorkPhotos(job);
-      var sizeKB = Math.round(dataUrl.length * 0.75 / 1024); // base64 size approx
+      var sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
       showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e (~' + sizeKB + 'KB)');
+    } else {
+      // Retry with harder compression
+      job.photos.pop();
+      compressImageToDataURL(file, 600, 0.60).then(function(smallUrl) {
+        job.photos.push({id: genId(), data: smallUrl, ts: Date.now()});
+        var ok2 = save(d);
+        if (ok2) {
+          input.value = '';
+          renderWorkPhotos(job);
+          var sizeKB2 = Math.round(smallUrl.length * 0.75 / 1024);
+          showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e (~' + sizeKB2 + 'KB, \u0441\u0436\u0430\u0442\u043e \u0441\u0438\u043b\u044c\u043d\u0435\u0435)');
+        } else {
+          job.photos.pop();
+          showToast('\u041f\u0430\u043c\u044f\u0442\u044c \u043f\u0435\u0440\u0435\u043f\u043e\u043b\u043d\u0435\u043d\u0430. \u0423\u0434\u0430\u043b\u0438\u0442\u0435 \u0441\u0442\u0430\u0440\u044b\u0435 \u0444\u043e\u0442\u043e.');
+        }
+      }).catch(function() { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u0436\u0430\u0442\u0438\u044f'); });
     }
-    // If !ok, save() already showed memory warning toast; photo is not persisted
   }).catch(function() {
     showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438');
   });
@@ -1915,7 +1929,8 @@ function addPhotoFromHistory(input, jobId) {
     input.value = ''; return;
   }
   showToast('\u0421\u0436\u0438\u043c\u0430\u044e...');
-  compressImageToDataURL(file, 1400, 0.75).then(function(dataUrl) {
+  var ps = getPhotoSettings();
+  compressImageToDataURL(file, ps.dim, ps.q).then(function(dataUrl) {
     var d = load();
     var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
     if (!job) return;
@@ -1926,8 +1941,22 @@ function addPhotoFromHistory(input, jobId) {
     if (ok) {
       input.value = '';
       showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
-      // Re-open to refresh
       openHistoryDetail(jobId);
+    } else {
+      // Retry with harder compression
+      job.photos.pop();
+      compressImageToDataURL(file, 600, 0.60).then(function(smallUrl) {
+        job.photos.push({id: genId(), data: smallUrl, ts: Date.now()});
+        var ok2 = save(d);
+        if (ok2) {
+          input.value = '';
+          showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e (\u0441\u0436\u0430\u0442\u043e \u0441\u0438\u043b\u044c\u043d\u0435\u0435)');
+          openHistoryDetail(jobId);
+        } else {
+          job.photos.pop();
+          showToast('\u041f\u0430\u043c\u044f\u0442\u044c \u043f\u0435\u0440\u0435\u043f\u043e\u043b\u043d\u0435\u043d\u0430. \u0423\u0434\u0430\u043b\u0438\u0442\u0435 \u0441\u0442\u0430\u0440\u044b\u0435 \u0444\u043e\u0442\u043e.');
+        }
+      }).catch(function() { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u0436\u0430\u0442\u0438\u044f'); });
     }
   }).catch(function(){ showToast('\u041e\u0448\u0438\u0431\u043a\u0430'); });
 }
@@ -2423,15 +2452,12 @@ function renderRefSuggestions() {
   [].concat(d.jobs||[], d.done||[]).forEach(function(j) {
     if (j.ref) counts[j.ref] = (counts[j.ref]||0) + 1;
   });
-  // Default suggestions if no history
-  var DEFAULTS = ['16233', '16234'];
-  DEFAULTS.forEach(function(r) { if (!counts[r]) counts[r] = 0; });
-  // Sort: most-used first, then defaults at bottom; cap at 5
+  // Only show refs that actually appeared in history
   var entries = Object.keys(counts).map(function(k){ return {ref:k, n:counts[k]}; });
   entries.sort(function(a,b){ return b.n - a.n; });
-  var list = entries.slice(0, 5);
+  var list = entries.slice(0, 6);
   el.innerHTML = list.map(function(e) {
-    return '<button type="button" onclick="document.getElementById(\'inp-ref\').value=\''+e.ref+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.ref+(e.n>0?' \u00b7 '+e.n:'')+'</button>';
+    return '<button type="button" onclick="document.getElementById(\'inp-ref\').value=\''+e.ref+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.ref+' \u00b7 '+e.n+'</button>';
   }).join('');
 }
 
@@ -2463,13 +2489,12 @@ function renderModelSuggestions() {
   [].concat(d.jobs||[], d.done||[]).forEach(function(j) {
     if (j.model) counts[j.model] = (counts[j.model]||0) + 1;
   });
-  var DEFAULTS = ['3135', '3235'];
-  DEFAULTS.forEach(function(m) { if (!counts[m]) counts[m] = 0; });
+  // Only show calibres that actually appeared in history
   var entries = Object.keys(counts).map(function(k){ return {model:k, n:counts[k]}; });
   entries.sort(function(a,b){ return b.n - a.n; });
   var list = entries.slice(0, 6);
   el.innerHTML = list.map(function(e) {
-    return '<button type="button" onclick="document.getElementById(\'inp-model\').value=\''+e.model+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.model+(e.n>0?' \u00b7 '+e.n:'')+'</button>';
+    return '<button type="button" onclick="document.getElementById(\'inp-model\').value=\''+e.model+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.model+' \u00b7 '+e.n+'</button>';
   }).join('');
 }
 
@@ -3362,9 +3387,83 @@ function saveSettings() {
     var el = document.getElementById('toggle-'+b.id);
     s.statsBlocks[b.id] = el ? el.checked : true;
   });
+  var dimEl = document.getElementById('photo-dim');
+  var qEl   = document.getElementById('photo-q');
+  if (dimEl) s.photoDim = parseInt(dimEl.value, 10);
+  if (qEl)   s.photoQ   = parseFloat(qEl.value);
   localStorage.setItem('rst_settings', JSON.stringify(s));
   closeModal('modal-settings');
   showToast('\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b');
+}
+
+// Returns current photo compression settings (with defaults)
+function getPhotoSettings() {
+  var s = loadSettings();
+  return { dim: s.photoDim || 900, q: s.photoQ || 0.72 };
+}
+
+function recompressAllPhotos() {
+  var dimEl = document.getElementById('photo-dim');
+  var qEl   = document.getElementById('photo-q');
+  var dim = dimEl ? parseInt(dimEl.value, 10) : 900;
+  var q   = qEl   ? parseFloat(qEl.value)     : 0.72;
+  var statusEl = document.getElementById('recompress-status');
+  if (statusEl) statusEl.textContent = '\u0421\u0436\u0438\u043c\u0430\u044e...';
+
+  var d = load();
+  var allJobs = [].concat(d.jobs||[], d.done||[]);
+  var allPhotos = [];
+  allJobs.forEach(function(job) {
+    if (!job.photos || !job.photos.length) return;
+    job.photos.forEach(function(photo) {
+      allPhotos.push({job: job, photo: photo});
+    });
+  });
+
+  if (allPhotos.length === 0) {
+    if (statusEl) statusEl.textContent = '\u0424\u043e\u0442\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b';
+    return;
+  }
+
+  var done = 0;
+  var total = allPhotos.length;
+  var beforeBytes = 0;
+  var afterBytes  = 0;
+
+  function processNext(i) {
+    if (i >= total) {
+      save(d);
+      var savedKB = Math.round((beforeBytes - afterBytes) * 0.75 / 1024);
+      if (statusEl) statusEl.textContent = '\u0413\u043e\u0442\u043e\u0432\u043e! ' + total + ' \u0444\u043e\u0442\u043e \u00b7 -' + savedKB + 'KB';
+      showToast('\u041f\u0435\u0440\u0435\u0441\u0436\u0430\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e \u00b7 ' + total + ' \u0444\u043e\u0442\u043e');
+      return;
+    }
+    var item = allPhotos[i];
+    var dataUrl = item.photo.data;
+    if (!dataUrl || dataUrl.indexOf('data:image') !== 0) { processNext(i+1); return; }
+    beforeBytes += dataUrl.length;
+    // Re-draw through canvas to compress
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var ratio = Math.min(dim/img.width, dim/img.height, 1);
+      canvas.width  = Math.round(img.width  * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      var ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var newDataUrl = canvas.toDataURL('image/jpeg', q);
+      afterBytes += newDataUrl.length;
+      item.photo.data = newDataUrl;
+      done++;
+      if (statusEl) statusEl.textContent = done + ' / ' + total;
+      processNext(i+1);
+    };
+    img.onerror = function() { beforeBytes -= dataUrl.length; afterBytes += dataUrl.length; processNext(i+1); };
+    img.src = dataUrl;
+  }
+
+  processNext(0);
 }
 
 function openSettingsModal() {
@@ -3379,6 +3478,18 @@ function openSettingsModal() {
         + '</label>';
     }).join('');
   }
+  // Restore photo compression sliders
+  var dim = s.photoDim || 900;
+  var q   = s.photoQ   || 0.72;
+  var dimEl = document.getElementById('photo-dim');
+  var qEl   = document.getElementById('photo-q');
+  var dimVal = document.getElementById('photo-dim-val');
+  var qVal   = document.getElementById('photo-q-val');
+  if (dimEl) { dimEl.value = dim; }
+  if (qEl)   { qEl.value   = q; }
+  if (dimVal) dimVal.textContent = dim;
+  if (qVal)   qVal.textContent   = parseFloat(q).toFixed(2);
+  document.getElementById('recompress-status').textContent = '';
   openModal('modal-settings');
 }
 
@@ -4160,6 +4271,34 @@ function filterGlobalCatalog() {
       <div id="stats-toggles" style="margin-bottom:20px;"></div>
 
       <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;">Нормативы скорости можно изменить прямо на странице статистики.</div>
+
+      <div style="border-top:1px solid var(--glass-border);margin:4px 0 18px;"></div>
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;">&#128247; &#1057;&#1078;&#1072;&#1090;&#1080;&#1077; &#1092;&#1086;&#1090;&#1086;</div>
+
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;color:var(--text);">&#1056;&#1072;&#1079;&#1084;&#1077;&#1088; (px)</span>
+          <span id="photo-dim-val" style="font-size:13px;font-weight:700;color:var(--gold);min-width:36px;text-align:right;">900</span>
+        </div>
+        <input type="range" id="photo-dim" min="400" max="1400" step="100" value="900"
+          oninput="document.getElementById('photo-dim-val').textContent=this.value"
+          style="width:100%;accent-color:var(--gold);" />
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:2px;"><span>400 (&#1084;&#1072;&#1083;&#1077;&#1085;&#1100;&#1082;&#1080;&#1077;)</span><span>1400 (&#1074;&#1099;&#1089;&#1086;&#1082;&#1086;&#1077; &#1082;&#1072;&#1095;&#1077;&#1089;&#1090;&#1074;&#1086;)</span></div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;color:var(--text);">&#1050;&#1072;&#1095;&#1077;&#1089;&#1090;&#1074;&#1086; JPEG</span>
+          <span id="photo-q-val" style="font-size:13px;font-weight:700;color:var(--gold);min-width:36px;text-align:right;">0.72</span>
+        </div>
+        <input type="range" id="photo-q" min="0.3" max="0.9" step="0.02" value="0.72"
+          oninput="document.getElementById('photo-q-val').textContent=parseFloat(this.value).toFixed(2)"
+          style="width:100%;accent-color:var(--gold);" />
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:2px;"><span>0.30 (&#1084;&#1072;&#1082;&#1089;. &#1089;&#1078;&#1072;&#1090;&#1080;&#1077;)</span><span>0.90 (&#1074;&#1099;&#1089;&#1086;&#1082;&#1086;&#1077; &#1082;&#1072;&#1095;&#1077;&#1089;&#1090;&#1074;&#1086;)</span></div>
+      </div>
+
+      <div id="recompress-status" style="font-size:12px;color:var(--text-dim);margin-bottom:10px;min-height:18px;text-align:center;"></div>
+      <button class="btn" onclick="recompressAllPhotos()" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);margin-bottom:8px;">&#9881; &#1055;&#1077;&#1088;&#1077;&#1089;&#1078;&#1072;&#1090;&#1100; &#1074;&#1089;&#1077; &#1092;&#1086;&#1090;&#1086;</button>
 
       <button class="btn btn-gold" onclick="saveSettings()">Сохранить</button>
       <button class="btn btn-outline" onclick="closeModal('modal-settings')">Закрыть</button>
