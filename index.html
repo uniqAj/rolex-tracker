@@ -3436,6 +3436,7 @@ function recompressAllPhotos() {
       var savedKB = Math.round((beforeBytes - afterBytes) * 0.75 / 1024);
       if (statusEl) statusEl.textContent = '\u0413\u043e\u0442\u043e\u0432\u043e! ' + total + ' \u0444\u043e\u0442\u043e \u00b7 -' + savedKB + 'KB';
       showToast('\u041f\u0435\u0440\u0435\u0441\u0436\u0430\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e \u00b7 ' + total + ' \u0444\u043e\u0442\u043e');
+      renderStorageMeter();
       return;
     }
     var item = allPhotos[i];
@@ -3466,6 +3467,78 @@ function recompressAllPhotos() {
   processNext(0);
 }
 
+function renderStorageMeter() {
+  var LIMIT = 5 * 1024 * 1024; // 5MB iOS Safari localStorage limit
+  // Measure each key
+  var keys = ['rst_data', 'rst_settings', 'rst_theme'];
+  var breakdown = [];
+  var totalBytes = 0;
+  keys.forEach(function(k) {
+    var val = localStorage.getItem(k);
+    if (!val) return;
+    var bytes = val.length * 2; // UTF-16
+    totalBytes += bytes;
+    breakdown.push({key: k, bytes: bytes});
+  });
+
+  // Also count any other rst_ keys
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (k && k.indexOf('rst_') === 0 && keys.indexOf(k) === -1) {
+      var val2 = localStorage.getItem(k);
+      if (val2) {
+        var b = val2.length * 2;
+        totalBytes += b;
+        breakdown.push({key: k, bytes: b});
+      }
+    }
+  }
+
+  // Separate photos size from rst_data
+  var d = load();
+  var photoBytes = 0;
+  var allJobs = [].concat(d.jobs||[], d.done||[]);
+  allJobs.forEach(function(job) {
+    if (!job.photos) return;
+    job.photos.forEach(function(p) {
+      if (p.data) photoBytes += p.data.length * 2;
+    });
+  });
+
+  var pct = Math.min(100, Math.round(totalBytes / LIMIT * 100));
+  var barColor = pct > 85 ? '#ff6b6b' : pct > 60 ? '#f0c060' : 'var(--gold)';
+
+  var usedKB = (totalBytes / 1024).toFixed(0);
+  var usedMB = (totalBytes / 1024 / 1024).toFixed(2);
+  var label = totalBytes > 1024*1024 ? usedMB+' MB' : usedKB+' KB';
+
+  var usedEl = document.getElementById('storage-used-label');
+  var barEl  = document.getElementById('storage-bar');
+  var bdEl   = document.getElementById('storage-breakdown');
+  if (!usedEl) return;
+
+  usedEl.textContent = label + ' (' + pct + '%)';
+  usedEl.style.color = barColor;
+  barEl.style.width = pct + '%';
+  barEl.style.background = barColor;
+
+  var photoKB = Math.round(photoBytes / 1024);
+  var dataKB  = Math.round((totalBytes - photoBytes) / 1024);
+
+  function row(label, kb, color) {
+    var w = Math.round(kb * 1024 / LIMIT * 100);
+    return '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<div style="width:10px;height:10px;border-radius:50%;background:'+color+';flex-shrink:0;"></div>'
+      + '<span style="font-size:12px;color:var(--text-dim);flex:1;">'+label+'</span>'
+      + '<span style="font-size:12px;color:var(--text);font-weight:600;">'+kb+' KB</span>'
+      + '</div>';
+  }
+
+  bdEl.innerHTML = row('\u0424\u043e\u0442\u043e', photoKB, 'var(--gold)')
+    + row('\u0414\u0430\u043d\u043d\u044b\u0435 (\u0440\u0430\u0431\u043e\u0442\u044b, \u0438\u0441\u0442\u043e\u0440\u0438\u044f)', dataKB, '#7F77DD')
+    + row('\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e', Math.round((LIMIT - totalBytes) / 1024), 'var(--glass-border)');
+}
+
 function openSettingsModal() {
   var s = loadSettings();
   var togglesEl = document.getElementById('stats-toggles');
@@ -3490,6 +3563,7 @@ function openSettingsModal() {
   if (dimVal) dimVal.textContent = dim;
   if (qVal)   qVal.textContent   = parseFloat(q).toFixed(2);
   document.getElementById('recompress-status').textContent = '';
+  renderStorageMeter();
   openModal('modal-settings');
 }
 
@@ -4266,6 +4340,19 @@ function filterGlobalCatalog() {
     <div class="modal-handle"></div>
     <div class="modal-title">⚙️ Настройки</div>
     <div class="modal-body">
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">&#128190; &#1055;&#1072;&#1084;&#1103;&#1090;&#1100;</div>
+      <div id="storage-meter" style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span id="storage-used-label" style="font-size:22px;font-weight:700;color:var(--gold);">—</span>
+          <span id="storage-limit-label" style="font-size:12px;color:var(--text-dim);">из ~5 MB</span>
+        </div>
+        <div style="height:8px;background:var(--glass);border-radius:4px;overflow:hidden;border:1px solid var(--glass-border);">
+          <div id="storage-bar" style="height:100%;border-radius:4px;background:var(--gold);width:0%;transition:width 0.4s ease;"></div>
+        </div>
+        <div id="storage-breakdown" style="margin-top:10px;display:flex;flex-direction:column;gap:5px;"></div>
+      </div>
+      <div style="border-top:1px solid var(--glass-border);margin:4px 0 18px;"></div>
 
       <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Показывать в статистике</div>
       <div id="stats-toggles" style="margin-bottom:20px;"></div>
