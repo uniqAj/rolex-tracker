@@ -657,6 +657,8 @@
     @keyframes emptyFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
     .period-btn { padding:7px 14px; border-radius:20px; border:1px solid var(--glass-border); background:var(--glass); color:var(--text-dim); font-size:13px; cursor:pointer; transition:all 0.2s; }
     .period-btn.active { background:rgba(240,192,96,0.15); color:var(--gold); border-color:rgba(240,192,96,0.4); font-weight:600; }
+    .period-btn-mini { padding:4px 10px; border-radius:16px; border:1px solid var(--glass-border); background:rgba(240,192,96,0.05); color:var(--text-dim); font-size:11px; cursor:pointer; transition:all 0.2s; }
+    .period-btn-mini.active { background:rgba(240,192,96,0.2); color:var(--gold); border-color:rgba(240,192,96,0.4); font-weight:600; }
 
     @keyframes btnPulse { 0%{transform:scale(1)} 30%{transform:scale(0.94)} 70%{transform:scale(1.03)} 100%{transform:scale(1)} }
 
@@ -901,7 +903,34 @@
     <div class="chart-title">Full Service vs &#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1057;&#1073;&#1086;&#1088;&#1082;&#1072;</div>
     <div class="bar-chart" id="type-chart"></div>
   </div>
-  <!-- Нормативы прямо в статистике -->
+
+  <div id="stats-block-ref" class="chart-container">
+    <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>&#1055;&#1086; Ref &#1085;&#1086;&#1084;&#1077;&#1088;&#1072;&#1084;</span>
+      <div style="display:flex;gap:4px;font-size:11px;">
+        <button class="period-btn-mini active" onclick="setRefPeriod('month')" data-period="month">&#1084;&#1077;&#1089;</button>
+        <button class="period-btn-mini" onclick="setRefPeriod('week')" data-period="week">&#1085;&#1077;&#1076;</button>
+        <button class="period-btn-mini" onclick="setRefPeriod('year')" data-period="year">&#1075;&#1086;&#1076;</button>
+        <button class="period-btn-mini" onclick="setRefPeriod('all')" data-period="all">&#1074;&#1089;&#1105;</button>
+      </div>
+    </div>
+    <div id="ref-stats-container"></div>
+  </div>
+
+  <div id="stats-block-model" class="chart-container">
+    <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>&#1055;&#1086; &#1050;&#1072;&#1083;&#1080;&#1073;&#1088;&#1072;&#1084;</span>
+      <div style="display:flex;gap:4px;font-size:11px;">
+        <button class="period-btn-mini active" onclick="setModelPeriod('month')" data-period="month">&#1084;&#1077;&#1089;</button>
+        <button class="period-btn-mini" onclick="setModelPeriod('week')" data-period="week">&#1085;&#1077;&#1076;</button>
+        <button class="period-btn-mini" onclick="setModelPeriod('year')" data-period="year">&#1075;&#1086;&#1076;</button>
+        <button class="period-btn-mini" onclick="setModelPeriod('all')" data-period="all">&#1074;&#1089;&#1105;</button>
+      </div>
+    </div>
+    <div id="model-stats-container"></div>
+  </div>
+
+  <!-- &#1053;&#1086;&#1088;&#1084;&#1072;&#1090;&#1080;&#1074;&#1099; &#1087;&#1088;&#1103;&#1084;&#1086; &#1074; &#1089;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1077; -->
   <div style="margin:0 16px 16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:16px;backdrop-filter:blur(12px);">
     <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;">&#9201; &#1053;&#1086;&#1088;&#1084;&#1072;&#1090;&#1080;&#1074;&#1099;</div>
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Service (&#1095;)</div>
@@ -2455,8 +2484,7 @@ function renderRefSuggestions() {
   // Only show refs that actually appeared in history
   var entries = Object.keys(counts).map(function(k){ return {ref:k, n:counts[k]}; });
   entries.sort(function(a,b){ return b.n - a.n; });
-  var list = entries.slice(0, 6);
-  el.innerHTML = list.map(function(e) {
+  el.innerHTML = entries.map(function(e) {
     return '<button type="button" onclick="document.getElementById(\'inp-ref\').value=\''+e.ref+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.ref+' \u00b7 '+e.n+'</button>';
   }).join('');
 }
@@ -2492,8 +2520,7 @@ function renderModelSuggestions() {
   // Only show calibres that actually appeared in history
   var entries = Object.keys(counts).map(function(k){ return {model:k, n:counts[k]}; });
   entries.sort(function(a,b){ return b.n - a.n; });
-  var list = entries.slice(0, 6);
-  el.innerHTML = list.map(function(e) {
+  el.innerHTML = entries.map(function(e) {
     return '<button type="button" onclick="document.getElementById(\'inp-model\').value=\''+e.model+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.model+' \u00b7 '+e.n+'</button>';
   }).join('');
 }
@@ -3014,6 +3041,8 @@ function populateStatsNorms() {
 }
 
 var currentPeriod = 'month';
+var currentRefPeriod = 'month';
+var currentModelPeriod = 'month';
 
 function setPeriod(period) {
   currentPeriod = period;
@@ -3024,6 +3053,22 @@ function setPeriod(period) {
   var lbl = document.getElementById('stats-period-label');
   if (lbl) lbl.textContent = labels[period] || period;
   renderStats();
+}
+
+function setRefPeriod(period) {
+  currentRefPeriod = period;
+  document.querySelectorAll('#stats-block-ref .period-btn-mini').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-period') === period);
+  });
+  renderRefStats();
+}
+
+function setModelPeriod(period) {
+  currentModelPeriod = period;
+  document.querySelectorAll('#stats-block-model .period-btn-mini').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-period') === period);
+  });
+  renderModelStats();
 }
 
 function filterByPeriod(jobs) {
@@ -3195,10 +3240,14 @@ function renderStats() {
   var typeBlock = document.getElementById('stats-block-type');
   var speedBlock = document.getElementById('stats-speed');
   var heatmapBlock = document.getElementById('stats-block-heatmap');
+  var refBlock = document.getElementById('stats-block-ref');
+  var modelBlock = document.getElementById('stats-block-model');
   if (stageBlock) stageBlock.style.display = isBlockVisible('stage') ? '' : 'none';
   if (typeBlock) typeBlock.style.display = isBlockVisible('type') ? '' : 'none';
   if (speedBlock) speedBlock.style.display = isBlockVisible('speed') ? '' : 'none';
   if (heatmapBlock) heatmapBlock.style.display = isBlockVisible('heatmap') ? '' : 'none';
+  if (refBlock) refBlock.style.display = isBlockVisible('ref') ? '' : 'none';
+  if (modelBlock) modelBlock.style.display = isBlockVisible('model') ? '' : 'none';
   if (heatmapBlock && isBlockVisible('heatmap')) renderHeatmap(allDone);
   document.getElementById('stats-grid').innerHTML =
     '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(totalJobs)+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
@@ -3260,6 +3309,117 @@ function renderStats() {
   document.getElementById('type-chart').innerHTML =
     '<div class="bar-row"><div class="bar-label">Full Service</div><div class="bar-track"><div class="bar-fill" style="width:'+(aF/mT*100).toFixed(1)+'%"></div></div><div class="bar-val">'+fmtMs(aF)+'</div></div>'+
     '<div class="bar-row"><div class="bar-label">\u0421\u0431\u043e\u0440\u043a\u0430</div><div class="bar-track"><div class="bar-fill" style="width:'+(aA/mT*100).toFixed(1)+'%;background:var(--blue)"></div></div><div class="bar-val">'+fmtMs(aA)+'</div></div>';
+  
+  renderRefStats();
+  renderModelStats();
+}
+
+function filterByDynamicPeriod(jobs, period) {
+  if (period === 'all') return jobs;
+  var now = new Date();
+  var cutoff;
+  if (period === 'month') {
+    cutoff = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  } else if (period === 'year') {
+    cutoff = new Date(now.getFullYear(), 0, 1).getTime();
+  } else if (period === 'week') {
+    var dow = now.getDay() === 0 ? 6 : now.getDay() - 1;
+    var weekStart = new Date(now.getTime() - dow*86400000);
+    weekStart.setHours(0,0,0,0);
+    cutoff = weekStart.getTime();
+  }
+  if (!cutoff) return jobs; // guard: unknown period → return all
+  return jobs.filter(function(j){ return (j.completedAt || j.createdAt || 0) >= cutoff; });
+}
+
+function renderRefStats() {
+  var d = load();
+  var allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var filtered = filterByDynamicPeriod(allDone, currentRefPeriod);
+  var refMap = {};
+  
+  filtered.forEach(function(j) {
+    if (!j.ref) return;
+    if (!refMap[j.ref]) refMap[j.ref] = {ref:j.ref, hours:0, count:0, models:{}};
+    var h = totalTime(j) / 3600000;
+    refMap[j.ref].hours += h;
+    refMap[j.ref].count++;
+    if (j.model) {
+      if (!refMap[j.ref].models[j.model]) refMap[j.ref].models[j.model] = 0;
+      refMap[j.ref].models[j.model]++;
+    }
+  });
+  
+  var entries = Object.values(refMap).sort(function(a,b){ return b.hours - a.hours; });
+  var maxH = entries.length > 0 ? Math.max.apply(null, entries.map(function(e){ return e.hours; })) : 1;
+  
+  var html = '';
+  if (entries.length === 0) {
+    html = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:20px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
+  } else {
+    html = entries.map(function(e) {
+      var topModels = Object.entries(e.models).sort(function(a,b){ return b[1]-a[1]; }).slice(0,2).map(function(m){ return m[0]+' ('+m[1]+')'; }).join(', ');
+      return '<div class="bar-row" style="margin-bottom:14px;cursor:pointer;" onclick="showRefDetail(\''+e.ref+'\')">'
+        + '<div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;">'
+        + '<div style="font-size:14px;font-weight:600;color:var(--gold);">'+e.ref+'</div>'
+        + '<div style="font-size:11px;color:var(--text-dim);">'+e.count+' \u0447 \u2713 '+fmtMs(e.hours*3600000)+'</div>'
+        + '</div>'
+        + '<div class="bar-track" style="height:20px;background:var(--glass);border-radius:6px;overflow:hidden;"><div class="bar-fill" style="width:'+(e.hours/maxH*100).toFixed(1)+'%;height:100%;background:linear-gradient(90deg, var(--gold) 0%, rgba(240,192,96,0.4) 100%);"></div></div>'
+        + '<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">\u041a\u0430\u043b\u0438\u0431\u0440\u044b: '+topModels+'</div>'
+        + '</div>';
+    }).join('');
+  }
+  var el = document.getElementById('ref-stats-container');
+  if (el) el.innerHTML = html;
+}
+
+function renderModelStats() {
+  var d = load();
+  var allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var filtered = filterByDynamicPeriod(allDone, currentModelPeriod);
+  var modelMap = {};
+  
+  filtered.forEach(function(j) {
+    if (!j.model) return;
+    if (!modelMap[j.model]) modelMap[j.model] = {model:j.model, hours:0, count:0, refs:{}};
+    var h = totalTime(j) / 3600000;
+    modelMap[j.model].hours += h;
+    modelMap[j.model].count++;
+    if (j.ref) {
+      if (!modelMap[j.model].refs[j.ref]) modelMap[j.model].refs[j.ref] = 0;
+      modelMap[j.model].refs[j.ref]++;
+    }
+  });
+  
+  var entries = Object.values(modelMap).sort(function(a,b){ return b.hours - a.hours; });
+  var maxH = entries.length > 0 ? Math.max.apply(null, entries.map(function(e){ return e.hours; })) : 1;
+  
+  var html = '';
+  if (entries.length === 0) {
+    html = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:20px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
+  } else {
+    html = entries.map(function(e) {
+      var topRefs = Object.entries(e.refs).sort(function(a,b){ return b[1]-a[1]; }).slice(0,3).map(function(r){ return r[0]+' ('+r[1]+')'; }).join(', ');
+      return '<div class="bar-row" style="margin-bottom:14px;cursor:pointer;" onclick="showModelDetail(\''+e.model+'\')">'
+        + '<div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;">'
+        + '<div style="font-size:14px;font-weight:600;color:#7F77DD;">'+e.model+'</div>'
+        + '<div style="font-size:11px;color:var(--text-dim);">'+e.count+' \u0447 \u2713 '+fmtMs(e.hours*3600000)+'</div>'
+        + '</div>'
+        + '<div class="bar-track" style="height:20px;background:var(--glass);border-radius:6px;overflow:hidden;"><div class="bar-fill" style="width:'+(e.hours/maxH*100).toFixed(1)+'%;height:100%;background:linear-gradient(90deg, #7F77DD 0%, rgba(127,119,221,0.4) 100%);"></div></div>'
+        + '<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Ref: '+topRefs+'</div>'
+        + '</div>';
+    }).join('');
+  }
+  var el = document.getElementById('model-stats-container');
+  if (el) el.innerHTML = html;
+}
+
+function showRefDetail(ref) {
+  showToast(ref + ' — \u0434\u0435\u0442\u0430\u043b\u0438 (\u0432 \u043f\u043b\u0430\u043d\u0435)');
+}
+
+function showModelDetail(model) {
+  showToast(model + ' — \u0434\u0435\u0442\u0430\u043b\u0438 (\u0432 \u043f\u043b\u0430\u043d\u0435)');
 }
 
 function exportData() {
@@ -3371,6 +3531,8 @@ const STATS_BLOCKS = [
   {id:'speed',    label:'\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c (\u0431\u044b\u0441\u0442\u0440\u043e/\u0441\u0440\u0435\u0434\u043d\u0435/\u0434\u043e\u043b\u0433\u043e)'},
   {id:'stage',    label:'\u0413\u0440\u0430\u0444\u0438\u043a \u043f\u043e \u044d\u0442\u0430\u043f\u0430\u043c'},
   {id:'type',     label:'Full Service vs \u0421\u0431\u043e\u0440\u043a\u0430'},
+  {id:'ref',      label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043f\u043e Ref'},
+  {id:'model',    label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043f\u043e \u041a\u0430\u043b\u0438\u0431\u0440\u0430\u043c'},
   {id:'dorabotka',label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a'},
 ];
 
