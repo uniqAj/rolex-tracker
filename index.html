@@ -880,7 +880,7 @@
     <div class="section-title">&#1057;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1072;</div>
     <div class="section-meta" id="stats-period-label">&#1058;&#1077;&#1082;&#1091;&#1097;&#1080;&#1081; &#1084;&#1077;&#1089;&#1103;&#1094;</div>
   </div>
-  <div style="padding:0 16px 12px;display:flex;gap:8px;flex-wrap:wrap;">
+  <div style="padding:0 16px 4px;display:flex;gap:6px;flex-wrap:wrap;">
     <button class="period-btn active" onclick="setPeriod('month')" id="period-month">&#1052;&#1077;&#1089;&#1103;&#1094;</button>
     <button class="period-btn" onclick="setPeriod('week')" id="period-week">&#1053;&#1077;&#1076;&#1077;&#1083;&#1103;</button>
     <button class="period-btn" onclick="setPeriod('day')" id="period-day">&#1057;&#1077;&#1075;&#1086;&#1076;&#1085;&#1103;</button>
@@ -888,6 +888,23 @@
     <button class="period-btn" onclick="setPeriod('6months')" id="period-6months">6 &#1084;&#1077;&#1089;</button>
     <button class="period-btn" onclick="setPeriod('year')" id="period-year">&#1043;&#1086;&#1076;</button>
     <button class="period-btn" onclick="setPeriod('all')" id="period-all">&#1042;&#1089;&#1105;</button>
+    <button class="period-btn" onclick="toggleMonthPicker()" id="period-pick-month">&#128197; &#1052;&#1077;&#1089;&#1103;&#1094; &#8595;</button>
+    <button class="period-btn" onclick="toggleRangePicker()" id="period-range">&#8596; &#1044;&#1080;&#1072;&#1087;&#1072;&#1079;&#1086;&#1085;</button>
+  </div>
+
+  <!-- Month picker dropdown -->
+  <div id="month-picker-bar" style="display:none;padding:0 16px 8px;">
+    <div id="month-picker-list" style="display:flex;gap:6px;flex-wrap:wrap;background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:10px 12px;backdrop-filter:blur(12px);"></div>
+  </div>
+
+  <!-- Custom date range bar -->
+  <div id="range-picker-bar" style="display:none;padding:0 16px 8px;">
+    <div style="display:flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:10px 12px;backdrop-filter:blur(12px);">
+      <input type="date" id="range-from" class="form-input" style="flex:1;padding:8px 10px;font-size:14px;" />
+      <span style="color:var(--text-dim);flex-shrink:0;">&#8212;</span>
+      <input type="date" id="range-to" class="form-input" style="flex:1;padding:8px 10px;font-size:14px;" />
+      <button onclick="applyDateRange()" class="period-btn active" style="flex-shrink:0;white-space:nowrap;">&#10003;</button>
+    </div>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
   <div id="stats-block-heatmap" class="chart-container">
@@ -2701,21 +2718,45 @@ function historyCard(j, compact) {
 }
 
 function renderHistory() {
-  const d = load();
-  const q = (document.getElementById('history-search') ? document.getElementById('history-search').value : '').toLowerCase().trim();
-  let done = (d.done||[]).slice().reverse();
-  if (q) done = done.filter(j =>
-    (j.serial||''). toLowerCase().includes(q)||(j.ref||''). toLowerCase().includes(q)||
-    (j.model||''). toLowerCase().includes(q)||(j.note||''). toLowerCase().includes(q)||
-    j.steps.some(s => (s.notes||''). toLowerCase().includes(q)||(s.parts||''). toLowerCase().includes(q))||
-    (j.dorabotki||[]).some(r => r.desc.toLowerCase().includes(q))||
-    (j.vozvrat||[]).some(r => r.desc.toLowerCase().includes(q)));
-  document.getElementById('history-count').textContent = done.length+'\u00a0\u0447\u0430\u0441\u043e\u0432'+(q?' (\u043d\u0430\u0439\u0434\u0435\u043d\u043e)':'  ');
-  const list = document.getElementById('history-list');
-  list.innerHTML = done.length===0
-    ? '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u0443\u0441\u0442\u0430')+'</div></div>'
-    : done.map(j => historyCard(j, false)).join('');
-  // Init swipe on each card
+  var d = load();
+  var q = (document.getElementById('history-search') ? document.getElementById('history-search').value : '').toLowerCase().trim();
+  var done = (d.done||[]).slice().reverse();
+  if (q) done = done.filter(function(j) {
+    return (j.serial||'').toLowerCase().includes(q) || (j.ref||'').toLowerCase().includes(q) ||
+      (j.model||'').toLowerCase().includes(q) || (j.note||'').toLowerCase().includes(q) ||
+      j.steps.some(function(s){ return (s.notes||'').toLowerCase().includes(q) || (s.parts||'').toLowerCase().includes(q); }) ||
+      (j.dorabotki||[]).some(function(r){ return r.desc.toLowerCase().includes(q); }) ||
+      (j.vozvrat||[]).some(function(r){ return r.desc.toLowerCase().includes(q); });
+  });
+  document.getElementById('history-count').textContent = done.length+'\u00a0\u0447\u0430\u0441\u043e\u0432'+(q?' (\u043d\u0430\u0439\u0434\u0435\u043d\u043e)':'');
+  var list = document.getElementById('history-list');
+  if (done.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">\ud83d\udccb</div><div class="empty-title">'+(q?'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u0443\u0441\u0442\u0430')+'</div></div>';
+    return;
+  }
+  var RU_MONTHS_FULL = ['\u042f\u043d\u0432\u0430\u0440\u044c','\u0424\u0435\u0432\u0440\u0430\u043b\u044c','\u041c\u0430\u0440\u0442','\u0410\u043f\u0440\u0435\u043b\u044c','\u041c\u0430\u0439','\u0418\u044e\u043d\u044c','\u0418\u044e\u043b\u044c','\u0410\u0432\u0433\u0443\u0441\u0442','\u0421\u0435\u043d\u0442\u044f\u0431\u0440\u044c','\u041e\u043a\u0442\u044f\u0431\u0440\u044c','\u041d\u043e\u044f\u0431\u0440\u044c','\u0414\u0435\u043a\u0430\u0431\u0440\u044c'];
+  var html = '';
+  var lastMonthKey = '';
+  done.forEach(function(j) {
+    var ts = j.completedAt || j.createdAt || 0;
+    var dt = new Date(ts);
+    var mk = dt.getFullYear()+'-'+dt.getMonth();
+    if (mk !== lastMonthKey) {
+      lastMonthKey = mk;
+      var monthDone = done.filter(function(x){
+        var xts = x.completedAt || x.createdAt || 0;
+        var xd = new Date(xts);
+        return xd.getFullYear()===dt.getFullYear() && xd.getMonth()===dt.getMonth();
+      });
+      var monthHrs = monthDone.reduce(function(a,x){ return a+totalTime(x); }, 0);
+      html += '<div style="padding:16px 20px 8px;display:flex;align-items:baseline;justify-content:space-between;">'
+        + '<span style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:600;color:var(--text-mid);letter-spacing:0.02em;">'+RU_MONTHS_FULL[dt.getMonth()]+' '+dt.getFullYear()+'</span>'
+        + '<span style="font-size:12px;color:var(--text-dim);">'+monthDone.length+' \u0447 \u00b7 '+fmtMs(monthHrs)+'</span>'
+        + '</div>';
+    }
+    html += historyCard(j, false);
+  });
+  list.innerHTML = html;
   setTimeout(function() {
     done.forEach(function(j) {
       var el = document.getElementById('swipe-'+j.id);
@@ -3043,12 +3084,111 @@ function populateStatsNorms() {
 var currentPeriod = 'month';
 var currentRefPeriod = 'month';
 var currentModelPeriod = 'month';
+var customRangeFrom = 0;
+var customRangeTo   = 0;
+var customMonthKey  = '';   // 'YYYY-MM'
+
+function toggleMonthPicker() {
+  var bar = document.getElementById('month-picker-bar');
+  var rangeBar = document.getElementById('range-picker-bar');
+  if (!bar) return;
+  var isOpen = bar.style.display !== 'none';
+  bar.style.display = isOpen ? 'none' : 'block';
+  if (rangeBar) rangeBar.style.display = 'none';
+  if (!isOpen) buildMonthPickerList();
+}
+
+function toggleRangePicker() {
+  var bar = document.getElementById('range-picker-bar');
+  var monthBar = document.getElementById('month-picker-bar');
+  if (!bar) return;
+  var isOpen = bar.style.display !== 'none';
+  bar.style.display = isOpen ? 'none' : 'block';
+  if (monthBar) monthBar.style.display = 'none';
+  if (!isOpen) {
+    // Pre-fill with current month range
+    var now = new Date();
+    var y = now.getFullYear(), m = now.getMonth();
+    var pad = function(n){ return ('0'+n).slice(-2); };
+    var fromEl = document.getElementById('range-from');
+    var toEl   = document.getElementById('range-to');
+    if (fromEl && !fromEl.value) fromEl.value = y+'-'+pad(m+1)+'-01';
+    if (toEl && !toEl.value) {
+      var lastDay = new Date(y, m+1, 0).getDate();
+      toEl.value = y+'-'+pad(m+1)+'-'+pad(lastDay);
+    }
+  }
+}
+
+function buildMonthPickerList() {
+  var el = document.getElementById('month-picker-list');
+  if (!el) return;
+  var d = load();
+  var monthSet = {};
+  [].concat(d.jobs||[], d.done||[]).forEach(function(j) {
+    var ts = j.completedAt || j.createdAt;
+    if (!ts) return;
+    var dt = new Date(ts);
+    var key = dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2);
+    monthSet[key] = (monthSet[key]||0) + 1;
+  });
+  var keys = Object.keys(monthSet).sort().reverse();
+  if (keys.length === 0) { el.innerHTML = '<span style="font-size:12px;color:var(--text-dim);">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445</span>'; return; }
+  var RU_MONTHS = ['\u042f\u043d\u0432','\u0424\u0435\u0432','\u041c\u0430\u0440','\u0410\u043f\u0440','\u041c\u0430\u0439','\u0418\u044e\u043d','\u0418\u044e\u043b','\u0410\u0432\u0433','\u0421\u0435\u043d','\u041e\u043a\u0442','\u041d\u043e\u044f','\u0414\u0435\u043a'];
+  el.innerHTML = keys.map(function(k) {
+    var parts = k.split('-');
+    var mName = RU_MONTHS[parseInt(parts[1],10)-1]+' '+parts[0];
+    var isActive = customMonthKey === k && currentPeriod === 'custom-month';
+    return '<button class="period-btn-mini'+(isActive?' active':'')+'" onclick="applyMonthPicker(\''+k+'\')" style="white-space:nowrap;">'+mName+' \u00b7 '+monthSet[k]+'</button>';
+  }).join('');
+}
+
+function applyMonthPicker(key) {
+  customMonthKey = key;
+  var parts = key.split('-');
+  var y = parseInt(parts[0],10), m = parseInt(parts[1],10)-1;
+  customRangeFrom = new Date(y, m, 1).getTime();
+  customRangeTo   = new Date(y, m+1, 1).getTime() - 1;
+  currentPeriod = 'custom-month';
+  // Update UI
+  document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('period-pick-month').classList.add('active');
+  var RU_MONTHS_FULL = ['\u042f\u043d\u0432\u0430\u0440\u044c','\u0424\u0435\u0432\u0440\u0430\u043b\u044c','\u041c\u0430\u0440\u0442','\u0410\u043f\u0440\u0435\u043b\u044c','\u041c\u0430\u0439','\u0418\u044e\u043d\u044c','\u0418\u044e\u043b\u044c','\u0410\u0432\u0433\u0443\u0441\u0442','\u0421\u0435\u043d\u0442\u044f\u0431\u0440\u044c','\u041e\u043a\u0442\u044f\u0431\u0440\u044c','\u041d\u043e\u044f\u0431\u0440\u044c','\u0414\u0435\u043a\u0430\u0431\u0440\u044c'];
+  var lbl = document.getElementById('stats-period-label');
+  if (lbl) lbl.textContent = RU_MONTHS_FULL[m]+' '+y;
+  buildMonthPickerList(); // refresh active state
+  renderStats();
+}
+
+function applyDateRange() {
+  var fromEl = document.getElementById('range-from');
+  var toEl   = document.getElementById('range-to');
+  if (!fromEl || !toEl || !fromEl.value || !toEl.value) return;
+  customRangeFrom = new Date(fromEl.value).getTime();
+  customRangeTo   = new Date(toEl.value).getTime() + 86399999; // end of day
+  if (customRangeFrom > customRangeTo) {
+    showToast('\u0414\u0430\u0442\u0430 \u043d\u0430\u0447\u0430\u043b\u0430 \u0431\u043e\u043b\u044c\u0448\u0435 \u043a\u043e\u043d\u0446\u0430');
+    return;
+  }
+  currentPeriod = 'custom-range';
+  document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('period-range').classList.add('active');
+  var pad = function(n){ return ('0'+n).slice(-2); };
+  var lbl = document.getElementById('stats-period-label');
+  if (lbl) lbl.textContent = fromEl.value.split('-').reverse().join('.')+' \u2013 '+toEl.value.split('-').reverse().join('.');
+  renderStats();
+}
 
 function setPeriod(period) {
   currentPeriod = period;
+  customMonthKey = '';
   document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
   var btn = document.getElementById('period-'+period);
   if (btn) btn.classList.add('active');
+  var monthBar = document.getElementById('month-picker-bar');
+  var rangeBar = document.getElementById('range-picker-bar');
+  if (monthBar) monthBar.style.display = 'none';
+  if (rangeBar) rangeBar.style.display = 'none';
   var labels = {day:'\u0421\u0435\u0433\u043e\u0434\u043d\u044f', week:'\u042d\u0442\u0430 \u043d\u0435\u0434\u0435\u043b\u044f', month:'\u0422\u0435\u043a\u0443\u0449\u0438\u0439 \u043c\u0435\u0441\u044f\u0446', '3months':'\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 3 \u043c\u0435\u0441.', '6months':'\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 6 \u043c\u0435\u0441.', year:'\u042d\u0442\u043e\u0442 \u0433\u043e\u0434', all:'\u0412\u0441\u0451 \u0432\u0440\u0435\u043c\u044f'};
   var lbl = document.getElementById('stats-period-label');
   if (lbl) lbl.textContent = labels[period] || period;
@@ -3073,24 +3213,25 @@ function setModelPeriod(period) {
 
 function filterByPeriod(jobs) {
   if (currentPeriod === 'all') return jobs;
+  if (currentPeriod === 'custom-month' || currentPeriod === 'custom-range') {
+    return jobs.filter(function(j){
+      var ts = j.completedAt || j.createdAt || 0;
+      return ts >= customRangeFrom && ts <= customRangeTo;
+    });
+  }
   var now = new Date();
   var cutoff;
   if (currentPeriod === 'month') {
-    // Current calendar month — from 1st of this month
     cutoff = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   } else if (currentPeriod === 'year') {
-    // Current calendar year — from Jan 1st
     cutoff = new Date(now.getFullYear(), 0, 1).getTime();
   } else if (currentPeriod === 'week') {
-    // Current week — from Monday 00:00
-    var dow = now.getDay() === 0 ? 6 : now.getDay() - 1; // Mon=0..Sun=6
+    var dow = now.getDay() === 0 ? 6 : now.getDay() - 1;
     var mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
     cutoff = mon.getTime();
   } else if (currentPeriod === 'day') {
-    // Today only — from 00:00
     cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   } else {
-    // Rolling window for 3months / 6months
     var ms = {'3months':90*86400000, '6months':180*86400000};
     cutoff = now.getTime() - (ms[currentPeriod] || ms['3months']);
   }
@@ -3337,35 +3478,43 @@ function renderRefStats() {
   var allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
   var filtered = filterByDynamicPeriod(allDone, currentRefPeriod);
   var refMap = {};
-  
   filtered.forEach(function(j) {
     if (!j.ref) return;
-    if (!refMap[j.ref]) refMap[j.ref] = {ref:j.ref, hours:0, count:0, models:{}};
+    if (!refMap[j.ref]) refMap[j.ref] = {ref:j.ref, hours:0, count:0, models:{}, full:0, part:0, asm:0};
     var h = totalTime(j) / 3600000;
     refMap[j.ref].hours += h;
     refMap[j.ref].count++;
-    if (j.model) {
-      if (!refMap[j.ref].models[j.model]) refMap[j.ref].models[j.model] = 0;
-      refMap[j.ref].models[j.model]++;
-    }
+    if (j.model) refMap[j.ref].models[j.model] = (refMap[j.ref].models[j.model]||0) + 1;
+    if (j.type === 'full') refMap[j.ref].full++;
+    else if (j.type === 'part' || j.type === 'part_asm') refMap[j.ref].part++;
+    else if (j.type === 'assembly') refMap[j.ref].asm++;
   });
-  
-  var entries = Object.values(refMap).sort(function(a,b){ return b.hours - a.hours; });
-  var maxH = entries.length > 0 ? Math.max.apply(null, entries.map(function(e){ return e.hours; })) : 1;
-  
+  var entries = Object.values(refMap).sort(function(a,b){ return b.count - a.count; });
+  var maxH = entries.length > 0 ? entries.reduce(function(m,e){ return e.hours > m ? e.hours : m; }, 0) : 1;
+  if (maxH === 0) maxH = 1;
   var html = '';
   if (entries.length === 0) {
-    html = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:20px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
+    html = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:20px 0;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
   } else {
     html = entries.map(function(e) {
-      var topModels = Object.entries(e.models).sort(function(a,b){ return b[1]-a[1]; }).slice(0,2).map(function(m){ return m[0]+' ('+m[1]+')'; }).join(', ');
-      return '<div class="bar-row" style="margin-bottom:14px;cursor:pointer;" onclick="showRefDetail(\''+e.ref+'\')">'
-        + '<div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;">'
-        + '<div style="font-size:14px;font-weight:600;color:var(--gold);">'+e.ref+'</div>'
-        + '<div style="font-size:11px;color:var(--text-dim);">'+e.count+' \u0447 \u2713 '+fmtMs(e.hours*3600000)+'</div>'
+      var topModels = Object.entries(e.models).sort(function(a,b){ return b[1]-a[1]; }).slice(0,2).map(function(m){ return m[0]; }).join(', ');
+      var barW = maxH > 0 ? (e.hours/maxH*100).toFixed(1) : '0';
+      var typePills = '';
+      if (e.full  > 0) typePills += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,96,0.15);color:var(--gold);border:1px solid rgba(240,192,96,0.25);">Full \u00d7'+e.full+'</span>';
+      if (e.part  > 0) typePills += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(230,130,30,0.15);color:var(--orange);border:1px solid rgba(230,130,30,0.25);">Part \u00d7'+e.part+'</span>';
+      if (e.asm   > 0) typePills += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(96,160,255,0.15);color:var(--blue);border:1px solid rgba(96,160,255,0.25);">\u0421\u0431\u043e\u0440\u043a\u0430 \u00d7'+e.asm+'</span>';
+      return '<div style="margin-bottom:16px;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">'
+        + '<div style="display:flex;align-items:baseline;gap:8px;">'
+        + '<span style="font-size:16px;font-weight:700;color:var(--gold);font-family:\'Syne\',sans-serif;">'+e.ref+'</span>'
+        + (topModels ? '<span style="font-size:11px;color:var(--text-dim);">Cal.'+topModels+'</span>' : '')
         + '</div>'
-        + '<div class="bar-track" style="height:20px;background:var(--glass);border-radius:6px;overflow:hidden;"><div class="bar-fill" style="width:'+(e.hours/maxH*100).toFixed(1)+'%;height:100%;background:linear-gradient(90deg, var(--gold) 0%, rgba(240,192,96,0.4) 100%);"></div></div>'
-        + '<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">\u041a\u0430\u043b\u0438\u0431\u0440\u044b: '+topModels+'</div>'
+        + '<span style="font-size:12px;color:var(--text-dim);">'+e.count+' \u0448\u0442 \u00b7 '+fmtMs(e.hours*3600000)+'</span>'
+        + '</div>'
+        + '<div style="height:22px;background:var(--glass);border-radius:6px;overflow:hidden;margin-bottom:6px;">'
+        + '<div style="width:'+barW+'%;height:100%;background:linear-gradient(90deg,var(--gold) 0%,rgba(240,192,96,0.35) 100%);border-radius:6px;transition:width 0.5s cubic-bezier(.25,.46,.45,.94);"></div>'
+        + '</div>'
+        + (typePills ? '<div style="display:flex;gap:5px;flex-wrap:wrap;">'+typePills+'</div>' : '')
         + '</div>';
     }).join('');
   }
@@ -3378,35 +3527,45 @@ function renderModelStats() {
   var allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
   var filtered = filterByDynamicPeriod(allDone, currentModelPeriod);
   var modelMap = {};
-  
   filtered.forEach(function(j) {
     if (!j.model) return;
-    if (!modelMap[j.model]) modelMap[j.model] = {model:j.model, hours:0, count:0, refs:{}};
+    if (!modelMap[j.model]) modelMap[j.model] = {model:j.model, hours:0, count:0, refs:{}, full:0, part:0, asm:0};
     var h = totalTime(j) / 3600000;
     modelMap[j.model].hours += h;
     modelMap[j.model].count++;
-    if (j.ref) {
-      if (!modelMap[j.model].refs[j.ref]) modelMap[j.model].refs[j.ref] = 0;
-      modelMap[j.model].refs[j.ref]++;
-    }
+    if (j.ref) modelMap[j.model].refs[j.ref] = (modelMap[j.model].refs[j.ref]||0) + 1;
+    if (j.type === 'full') modelMap[j.model].full++;
+    else if (j.type === 'part' || j.type === 'part_asm') modelMap[j.model].part++;
+    else if (j.type === 'assembly') modelMap[j.model].asm++;
   });
-  
-  var entries = Object.values(modelMap).sort(function(a,b){ return b.hours - a.hours; });
-  var maxH = entries.length > 0 ? Math.max.apply(null, entries.map(function(e){ return e.hours; })) : 1;
-  
+  var entries = Object.values(modelMap).sort(function(a,b){ return b.count - a.count; });
+  var maxH = entries.length > 0 ? entries.reduce(function(m,e){ return e.hours > m ? e.hours : m; }, 0) : 1;
+  if (maxH === 0) maxH = 1;
   var html = '';
   if (entries.length === 0) {
-    html = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:20px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
+    html = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:20px 0;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
   } else {
     html = entries.map(function(e) {
-      var topRefs = Object.entries(e.refs).sort(function(a,b){ return b[1]-a[1]; }).slice(0,3).map(function(r){ return r[0]+' ('+r[1]+')'; }).join(', ');
-      return '<div class="bar-row" style="margin-bottom:14px;cursor:pointer;" onclick="showModelDetail(\''+e.model+'\')">'
-        + '<div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;">'
-        + '<div style="font-size:14px;font-weight:600;color:#7F77DD;">'+e.model+'</div>'
-        + '<div style="font-size:11px;color:var(--text-dim);">'+e.count+' \u0447 \u2713 '+fmtMs(e.hours*3600000)+'</div>'
+      var topRefs = Object.keys(e.refs).sort(function(a,b){ return e.refs[b]-e.refs[a]; }).slice(0,3).join(', ');
+      var barW = (e.hours/maxH*100).toFixed(1);
+      var typePills = '';
+      if (e.full  > 0) typePills += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,96,0.15);color:var(--gold);border:1px solid rgba(240,192,96,0.25);">Full \u00d7'+e.full+'</span>';
+      if (e.part  > 0) typePills += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(230,130,30,0.15);color:var(--orange);border:1px solid rgba(230,130,30,0.25);">Part \u00d7'+e.part+'</span>';
+      if (e.asm   > 0) typePills += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(96,160,255,0.15);color:var(--blue);border:1px solid rgba(96,160,255,0.25);">\u0421\u0431\u043e\u0440\u043a\u0430 \u00d7'+e.asm+'</span>';
+      return '<div style="margin-bottom:16px;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">'
+        + '<div style="display:flex;align-items:baseline;gap:8px;">'
+        + '<span style="font-size:16px;font-weight:700;color:#7F77DD;font-family:\'Syne\',sans-serif;">Cal. '+e.model+'</span>'
         + '</div>'
-        + '<div class="bar-track" style="height:20px;background:var(--glass);border-radius:6px;overflow:hidden;"><div class="bar-fill" style="width:'+(e.hours/maxH*100).toFixed(1)+'%;height:100%;background:linear-gradient(90deg, #7F77DD 0%, rgba(127,119,221,0.4) 100%);"></div></div>'
-        + '<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Ref: '+topRefs+'</div>'
+        + '<span style="font-size:12px;color:var(--text-dim);">'+e.count+' \u0448\u0442 \u00b7 '+fmtMs(e.hours*3600000)+'</span>'
+        + '</div>'
+        + '<div style="height:22px;background:var(--glass);border-radius:6px;overflow:hidden;margin-bottom:6px;">'
+        + '<div style="width:'+barW+'%;height:100%;background:linear-gradient(90deg,#7F77DD 0%,rgba(127,119,221,0.35) 100%);border-radius:6px;transition:width 0.5s cubic-bezier(.25,.46,.45,.94);"></div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+        + (typePills ? typePills : '')
+        + (topRefs ? '<span style="font-size:10px;color:var(--text-dim);">Ref: '+topRefs+'</span>' : '')
+        + '</div>'
         + '</div>';
     }).join('');
   }
