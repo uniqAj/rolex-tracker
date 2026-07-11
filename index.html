@@ -1233,6 +1233,99 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── IndexedDB для фото (вместо localStorage) ──
+var rstDB = null;
+var dbReady = false;
+
+function initIndexedDB() {
+  return new Promise(function(resolve) {
+    if (!window.indexedDB) { resolve(false); return; }
+    var req = indexedDB.open('rst_db', 1);
+    req.onerror = function() { resolve(false); };
+    req.onsuccess = function(e) {
+      rstDB = e.target.result;
+      dbReady = true;
+      resolve(true);
+    };
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains('photos')) {
+        db.createObjectStore('photos', { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+function savePhotoToIDB(jobId, photoId, fullData, thumbnail, ts) {
+  return new Promise(function(resolve) {
+    if (!dbReady || !rstDB) { resolve(false); return; }
+    try {
+      var tx = rstDB.transaction(['photos'], 'readwrite');
+      var store = tx.objectStore('photos');
+      store.put({ id: photoId, jobId: jobId, full: fullData, thumb: thumbnail, ts: ts });
+      tx.oncomplete = function() { resolve(true); };
+      tx.onerror = function() { resolve(false); };
+    } catch(err) { resolve(false); }
+  });
+}
+
+function getPhotoFromIDB(photoId) {
+  return new Promise(function(resolve) {
+    if (!dbReady || !rstDB) { resolve(null); return; }
+    try {
+      var tx = rstDB.transaction(['photos'], 'readonly');
+      var req = tx.objectStore('photos').get(photoId);
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror = function() { resolve(null); };
+    } catch(err) { resolve(null); }
+  });
+}
+
+function deletePhotoFromIDB(photoId) {
+  return new Promise(function(resolve) {
+    if (!dbReady || !rstDB) { resolve(false); return; }
+    try {
+      var tx = rstDB.transaction(['photos'], 'readwrite');
+      tx.objectStore('photos').delete(photoId);
+      tx.oncomplete = function() { resolve(true); };
+      tx.onerror = function() { resolve(false); };
+    } catch(err) { resolve(false); }
+  });
+}
+
+function getAllPhotosFromIDB() {
+  return new Promise(function(resolve) {
+    if (!dbReady || !rstDB) { resolve([]); return; }
+    try {
+      var req = rstDB.transaction(['photos'], 'readonly').objectStore('photos').getAll();
+      req.onsuccess = function() { resolve(req.result || []); };
+      req.onerror = function() { resolve([]); };
+    } catch(err) { resolve([]); }
+  });
+}
+
+function migrateOldPhotos() {
+  return new Promise(function(resolve) {
+    if (!dbReady) { resolve(); return; }
+    var d = load();
+    var allJobs = [].concat(d.jobs||[], d.done||[]);
+    var pending = 0;
+    allJobs.forEach(function(job) {
+      if (!job.photos) return;
+      job.photos.forEach(function(p) {
+        if (p.full || !p.data || p.data.length < 1000) return;
+        pending++;
+        savePhotoToIDB(job.id, p.id, p.data, p.data.slice(0, 3000), p.ts).then(function(ok) {
+          if (ok) p.data = p.data.slice(0, 3000);
+          pending--;
+          if (pending === 0) { save(d); resolve(); }
+        });
+      });
+    });
+    if (pending === 0) resolve();
+  });
+}
+
 const FULL_STEPS = [
   {id:'measure',    name:'\u0417\u0430\u043c\u0435\u0440 \u043f\u043e\u043a\u0430\u0437\u0430\u043d\u0438\u0439 / \u043e\u0441\u043c\u043e\u0442\u0440'},
   {id:'disassem',   name:'\u0420\u0430\u0437\u0431\u043e\u0440\u043a\u0430'},
@@ -1929,39 +2022,31 @@ function addWorkPhoto(input) {
   }
   showToast('\u0421\u0436\u0438\u043c\u0430\u044e \u0444\u043e\u0442\u043e...');
   var ps = getPhotoSettings();
-  compressImageToDataURL(file, ps.dim, ps.q).then(function(dataUrl) {
-    var d = load();
-    var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
-    if (!job) return;
-    if (!job.photos) job.photos = [];
-    if (job.photos.length >= MAX_PHOTOS_PER_JOB) {
-      showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c ' + MAX_PHOTOS_PER_JOB + ' \u0444\u043e\u0442\u043e \u043d\u0430 \u0447\u0430\u0441\u044b');
-      return;
-    }
-    job.photos.push({id: genId(), data: dataUrl, ts: Date.now()});
-    var ok = save(d);
-    if (ok) {
-      input.value = '';
-      renderWorkPhotos(job);
-      var sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
-      showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e (~' + sizeKB + 'KB)');
-    } else {
-      // Retry with harder compression
-      job.photos.pop();
-      compressImageToDataURL(file, 600, 0.60).then(function(smallUrl) {
-        job.photos.push({id: genId(), data: smallUrl, ts: Date.now()});
-        var ok2 = save(d);
-        if (ok2) {
-          input.value = '';
-          renderWorkPhotos(job);
-          var sizeKB2 = Math.round(smallUrl.length * 0.75 / 1024);
-          showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e (~' + sizeKB2 + 'KB, \u0441\u0436\u0430\u0442\u043e \u0441\u0438\u043b\u044c\u043d\u0435\u0435)');
-        } else {
-          job.photos.pop();
-          showToast('\u041f\u0430\u043c\u044f\u0442\u044c \u043f\u0435\u0440\u0435\u043f\u043e\u043b\u043d\u0435\u043d\u0430. \u0423\u0434\u0430\u043b\u0438\u0442\u0435 \u0441\u0442\u0430\u0440\u044b\u0435 \u0444\u043e\u0442\u043e.');
-        }
-      }).catch(function() { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u0436\u0430\u0442\u0438\u044f'); });
-    }
+  compressImageToDataURL(file, ps.dim, ps.q).then(function(fullDataUrl) {
+    // Thumbnail = первые 3KB base64
+    var thumb = fullDataUrl.slice(0, 3000);
+    var photoId = genId();
+    var ts = Date.now();
+    
+    // Сохранить полное в IndexedDB
+    savePhotoToIDB(currentJobId, photoId, fullDataUrl, thumb, ts).then(function(idbOk) {
+      var d = load();
+      var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+      if (!job || !idbOk) {
+        showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f');
+        return;
+      }
+      if (!job.photos) job.photos = [];
+      if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c ' + MAX_PHOTOS_PER_JOB + ' \u0444\u043e\u0442\u043e'); return; }
+      
+      // В localStorage только метаданные + thumbnail
+      job.photos.push({id: photoId, data: thumb, ts: ts});
+      if (save(d)) {
+        input.value = '';
+        renderWorkPhotos(job);
+        showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
+      }
+    });
   }).catch(function() {
     showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438');
   });
@@ -1976,34 +2061,23 @@ function addPhotoFromHistory(input, jobId) {
   }
   showToast('\u0421\u0436\u0438\u043c\u0430\u044e...');
   var ps = getPhotoSettings();
-  compressImageToDataURL(file, ps.dim, ps.q).then(function(dataUrl) {
-    var d = load();
-    var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
-    if (!job) return;
-    if (!job.photos) job.photos = [];
-    if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c '+MAX_PHOTOS_PER_JOB+' \u0444\u043e\u0442\u043e'); return; }
-    job.photos.push({id: genId(), data: dataUrl, ts: Date.now()});
-    var ok = save(d);
-    if (ok) {
-      input.value = '';
-      showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
-      openHistoryDetail(jobId);
-    } else {
-      // Retry with harder compression
-      job.photos.pop();
-      compressImageToDataURL(file, 600, 0.60).then(function(smallUrl) {
-        job.photos.push({id: genId(), data: smallUrl, ts: Date.now()});
-        var ok2 = save(d);
-        if (ok2) {
-          input.value = '';
-          showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e (\u0441\u0436\u0430\u0442\u043e \u0441\u0438\u043b\u044c\u043d\u0435\u0435)');
-          openHistoryDetail(jobId);
-        } else {
-          job.photos.pop();
-          showToast('\u041f\u0430\u043c\u044f\u0442\u044c \u043f\u0435\u0440\u0435\u043f\u043e\u043b\u043d\u0435\u043d\u0430. \u0423\u0434\u0430\u043b\u0438\u0442\u0435 \u0441\u0442\u0430\u0440\u044b\u0435 \u0444\u043e\u0442\u043e.');
-        }
-      }).catch(function() { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u0436\u0430\u0442\u0438\u044f'); });
-    }
+  compressImageToDataURL(file, ps.dim, ps.q).then(function(fullDataUrl) {
+    var thumb = fullDataUrl.slice(0, 3000);
+    var photoId = genId();
+    var ts = Date.now();
+    savePhotoToIDB(jobId, photoId, fullDataUrl, thumb, ts).then(function(idbOk) {
+      var d = load();
+      var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
+      if (!job || !idbOk) return;
+      if (!job.photos) job.photos = [];
+      if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c '+MAX_PHOTOS_PER_JOB+' \u0444\u043e\u0442\u043e'); return; }
+      job.photos.push({id: photoId, data: thumb, ts: ts});
+      if (save(d)) {
+        input.value = '';
+        showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
+        openHistoryDetail(jobId);
+      }
+    });
   }).catch(function(){ showToast('\u041e\u0448\u0438\u0431\u043a\u0430'); });
 }
 
@@ -2014,6 +2088,7 @@ function deletePhotoFromHistory(jobId, photoId) {
   if (!job || !job.photos) return;
   job.photos = job.photos.filter(function(p){ return p.id !== photoId; });
   save(d);
+  if (dbReady) deletePhotoFromIDB(photoId);
   showToast('\u0424\u043e\u0442\u043e \u0443\u0434\u0430\u043b\u0435\u043d\u043e');
   openHistoryDetail(jobId);
 }
@@ -2026,6 +2101,7 @@ function deleteWorkPhoto(photoId) {
   if (!job || !job.photos) return;
   job.photos = job.photos.filter(function(p){ return p.id !== photoId; });
   save(d);
+  if (dbReady) deletePhotoFromIDB(photoId);
   renderWorkPhotos(job);
   showToast('\u0424\u043e\u0442\u043e \u0443\u0434\u0430\u043b\u0435\u043d\u043e');
 }
@@ -2068,8 +2144,15 @@ function openPhotoViewerForJob(jobId, photoId) {
   var photo = job.photos.find(function(p){ return p.id === photoId; });
   if (!photo) return;
   document.getElementById('part-img-title').textContent = '\u0424\u043e\u0442\u043e \u00b7 ' + (job.serial||job.ref||'');
-  document.getElementById('part-img-src').src = photo.data;
-  // Build date string manually to avoid Safari PWA locale bugs
+  
+  // Try to load full photo from IndexedDB, fallback to thumbnail from localStorage
+  getPhotoFromIDB(photoId).then(function(idbPhoto) {
+    var imgSrc = (idbPhoto && idbPhoto.full) ? idbPhoto.full : photo.data;
+    document.getElementById('part-img-src').src = imgSrc;
+  }).catch(function() {
+    document.getElementById('part-img-src').src = photo.data;
+  });
+  
   var dt = new Date(photo.ts);
   var pad = function(n){ return n<10?'0'+n:n; };
   var hint = pad(dt.getDate())+'.'+pad(dt.getMonth()+1)+'.'+dt.getFullYear()+', '+pad(dt.getHours())+':'+pad(dt.getMinutes())+':'+pad(dt.getSeconds());
@@ -3729,135 +3812,128 @@ function recompressAllPhotos() {
   var dim = dimEl ? parseInt(dimEl.value, 10) : 900;
   var q   = qEl   ? parseFloat(qEl.value)     : 0.72;
   var statusEl = document.getElementById('recompress-status');
-  if (statusEl) statusEl.textContent = '\u0421\u0436\u0438\u043c\u0430\u044e...';
-
-  var d = load();
-  var allJobs = [].concat(d.jobs||[], d.done||[]);
-  var allPhotos = [];
-  allJobs.forEach(function(job) {
-    if (!job.photos || !job.photos.length) return;
-    job.photos.forEach(function(photo) {
-      allPhotos.push({job: job, photo: photo});
-    });
-  });
-
-  if (allPhotos.length === 0) {
-    if (statusEl) statusEl.textContent = '\u0424\u043e\u0442\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b';
+  if (statusEl) statusEl.textContent = '\u041b\u043e\u0430\u0434\u044e \u0444\u043e\u0442\u043e...';
+  
+  if (!dbReady) {
+    if (statusEl) statusEl.textContent = '\u041e\u0448\u0438\u0431\u043a\u0430: IndexedDB \u043d\u0435 \u0430\u043a\u0442\u0438\u0432\u0435\u043d';
     return;
   }
-
-  var done = 0;
-  var total = allPhotos.length;
-  var beforeBytes = 0;
-  var afterBytes  = 0;
-
-  function processNext(i) {
-    if (i >= total) {
-      save(d);
-      var savedKB = Math.round((beforeBytes - afterBytes) * 0.75 / 1024);
-      if (statusEl) statusEl.textContent = '\u0413\u043e\u0442\u043e\u0432\u043e! ' + total + ' \u0444\u043e\u0442\u043e \u00b7 -' + savedKB + 'KB';
-      showToast('\u041f\u0435\u0440\u0435\u0441\u0436\u0430\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e \u00b7 ' + total + ' \u0444\u043e\u0442\u043e');
-      renderStorageMeter();
+  
+  getAllPhotosFromIDB().then(function(allPhotosIDB) {
+    if (allPhotosIDB.length === 0) {
+      if (statusEl) statusEl.textContent = '\u0424\u043e\u0442\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b';
       return;
     }
-    var item = allPhotos[i];
-    var dataUrl = item.photo.data;
-    if (!dataUrl || dataUrl.indexOf('data:image') !== 0) { processNext(i+1); return; }
-    beforeBytes += dataUrl.length;
-    // Re-draw through canvas to compress
-    var img = new Image();
-    img.onload = function() {
-      var canvas = document.createElement('canvas');
-      var ratio = Math.min(dim/img.width, dim/img.height, 1);
-      canvas.width  = Math.round(img.width  * ratio);
-      canvas.height = Math.round(img.height * ratio);
-      var ctx = canvas.getContext('2d');
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      var newDataUrl = canvas.toDataURL('image/jpeg', q);
-      afterBytes += newDataUrl.length;
-      item.photo.data = newDataUrl;
-      done++;
-      if (statusEl) statusEl.textContent = done + ' / ' + total;
-      processNext(i+1);
-    };
-    img.onerror = function() { beforeBytes -= dataUrl.length; afterBytes += dataUrl.length; processNext(i+1); };
-    img.src = dataUrl;
-  }
-
-  processNext(0);
+    
+    var total = allPhotosIDB.length;
+    var done = 0;
+    var savedKB = 0;
+    
+    allPhotosIDB.forEach(function(photoRec) {
+      if (!photoRec.full || photoRec.full.indexOf('data:image') !== 0) {
+        done++;
+        if (done === total) {
+          if (statusEl) statusEl.textContent = '\u0413\u043e\u0442\u043e\u0432\u043e! ' + total + ' \u0444\u043e\u0442\u043e \u00b7 -' + savedKB + 'KB';
+          showToast('\u041f\u0435\u0440\u0435\u0441\u0436\u0430\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e');
+          renderStorageMeter();
+        }
+        return;
+      }
+      
+      var beforeSizeKB = Math.round(photoRec.full.length / 1024);
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var ratio = Math.min(dim/img.width, dim/img.height, 1);
+        canvas.width  = Math.round(img.width  * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        var ctx = canvas.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        var newData = canvas.toDataURL('image/jpeg', q);
+        var afterSizeKB = Math.round(newData.length / 1024);
+        savedKB += Math.max(0, beforeSizeKB - afterSizeKB);
+        photoRec.full = newData;
+        photoRec.thumb = newData.slice(0, 3000);
+        savePhotoToIDB(photoRec.jobId, photoRec.id, newData, photoRec.thumb, photoRec.ts);
+        done++;
+        if (statusEl) statusEl.textContent = done + ' / ' + total;
+        if (done === total) {
+          if (statusEl) statusEl.textContent = '\u0413\u043e\u0442\u043e\u0432\u043e! ' + total + ' \u0444\u043e\u0442\u043e \u00b7 -' + savedKB + 'KB';
+          showToast('\u041f\u0435\u0440\u0435\u0441\u0436\u0430\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e');
+          renderStorageMeter();
+        }
+      };
+      img.onerror = function() { done++; if (statusEl) statusEl.textContent = done + ' / ' + total; };
+      img.src = photoRec.full;
+    });
+  });
 }
 
 function renderStorageMeter() {
   var LIMIT = 5 * 1024 * 1024; // 5MB iOS Safari localStorage limit
-  // Measure each key
+  // Measure localStorage only (thumbnails + data)
   var keys = ['rst_data', 'rst_settings', 'rst_theme'];
-  var breakdown = [];
   var totalBytes = 0;
   keys.forEach(function(k) {
     var val = localStorage.getItem(k);
     if (!val) return;
-    var bytes = val.length * 2; // UTF-16
-    totalBytes += bytes;
-    breakdown.push({key: k, bytes: bytes});
+    totalBytes += val.length * 2; // UTF-16
   });
-
-  // Also count any other rst_ keys
+  
+  // Count any other rst_ keys
   for (var i = 0; i < localStorage.length; i++) {
     var k = localStorage.key(i);
     if (k && k.indexOf('rst_') === 0 && keys.indexOf(k) === -1) {
       var val2 = localStorage.getItem(k);
-      if (val2) {
-        var b = val2.length * 2;
-        totalBytes += b;
-        breakdown.push({key: k, bytes: b});
-      }
+      if (val2) totalBytes += val2.length * 2;
     }
   }
-
-  // Separate photos size from rst_data
+  
+  // Thumbnails only (full photos now in IndexedDB)
   var d = load();
-  var photoBytes = 0;
+  var thumbBytes = 0;
   var allJobs = [].concat(d.jobs||[], d.done||[]);
   allJobs.forEach(function(job) {
     if (!job.photos) return;
     job.photos.forEach(function(p) {
-      if (p.data) photoBytes += p.data.length * 2;
+      if (p.data) thumbBytes += p.data.length * 2; // these are now small thumbnails
     });
   });
-
-  var pct = Math.min(100, Math.round(totalBytes / LIMIT * 100));
+  
+  var localStorageUsed = totalBytes + thumbBytes;
+  var pct = Math.min(100, Math.round(localStorageUsed / LIMIT * 100));
   var barColor = pct > 85 ? '#ff6b6b' : pct > 60 ? '#f0c060' : 'var(--gold)';
-
-  var usedKB = (totalBytes / 1024).toFixed(0);
-  var usedMB = (totalBytes / 1024 / 1024).toFixed(2);
-  var label = totalBytes > 1024*1024 ? usedMB+' MB' : usedKB+' KB';
-
+  
+  var usedKB = (localStorageUsed / 1024).toFixed(0);
+  var usedMB = (localStorageUsed / 1024 / 1024).toFixed(2);
+  var label = localStorageUsed > 1024*1024 ? usedMB+' MB' : usedKB+' KB';
+  
   var usedEl = document.getElementById('storage-used-label');
   var barEl  = document.getElementById('storage-bar');
   var bdEl   = document.getElementById('storage-breakdown');
   if (!usedEl) return;
-
-  usedEl.textContent = label + ' (' + pct + '%)';
+  
+  usedEl.textContent = label + ' из 5 MB (' + pct + '%) - полные фото в IndexedDB';
   usedEl.style.color = barColor;
   barEl.style.width = pct + '%';
   barEl.style.background = barColor;
-
-  var photoKB = Math.round(photoBytes / 1024);
-  var dataKB  = Math.round((totalBytes - photoBytes) / 1024);
-
+  
+  var dataKB = Math.round((totalBytes - thumbBytes) / 1024);
+  var thumbKB = Math.round(thumbBytes / 1024);
+  var freeKB = Math.round((LIMIT - localStorageUsed) / 1024);
+  
   function row(label, kb, color) {
-    var w = Math.round(kb * 1024 / LIMIT * 100);
     return '<div style="display:flex;align-items:center;gap:8px;">'
       + '<div style="width:10px;height:10px;border-radius:50%;background:'+color+';flex-shrink:0;"></div>'
       + '<span style="font-size:12px;color:var(--text-dim);flex:1;">'+label+'</span>'
       + '<span style="font-size:12px;color:var(--text);font-weight:600;">'+kb+' KB</span>'
       + '</div>';
   }
-
-  bdEl.innerHTML = row('\u0424\u043e\u0442\u043e', photoKB, 'var(--gold)')
+  
+  bdEl.innerHTML = row('\u041c\u0438\u043d\u0438\u0430\u0442\u044e\u0440\u044b \u0444\u043e\u0442\u043e', thumbKB, 'var(--gold)')
     + row('\u0414\u0430\u043d\u043d\u044b\u0435 (\u0440\u0430\u0431\u043e\u0442\u044b, \u0438\u0441\u0442\u043e\u0440\u0438\u044f)', dataKB, '#7F77DD')
-    + row('\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e', Math.round((LIMIT - totalBytes) / 1024), 'var(--glass-border)');
+    + row('\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e', freeKB, 'var(--glass-border)');
 }
 
 function openSettingsModal() {
@@ -4655,6 +4731,19 @@ function filterGlobalCatalog() {
   html += '</div>';
   resultsEl.innerHTML = html;
 }
+
+// ── STARTUP ──────────────────────────────────────────────────────────────
+initIndexedDB().then(function(ready) {
+  if (ready) {
+    migrateOldPhotos();
+  }
+});
+
+// Инициализация приложения при загрузке
+window.addEventListener('DOMContentLoaded', function() {
+  renderHome();
+  updateClock();
+});
 </script>
 <div class="modal-overlay" id="modal-settings">
   <div class="modal">
