@@ -1361,11 +1361,15 @@ function migrateOldPhotos() {
         any = true;
         pending++;
         var fullBackup = p.data;
-        var thumb = fullBackup.slice(0, 10000);
-        savePhotoToIDB(job.id, p.id, fullBackup, thumb, p.ts).then(function(ok) {
-          if (ok) results.push({photoId: p.id, thumb: thumb});
-          pending--;
-          if (pending === 0) finalizeAll();
+        makeThumbnail(fullBackup, 220, 0.6).then(function(thumb) {
+          // Если canvas не смог декодировать оригинал — сами данные повреждены,
+          // обрезка строки тут не поможет, поэтому просто используем исходные данные как есть
+          if (!thumb) thumb = fullBackup;
+          savePhotoToIDB(job.id, p.id, fullBackup, thumb, p.ts).then(function(ok) {
+            if (ok) results.push({photoId: p.id, thumb: thumb});
+            pending--;
+            if (pending === 0) finalizeAll();
+          });
         });
       });
     });
@@ -2066,6 +2070,26 @@ function compressImageToDataURL(file, maxDim, quality) {
   });
 }
 
+// Создаёт НАСТОЯЩУЮ маленькую миниатюру через canvas (не обрезку base64-строки,
+// которая ломает JPEG-структуру и даёт невалидное изображение)
+function makeThumbnail(fullDataUrl, maxDim, quality) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var ratio = Math.min(maxDim/img.width, maxDim/img.height, 1);
+      canvas.width  = Math.max(1, Math.round(img.width  * ratio));
+      canvas.height = Math.max(1, Math.round(img.height * ratio));
+      var ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = function() { resolve(null); };
+    img.src = fullDataUrl;
+  });
+}
+
 var MAX_PHOTOS_PER_JOB = 2;
 var MAX_INPUT_FILE_SIZE = 20 * 1024 * 1024; // 20MB raw input limit
 
@@ -2087,29 +2111,31 @@ function addWorkPhoto(input) {
   showToast('\u0421\u0436\u0438\u043c\u0430\u044e \u0444\u043e\u0442\u043e...');
   var ps = getPhotoSettings();
   compressImageToDataURL(file, ps.dim, ps.q).then(function(fullDataUrl) {
-    // Thumbnail = первые 10KB base64 (более чёткое изображение)
-    var thumb = fullDataUrl.slice(0, 10000);
-    var photoId = genId();
-    var ts = Date.now();
-    
-    // Сохранить полное в IndexedDB
-    savePhotoToIDB(currentJobId, photoId, fullDataUrl, thumb, ts).then(function(idbOk) {
-      var d = load();
-      var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
-      if (!job || !idbOk) {
-        showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f');
-        return;
-      }
-      if (!job.photos) job.photos = [];
-      if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c ' + MAX_PHOTOS_PER_JOB + ' \u0444\u043e\u0442\u043e'); return; }
+    // Настоящая миниатюра через canvas (не обрезка base64!)
+    makeThumbnail(fullDataUrl, 220, 0.6).then(function(thumb) {
+      if (!thumb) thumb = fullDataUrl; // fallback: full image is better than nothing
+      var photoId = genId();
+      var ts = Date.now();
       
-      // В localStorage только метаданные + thumbnail
-      job.photos.push({id: photoId, data: thumb, ts: ts, migrated: true});
-      if (save(d)) {
-        input.value = '';
-        renderWorkPhotos(job);
-        showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
-      }
+      // Сохранить полное в IndexedDB
+      savePhotoToIDB(currentJobId, photoId, fullDataUrl, thumb, ts).then(function(idbOk) {
+        var d = load();
+        var job = (d.jobs||[]).find(function(j){ return j.id===currentJobId; }) || (d.done||[]).find(function(j){ return j.id===currentJobId; });
+        if (!job || !idbOk) {
+          showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f');
+          return;
+        }
+        if (!job.photos) job.photos = [];
+        if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c ' + MAX_PHOTOS_PER_JOB + ' \u0444\u043e\u0442\u043e'); return; }
+        
+        // В localStorage только метаданные + thumbnail
+        job.photos.push({id: photoId, data: thumb, ts: ts, migrated: true});
+        if (save(d)) {
+          input.value = '';
+          renderWorkPhotos(job);
+          showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
+        }
+      });
     });
   }).catch(function() {
     showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438');
@@ -2126,21 +2152,23 @@ function addPhotoFromHistory(input, jobId) {
   showToast('\u0421\u0436\u0438\u043c\u0430\u044e...');
   var ps = getPhotoSettings();
   compressImageToDataURL(file, ps.dim, ps.q).then(function(fullDataUrl) {
-    var thumb = fullDataUrl.slice(0, 10000);
-    var photoId = genId();
-    var ts = Date.now();
-    savePhotoToIDB(jobId, photoId, fullDataUrl, thumb, ts).then(function(idbOk) {
-      var d = load();
-      var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
-      if (!job || !idbOk) return;
-      if (!job.photos) job.photos = [];
-      if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c '+MAX_PHOTOS_PER_JOB+' \u0444\u043e\u0442\u043e'); return; }
-      job.photos.push({id: photoId, data: thumb, ts: ts, migrated: true});
-      if (save(d)) {
-        input.value = '';
-        showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
-        openHistoryDetail(jobId);
-      }
+    makeThumbnail(fullDataUrl, 220, 0.6).then(function(thumb) {
+      if (!thumb) thumb = fullDataUrl;
+      var photoId = genId();
+      var ts = Date.now();
+      savePhotoToIDB(jobId, photoId, fullDataUrl, thumb, ts).then(function(idbOk) {
+        var d = load();
+        var job = (d.jobs||[]).find(function(j){ return j.id===jobId; }) || (d.done||[]).find(function(j){ return j.id===jobId; });
+        if (!job || !idbOk) return;
+        if (!job.photos) job.photos = [];
+        if (job.photos.length >= MAX_PHOTOS_PER_JOB) { showToast('\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c '+MAX_PHOTOS_PER_JOB+' \u0444\u043e\u0442\u043e'); return; }
+        job.photos.push({id: photoId, data: thumb, ts: ts, migrated: true});
+        if (save(d)) {
+          input.value = '';
+          showToast('\u0424\u043e\u0442\u043e \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e');
+          openHistoryDetail(jobId);
+        }
+      });
     });
   }).catch(function(){ showToast('\u041e\u0448\u0438\u0431\u043a\u0430'); });
 }
@@ -4174,7 +4202,15 @@ function recompressAllPhotos() {
         var newData = canvas.toDataURL('image/jpeg', q);
         var afterSizeKB = Math.round(newData.length / 1024);
         savedKB += Math.max(0, beforeSizeKB - afterSizeKB);
-        var newThumb = newData.slice(0, 10000);
+        // Настоящая миниатюра — отдельный маленький canvas, а не обрезка строки
+        var thumbCanvas = document.createElement('canvas');
+        var thumbRatio = Math.min(220/img.width, 220/img.height, 1);
+        thumbCanvas.width  = Math.max(1, Math.round(img.width  * thumbRatio));
+        thumbCanvas.height = Math.max(1, Math.round(img.height * thumbRatio));
+        var thumbCtx = thumbCanvas.getContext('2d');
+        thumbCtx.imageSmoothingQuality = 'high';
+        thumbCtx.drawImage(img, 0, 0, thumbCanvas.width, thumbCanvas.height);
+        var newThumb = thumbCanvas.toDataURL('image/jpeg', 0.6);
         photoRec.full = newData;
         photoRec.thumb = newThumb;
         savePhotoToIDB(photoRec.jobId, photoRec.id, newData, newThumb, photoRec.ts);
@@ -5059,10 +5095,75 @@ function filterGlobalCatalog() {
   resultsEl.innerHTML = html;
 }
 
+// Чинит миниатюры, сломанные старыми версиями (обрезка base64-строки вместо
+// настоящего уменьшения через canvas). Регенерирует thumb из full фото,
+// которое хранится в IndexedDB и не пострадало от этого бага.
+function repairBrokenThumbnails() {
+  return new Promise(function(resolve) {
+    if (!dbReady) { resolve(); return; }
+    var s = loadSettings();
+    if (s.thumbsRepairedV2) { resolve(); return; } // already repaired once
+    getAllPhotosFromIDB().then(function(allPhotosIDB) {
+      var toFix = allPhotosIDB.filter(function(p){ return p.full && p.full.indexOf('data:image') === 0; });
+      if (toFix.length === 0) {
+        s.thumbsRepairedV2 = true;
+        localStorage.setItem('rst_settings', JSON.stringify(s));
+        resolve();
+        return;
+      }
+      var pending = toFix.length;
+      var results = [];
+      showToast('\u0412\u043e\u0441\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u044e ' + toFix.length + ' \u043c\u0438\u043d\u0438\u0430\u0442\u044e\u0440...');
+      toFix.forEach(function(photoRec) {
+        makeThumbnail(photoRec.full, 220, 0.6).then(function(thumb) {
+          if (thumb) {
+            photoRec.thumb = thumb;
+            savePhotoToIDB(photoRec.jobId, photoRec.id, photoRec.full, thumb, photoRec.ts).then(function() {
+              results.push({photoId: photoRec.id, thumb: thumb});
+              pending--;
+              if (pending === 0) finalizeRepair();
+            });
+          } else {
+            pending--;
+            if (pending === 0) finalizeRepair();
+          }
+        });
+      });
+      function finalizeRepair() {
+        if (results.length > 0) {
+          var fresh = load();
+          var freshJobs = [].concat(fresh.jobs||[], fresh.done||[]);
+          results.forEach(function(r) {
+            for (var ji = 0; ji < freshJobs.length; ji++) {
+              var jj = freshJobs[ji];
+              if (!jj.photos) continue;
+              for (var pi = 0; pi < jj.photos.length; pi++) {
+                if (jj.photos[pi].id === r.photoId) jj.photos[pi].data = r.thumb;
+              }
+            }
+          });
+          save(fresh);
+          showToast('\u0424\u043e\u0442\u043e \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u044b: ' + results.length);
+        }
+        var s2 = loadSettings();
+        s2.thumbsRepairedV2 = true;
+        localStorage.setItem('rst_settings', JSON.stringify(s2));
+        resolve();
+      }
+    });
+  });
+}
+
 // ── STARTUP ──────────────────────────────────────────────────────────────
 initIndexedDB().then(function(ready) {
   if (ready) {
-    migrateOldPhotos();
+    migrateOldPhotos().then(function() {
+      repairBrokenThumbnails().then(function() {
+        // Обновить текущий экран, если пользователь уже на нём
+        if (document.getElementById('page-home') && document.getElementById('page-home').classList.contains('active')) renderHome();
+        if (document.getElementById('page-history') && document.getElementById('page-history').classList.contains('active')) renderHistory();
+      });
+    });
   }
 });
 
