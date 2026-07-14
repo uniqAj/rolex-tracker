@@ -880,6 +880,11 @@
     <div class="section-title">&#1057;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1072;</div>
     <div class="section-meta" id="stats-period-label">&#1058;&#1077;&#1082;&#1091;&#1097;&#1080;&#1081; &#1084;&#1077;&#1089;&#1103;&#1094;</div>
   </div>
+  <div style="padding:0 16px 8px;">
+    <select id="worker-filter" onchange="onWorkerFilterChange()" style="width:100%;padding:10px 14px;font-size:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);backdrop-filter:blur(12px);">
+      <option value="__all__">&#1042;&#1089;&#1077; &#1089;&#1086;&#1090;&#1088;&#1091;&#1076;&#1085;&#1080;&#1082;&#1080;</option>
+    </select>
+  </div>
   <div style="padding:0 16px 4px;display:flex;gap:6px;flex-wrap:wrap;">
     <button class="period-btn active" onclick="setPeriod('month')" id="period-month">&#1052;&#1077;&#1089;&#1103;&#1094;</button>
     <button class="period-btn" onclick="setPeriod('week')" id="period-week">&#1053;&#1077;&#1076;&#1077;&#1083;&#1103;</button>
@@ -945,6 +950,19 @@
       </div>
     </div>
     <div id="model-stats-container"></div>
+  </div>
+
+  <div id="stats-block-extradays" class="chart-container">
+    <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>&#128197; &#1044;&#1086;&#1087;&#1086;&#1083;&#1085;&#1080;&#1090;&#1077;&#1083;&#1100;&#1085;&#1099;&#1077; &#1076;&#1085;&#1080;</span>
+      <span id="extradays-count" style="font-size:11px;color:var(--text-dim);">0</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="date" id="extraday-date" class="form-input" style="flex:1;padding:8px 10px;font-size:14px;" />
+      <input type="text" id="extraday-note" placeholder="&#1055;&#1088;&#1080;&#1095;&#1080;&#1085;&#1072; (&#1085;&#1077;&#1086;&#1073;&#1103;&#1079;&#1072;&#1090;&#1077;&#1083;&#1100;&#1085;&#1086;)" class="form-input" style="flex:1;padding:8px 10px;font-size:14px;" />
+    </div>
+    <button class="btn btn-outline" style="margin-top:0;margin-bottom:12px;" onclick="addExtraDay()">+ &#1054;&#1090;&#1084;&#1077;&#1090;&#1080;&#1090;&#1100; &#1044;&#1077;&#1085;&#1100;</button>
+    <div id="extradays-container"></div>
   </div>
 
   <!-- &#1053;&#1086;&#1088;&#1084;&#1072;&#1090;&#1080;&#1074;&#1099; &#1087;&#1088;&#1103;&#1084;&#1086; &#1074; &#1089;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1077; -->
@@ -1311,7 +1329,7 @@ function migrateOldPhotos() {
     var allJobs = [].concat(d.jobs||[], d.done||[]);
     var pending = 0;
     var any = false;
-    var results = []; // {photoId, thumb} — применяем точечно, без гонки условий
+    var results = []; // apply changes precisely by id to avoid race condition
 
     function finalizeAll() {
       if (results.length === 0) { resolve(); return; }
@@ -1478,6 +1496,13 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
+function escapeHtml(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function fmtMs(ms) {
   if (!ms || ms <= 0) return '\u2014';
   const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
@@ -1629,7 +1654,17 @@ function navigate(page) {
   const nb = document.getElementById('nav-'+page);
   if (nb) nb.classList.add('active');
   document.querySelector('.fab').style.display = page === 'home' ? 'flex' : 'none';
-  if (page === 'stats') { renderStats(); setTimeout(animateBars, 50); }
+  if (page === 'stats') {
+    populateWorkerFilter();
+    var edEl = document.getElementById('extraday-date');
+    if (edEl && !edEl.value) {
+      var t = new Date();
+      var pad2 = function(n){ return ('0'+n).slice(-2); };
+      edEl.value = t.getFullYear()+'-'+pad2(t.getMonth()+1)+'-'+pad2(t.getDate());
+    }
+    renderStats();
+    setTimeout(animateBars, 50);
+  }
   if (page === 'history') renderHistory();
   if (page === 'home') renderHome();
   if (page === 'catalog') renderCatalog();
@@ -2707,7 +2742,7 @@ function createJob() {
   var createdAt = (dateEl && dateEl.value) ? (datetimeLocalToTs(dateEl.value) || Date.now()) : Date.now();
   var excEl = document.getElementById('inp-exclude-stats');
   var excludeFromStats = !!(excEl && excEl.checked);
-  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:createdAt, excludeFromStats:excludeFromStats, steps:steps, dorabotki:[], vozvrat:[], done:false, completedAt:null};
+  var job = {id:Date.now().toString(), ref:ref, model:model, serial:serial, type:mainType, workTypes:selectedTypes, note:note, features:'', createdAt:createdAt, excludeFromStats:excludeFromStats, steps:steps, dorabotki:[], vozvrat:[], done:false, completedAt:null, worker:getCurrentWorkerName()};
   ensurePhaseSteps(job);
   var d = load(); d.jobs.push(job); save(d);
   closeModal('modal-new'); showToast('\u0427\u0430\u0441\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b');
@@ -3225,6 +3260,7 @@ var currentModelPeriod = 'month';
 var customRangeFrom = 0;
 var customRangeTo   = 0;
 var customMonthKey  = '';   // 'YYYY-MM'
+var currentWorkerFilter = getCurrentWorkerName(); // \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e \u043f\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u043c "\u043c\u043e\u044e" \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0443
 
 function toggleMonthPicker() {
   var bar = document.getElementById('month-picker-bar');
@@ -3503,7 +3539,8 @@ function renderHeatmap(allDone) {
 
 function renderStats() {
   const d = load();
-  const allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var allDoneRaw = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  const allDone = (currentWorkerFilter === '__all__') ? allDoneRaw : allDoneRaw.filter(function(j){ return (j.worker||'\u042f') === currentWorkerFilter; });
   const done = filterByPeriod(allDone);
   populateStatsNorms();
   const totalJobs = done.length;
@@ -3521,13 +3558,16 @@ function renderStats() {
   var heatmapBlock = document.getElementById('stats-block-heatmap');
   var refBlock = document.getElementById('stats-block-ref');
   var modelBlock = document.getElementById('stats-block-model');
+  var extraDaysBlock = document.getElementById('stats-block-extradays');
   if (stageBlock) stageBlock.style.display = isBlockVisible('stage') ? '' : 'none';
   if (typeBlock) typeBlock.style.display = isBlockVisible('type') ? '' : 'none';
   if (speedBlock) speedBlock.style.display = isBlockVisible('speed') ? '' : 'none';
   if (heatmapBlock) heatmapBlock.style.display = isBlockVisible('heatmap') ? '' : 'none';
   if (refBlock) refBlock.style.display = isBlockVisible('ref') ? '' : 'none';
   if (modelBlock) modelBlock.style.display = isBlockVisible('model') ? '' : 'none';
+  if (extraDaysBlock) extraDaysBlock.style.display = isBlockVisible('extradays') ? '' : 'none';
   if (heatmapBlock && isBlockVisible('heatmap')) renderHeatmap(allDone);
+  if (extraDaysBlock && isBlockVisible('extradays')) renderExtraDaysStats();
   document.getElementById('stats-grid').innerHTML =
     '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(totalJobs)+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+fmtMs(avgTotal)+'</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>'+
@@ -3609,6 +3649,200 @@ function filterByDynamicPeriod(jobs, period) {
   }
   if (!cutoff) return jobs; // guard: unknown period → return all
   return jobs.filter(function(j){ return (j.completedAt || j.createdAt || 0) >= cutoff; });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ДОПОЛНИТЕЛЬНЫЕ ДНИ (переработки) — отдельное локальное хранилище
+// ═══════════════════════════════════════════════════════════════
+
+function loadExtraDays() {
+  try {
+    var raw = localStorage.getItem('rst_extra_days');
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch(e) { return []; }
+}
+
+function saveExtraDaysList(arr) {
+  try {
+    localStorage.setItem('rst_extra_days', JSON.stringify(arr));
+    return true;
+  } catch(e) {
+    showToast('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c');
+    return false;
+  }
+}
+
+function addExtraDay() {
+  var dateEl = document.getElementById('extraday-date');
+  var noteEl = document.getElementById('extraday-note');
+  if (!dateEl || !dateEl.value) { showToast('\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0430\u0442\u0443'); return; }
+  var dateStr = dateEl.value; // YYYY-MM-DD
+  var note = noteEl ? noteEl.value.trim() : '';
+  var list = loadExtraDays();
+  var existing = list.find(function(x){ return x.date === dateStr; });
+  if (existing) {
+    existing.note = note;
+    showToast('\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u043e');
+  } else {
+    list.push({date: dateStr, note: note});
+    showToast('\u0414\u0435\u043d\u044c \u043e\u0442\u043c\u0435\u0447\u0435\u043d \u043a\u0430\u043a \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0439');
+  }
+  saveExtraDaysList(list);
+  if (noteEl) noteEl.value = '';
+  renderExtraDaysStats();
+}
+
+function removeExtraDay(dateStr) {
+  var list = loadExtraDays().filter(function(x){ return x.date !== dateStr; });
+  saveExtraDaysList(list);
+  renderExtraDaysStats();
+}
+
+function filterExtraDaysByPeriod(list) {
+  if (currentPeriod === 'all') return list;
+  if (currentPeriod === 'custom-month' || currentPeriod === 'custom-range') {
+    return list.filter(function(x){
+      var ts = new Date(x.date + 'T12:00:00').getTime();
+      return ts >= customRangeFrom && ts <= customRangeTo;
+    });
+  }
+  var now = new Date();
+  var cutoff;
+  if (currentPeriod === 'month') {
+    cutoff = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  } else if (currentPeriod === 'year') {
+    cutoff = new Date(now.getFullYear(), 0, 1).getTime();
+  } else if (currentPeriod === 'week') {
+    var dow = now.getDay() === 0 ? 6 : now.getDay() - 1;
+    var mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+    cutoff = mon.getTime();
+  } else if (currentPeriod === 'day') {
+    cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  } else {
+    var ms = {'3months':90*86400000, '6months':180*86400000};
+    cutoff = now.getTime() - (ms[currentPeriod] || ms['3months']);
+  }
+  return list.filter(function(x){ return new Date(x.date + 'T12:00:00').getTime() >= cutoff; });
+}
+
+function renderExtraDaysStats() {
+  var container = document.getElementById('extradays-container');
+  var countEl = document.getElementById('extradays-count');
+  if (!container) return;
+  var all = loadExtraDays().slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+  var filtered = filterExtraDaysByPeriod(all);
+  if (countEl) countEl.textContent = filtered.length + ' \u0432 \u044d\u0442\u043e\u043c \u043f\u0435\u0440\u0438\u043e\u0434\u0435';
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:16px 0;">\u041d\u0435\u0442 \u043e\u0442\u043c\u0435\u0447\u0435\u043d\u043d\u044b\u0445 \u0434\u043d\u0435\u0439 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
+    return;
+  }
+  var pad = function(n){ return ('0'+n).slice(-2); };
+  container.innerHTML = filtered.map(function(x) {
+    var d = new Date(x.date + 'T12:00:00');
+    var dateLabel = pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;"></div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:14px;font-weight:600;color:var(--text);">'+dateLabel+'</div>'
+      + (x.note ? '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+escapeHtml(x.note)+'</div>' : '')
+      + '</div>'
+      + '<button onclick="removeExtraDay(\''+x.date+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:6px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">\u2715</button>'
+      + '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// СОТРУДНИКИ (профили) — локальное переключение на одном устройстве
+// ═══════════════════════════════════════════════════════════════
+
+function loadWorkers() {
+  var s = loadSettings();
+  return Array.isArray(s.workers) ? s.workers : [];
+}
+
+function getCurrentWorkerName() {
+  var s = loadSettings();
+  return s.currentWorker || '\u042f';
+}
+
+function setCurrentWorker(name) {
+  var s = loadSettings();
+  s.currentWorker = name;
+  if (!Array.isArray(s.workers)) s.workers = [];
+  if (name && s.workers.indexOf(name) === -1) s.workers.push(name);
+  localStorage.setItem('rst_settings', JSON.stringify(s));
+}
+
+function addWorkerProfile() {
+  var inp = document.getElementById('new-worker-name');
+  if (!inp || !inp.value.trim()) { showToast('\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0438\u043c\u044f'); return; }
+  var name = inp.value.trim();
+  var s = loadSettings();
+  if (!Array.isArray(s.workers)) s.workers = [];
+  if (s.workers.indexOf(name) === -1) s.workers.push(name);
+  localStorage.setItem('rst_settings', JSON.stringify(s));
+  inp.value = '';
+  renderWorkerSettings();
+  showToast('\u0421\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d');
+}
+
+function selectWorkerProfile(name) {
+  setCurrentWorker(name);
+  renderWorkerSettings();
+  showToast('\u0422\u0435\u043a\u0443\u0449\u0438\u0439 \u043f\u0440\u043e\u0444\u0438\u043b\u044c: ' + name);
+  renderStats();
+  populateWorkerFilter();
+}
+
+function removeWorkerProfile(name) {
+  if (!confirm('\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0430 \u0438\u0437 \u0441\u043f\u0438\u0441\u043a\u0430? (\u0414\u0430\u043d\u043d\u044b\u0435 \u0435\u0433\u043e \u0440\u0430\u0431\u043e\u0442 \u043d\u0435 \u0443\u0434\u0430\u043b\u044f\u044e\u0442\u0441\u044f)')) return;
+  var s = loadSettings();
+  s.workers = (s.workers||[]).filter(function(w){ return w !== name; });
+  if (s.currentWorker === name) s.currentWorker = '\u042f';
+  localStorage.setItem('rst_settings', JSON.stringify(s));
+  renderWorkerSettings();
+}
+
+function renderWorkerSettings() {
+  var el = document.getElementById('worker-list');
+  if (!el) return;
+  var s = loadSettings();
+  var current = s.currentWorker || '\u042f';
+  var workers = Array.isArray(s.workers) ? s.workers : [];
+  if (workers.indexOf('\u042f') === -1) workers = ['\u042f'].concat(workers);
+  el.innerHTML = workers.map(function(w) {
+    var isActive = w === current;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;">'
+      + '<button onclick="selectWorkerProfile(\''+w+'\')" style="flex:1;text-align:left;padding:10px 14px;border-radius:10px;border:1px solid '+(isActive?'var(--gold)':'var(--glass-border)')+';background:'+(isActive?'rgba(240,192,96,0.12)':'transparent')+';color:'+(isActive?'var(--gold)':'var(--text)')+';font-size:14px;font-weight:'+(isActive?'700':'400')+';cursor:pointer;">'
+      + (isActive?'\u2713 ':'')+w
+      + '</button>'
+      + (w !== '\u042f' ? '<button onclick="removeWorkerProfile(\''+w+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:8px;color:#c94c4c;font-size:12px;padding:8px 10px;cursor:pointer;">\u2715</button>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function populateWorkerFilter() {
+  var sel = document.getElementById('worker-filter');
+  if (!sel) return;
+  var d = load();
+  var allDone = d.done || [];
+  var names = {};
+  allDone.forEach(function(j){ names[j.worker || '\u042f'] = true; });
+  var s = loadSettings();
+  (s.workers||[]).forEach(function(w){ names[w] = true; });
+  names['\u042f'] = true;
+  var nameList = Object.keys(names).sort();
+  var current = s.currentWorker || '\u042f';
+  sel.innerHTML = '<option value="__all__">\u0412\u0441\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0438</option>'
+    + nameList.map(function(n){ return '<option value="'+n+'"'+(n===current?' selected':'')+'>'+n+'</option>'; }).join('');
+}
+
+function onWorkerFilterChange() {
+  var sel = document.getElementById('worker-filter');
+  currentWorkerFilter = sel ? sel.value : '__all__';
+  renderStats();
 }
 
 function renderRefStats() {
@@ -3735,8 +3969,32 @@ function importData(input) {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.jobs||!data.done) throw new Error('bad');
-      localStorage.setItem('rst_data',JSON.stringify(data));
-      showToast('\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e '+( data.done||[]).length+' \u0437\u0430\u043f\u0438\u0441\u0435\u0439');
+      var doMerge = confirm('\u041e\u041a = \u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0438\u0442\u044c \u0441 \u0442\u0435\u043a\u0443\u0449\u0438\u043c\u0438 \u0434\u0430\u043d\u043d\u044b\u043c\u0438 (\u0447\u0442\u043e\u0431\u044b \u0441\u043e\u0431\u0440\u0430\u0442\u044c \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0443 \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u0438\u0445 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u043e\u0432)\n\u041e\u0442\u043c\u0435\u043d\u0430 = \u0417\u0430\u043c\u0435\u043d\u0438\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0435');
+      if (!doMerge) {
+        localStorage.setItem('rst_data',JSON.stringify(data));
+        showToast('\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e '+( data.done||[]).length+' \u0437\u0430\u043f\u0438\u0441\u0435\u0439');
+      } else {
+        var current = load();
+        var existingIds = {};
+        current.jobs.concat(current.done).forEach(function(j){ existingIds[j.id] = true; });
+        var addedJobs = 0, addedDone = 0;
+        (data.jobs||[]).forEach(function(j){
+          if (existingIds[j.id]) j.id = genId();
+          existingIds[j.id] = true;
+          current.jobs.push(j);
+          addedJobs++;
+        });
+        (data.done||[]).forEach(function(j){
+          if (existingIds[j.id]) j.id = genId();
+          existingIds[j.id] = true;
+          current.done.push(j);
+          addedDone++;
+        });
+        // Сортировка по дате, чтобы история отображалась корректно после объединения
+        current.done.sort(function(a,b){ return (a.completedAt||a.createdAt||0) - (b.completedAt||b.createdAt||0); });
+        save(current);
+        showToast('\u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u043e: +'+addedDone+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445, +'+addedJobs+' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445');
+      }
       setTimeout(()=>{renderHome();navigate('home');},1000);
     } catch(err) { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430'); }
     input.value='';
@@ -3831,6 +4089,7 @@ const STATS_BLOCKS = [
   {id:'ref',      label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043f\u043e Ref'},
   {id:'model',    label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043f\u043e \u041a\u0430\u043b\u0438\u0431\u0440\u0430\u043c'},
   {id:'dorabotka',label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a'},
+  {id:'extradays',label:'\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0434\u043d\u0438'},
 ];
 
 function loadSettings() {
@@ -3852,6 +4111,8 @@ function saveSettings() {
   if (qEl)   s.photoQ   = parseFloat(qEl.value);
   localStorage.setItem('rst_settings', JSON.stringify(s));
   closeModal('modal-settings');
+  populateWorkerFilter();
+  if (document.getElementById('page-stats').classList.contains('active')) renderStats();
   showToast('\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b');
 }
 
@@ -3883,11 +4144,11 @@ function recompressAllPhotos() {
     var total = allPhotosIDB.length;
     var done = 0;
     var savedKB = 0;
-    var d = load(); // Загружаем один раз, чтобы синхронизировать localStorage thumbnails
+    var d = load(); // load once to sync localStorage thumbnails
     var allJobs = [].concat(d.jobs||[], d.done||[]);
     
     function finalize() {
-      save(d); // Сохранить обновлённые thumbnails
+      save(d); // save updated thumbnails
       if (statusEl) statusEl.textContent = '\u0413\u043e\u0442\u043e\u0432\u043e! ' + total + ' \u0444\u043e\u0442\u043e \u00b7 -' + savedKB + 'KB';
       showToast('\u041f\u0435\u0440\u0435\u0441\u0436\u0430\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e');
       renderStorageMeter();
@@ -4003,6 +4264,7 @@ function renderStorageMeter() {
 
 function openSettingsModal() {
   var s = loadSettings();
+  renderWorkerSettings();
   var togglesEl = document.getElementById('stats-toggles');
   if (togglesEl) {
     togglesEl.innerHTML = STATS_BLOCKS.map(function(b) {
@@ -4827,6 +5089,16 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>
         <div id="storage-breakdown" style="margin-top:10px;display:flex;flex-direction:column;gap:5px;"></div>
       </div>
+      <div style="border-top:1px solid var(--glass-border);margin:4px 0 18px;"></div>
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">👥 Сотрудники</div>
+      <div id="worker-list" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="new-worker-name" placeholder="Имя сотрудника" class="form-input" style="flex:1;padding:10px 14px;font-size:14px;" />
+        <button class="btn btn-outline" style="margin-top:0;flex-shrink:0;padding:10px 16px;" onclick="addWorkerProfile()">+</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:18px;line-height:1.5;">Новые часы тегируются именем выбранного сотрудника. Чтобы видеть всех сотрудников вместе, экспортируйте данные с каждого телефона и импортируйте с объединением на одном устройстве.</div>
+
       <div style="border-top:1px solid var(--glass-border);margin:4px 0 18px;"></div>
 
       <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Показывать в статистике</div>
