@@ -881,7 +881,7 @@
     <div class="section-meta" id="stats-period-label">&#1058;&#1077;&#1082;&#1091;&#1097;&#1080;&#1081; &#1084;&#1077;&#1089;&#1103;&#1094;</div>
   </div>
   <div style="padding:0 16px 8px;">
-    <select id="worker-filter" onchange="onWorkerFilterChange()" style="width:100%;padding:10px 14px;font-size:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);backdrop-filter:blur(12px);">
+    <select id="worker-filter" onchange="onWorkerFilterChange()" class="form-select" style="font-size:14px;padding:10px 14px;">
       <option value="__all__">&#1042;&#1089;&#1077; &#1089;&#1086;&#1090;&#1088;&#1091;&#1076;&#1085;&#1080;&#1082;&#1080;</option>
     </select>
   </div>
@@ -1257,18 +1257,24 @@ var dbReady = false;
 
 function initIndexedDB() {
   return new Promise(function(resolve) {
-    if (!window.indexedDB) { resolve(false); return; }
+    if (!window.indexedDB) { debugLog('IndexedDB: window.indexedDB \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d (\u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043d\u0435 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442)', 'error'); resolve(false); return; }
     var req = indexedDB.open('rst_db', 1);
-    req.onerror = function() { resolve(false); };
+    req.onerror = function(e) {
+      var errMsg = (e && e.target && e.target.error) ? e.target.error.message : 'unknown';
+      debugLog('IndexedDB: \u043e\u0448\u0438\u0431\u043a\u0430 \u043e\u0442\u043a\u0440\u044b\u0442\u0438\u044f \u0411\u0414 \u2014 ' + errMsg, 'error');
+      resolve(false);
+    };
     req.onsuccess = function(e) {
       rstDB = e.target.result;
       dbReady = true;
+      debugLog('IndexedDB: \u0411\u0414 \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u0443\u0441\u043f\u0435\u0448\u043d\u043e (rst_db)', 'info');
       resolve(true);
     };
     req.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (!db.objectStoreNames.contains('photos')) {
         db.createObjectStore('photos', { keyPath: 'id' });
+        debugLog('IndexedDB: \u0441\u043e\u0437\u0434\u0430\u043d store "photos"', 'info');
       }
     };
   });
@@ -1276,14 +1282,18 @@ function initIndexedDB() {
 
 function savePhotoToIDB(jobId, photoId, fullData, thumbnail, ts) {
   return new Promise(function(resolve) {
-    if (!dbReady || !rstDB) { resolve(false); return; }
+    if (!dbReady || !rstDB) { debugLog('savePhotoToIDB: dbReady=' + dbReady + ', rstDB=' + !!rstDB, 'error'); resolve(false); return; }
     try {
       var tx = rstDB.transaction(['photos'], 'readwrite');
       var store = tx.objectStore('photos');
       store.put({ id: photoId, jobId: jobId, full: fullData, thumb: thumbnail, ts: ts });
       tx.oncomplete = function() { resolve(true); };
-      tx.onerror = function() { resolve(false); };
-    } catch(err) { resolve(false); }
+      tx.onerror = function(e) {
+        var errMsg = (e && e.target && e.target.error) ? e.target.error.message : 'unknown';
+        debugLog('savePhotoToIDB tx error [' + photoId + ']: ' + errMsg, 'error');
+        resolve(false);
+      };
+    } catch(err) { debugLog('savePhotoToIDB throw [' + photoId + ']: ' + err.message, 'error'); resolve(false); }
   });
 }
 
@@ -1313,26 +1323,33 @@ function deletePhotoFromIDB(photoId) {
 
 function getAllPhotosFromIDB() {
   return new Promise(function(resolve) {
-    if (!dbReady || !rstDB) { resolve([]); return; }
+    if (!dbReady || !rstDB) { debugLog('getAllPhotosFromIDB: \u0411\u0414 \u043d\u0435 \u0433\u043e\u0442\u043e\u0432\u0430', 'error'); resolve([]); return; }
     try {
       var req = rstDB.transaction(['photos'], 'readonly').objectStore('photos').getAll();
-      req.onsuccess = function() { resolve(req.result || []); };
-      req.onerror = function() { resolve([]); };
-    } catch(err) { resolve([]); }
+      req.onsuccess = function() {
+        var res = req.result || [];
+        debugLog('getAllPhotosFromIDB: \u043d\u0430\u0439\u0434\u0435\u043d\u043e ' + res.length + ' \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u0432 IndexedDB', 'info');
+        resolve(res);
+      };
+      req.onerror = function() { debugLog('getAllPhotosFromIDB: \u043e\u0448\u0438\u0431\u043a\u0430 \u0447\u0442\u0435\u043d\u0438\u044f', 'error'); resolve([]); };
+    } catch(err) { debugLog('getAllPhotosFromIDB throw: ' + err.message, 'error'); resolve([]); }
   });
 }
 
 function migrateOldPhotos() {
   return new Promise(function(resolve) {
-    if (!dbReady) { resolve(); return; }
+    if (!dbReady) { debugLog('migrateOldPhotos: \u0411\u0414 \u043d\u0435 \u0433\u043e\u0442\u043e\u0432\u0430, \u043f\u0440\u043e\u043f\u0443\u0441\u043a\u0430\u044e', 'warn'); resolve(); return; }
     var d = load();
     var allJobs = [].concat(d.jobs||[], d.done||[]);
+    var totalPhotos = 0;
+    allJobs.forEach(function(j){ totalPhotos += (j.photos||[]).length; });
+    debugLog('migrateOldPhotos: \u0432\u0441\u0435\u0433\u043e \u0444\u043e\u0442\u043e \u0432 localStorage: ' + totalPhotos, 'info');
     var pending = 0;
     var any = false;
     var results = []; // apply changes precisely by id to avoid race condition
 
     function finalizeAll() {
-      if (results.length === 0) { resolve(); return; }
+      if (results.length === 0) { debugLog('migrateOldPhotos: \u043d\u0435\u0447\u0435\u0433\u043e \u043c\u0438\u0433\u0440\u0438\u0440\u043e\u0432\u0430\u0442\u044c (0 \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u043e\u0432 \u0438\u043b\u0438 \u0432\u0441\u0435 \u043e\u0448\u0438\u0431\u043a\u0430)', 'info'); resolve(); return; }
       // Перечитать СВЕЖИЕ данные (могли измениться за время миграции)
       var fresh = load();
       var freshJobs = [].concat(fresh.jobs||[], fresh.done||[]);
@@ -1349,6 +1366,7 @@ function migrateOldPhotos() {
         }
       });
       save(fresh);
+      debugLog('migrateOldPhotos: \u0417\u0410\u0412\u0415\u0420\u0428\u0415\u041d\u041e, \u043c\u0438\u0433\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u043e ' + results.length, 'info');
       showToast('\u041c\u0438\u0433\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u043e ' + results.length + ' \u0444\u043e\u0442\u043e \u0432 IndexedDB');
       resolve();
     }
@@ -1360,11 +1378,12 @@ function migrateOldPhotos() {
         if (p.migrated || !p.data || p.data.length < 20000) return;
         any = true;
         pending++;
+        debugLog('migrateOldPhotos: \u043d\u0430\u0439\u0434\u0435\u043d \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442 [' + p.id + '], \u0440\u0430\u0437\u043c\u0435\u0440 ' + p.data.length, 'info');
         var fullBackup = p.data;
         makeThumbnail(fullBackup, 220, 0.6).then(function(thumb) {
           // Если canvas не смог декодировать оригинал — сами данные повреждены,
           // обрезка строки тут не поможет, поэтому просто используем исходные данные как есть
-          if (!thumb) thumb = fullBackup;
+          if (!thumb) { debugLog('migrateOldPhotos: makeThumbnail \u041d\u0415 \u0421\u041c\u041e\u0413 \u0434\u0435\u043a\u043e\u0434\u0438\u0440\u043e\u0432\u0430\u0442\u044c [' + p.id + ']', 'error'); thumb = fullBackup; }
           savePhotoToIDB(job.id, p.id, fullBackup, thumb, p.ts).then(function(ok) {
             if (ok) results.push({photoId: p.id, thumb: thumb});
             pending--;
@@ -1373,7 +1392,7 @@ function migrateOldPhotos() {
         });
       });
     });
-    if (!any) resolve();
+    if (!any) { debugLog('migrateOldPhotos: \u043d\u0435\u0442 \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u043e\u0432 \u043d\u0430 \u043c\u0438\u0433\u0440\u0430\u0446\u0438\u044e (\u0432\u0441\u0435 \u0443\u0436\u0435 \u043c\u0430\u043b\u0435\u043d\u044c\u043a\u0438\u0435 \u0438\u043b\u0438 \u043f\u043e\u043c\u0435\u0447\u0435\u043d\u044b)', 'info'); resolve(); }
   });
 }
 
@@ -1880,7 +1899,7 @@ function jobCard(j) {
   if (j.photos && j.photos.length > 0) {
     coverThumb = '<div onclick="event.stopPropagation();openPhotoViewerForJob(\''+j.id+'\',\''+j.photos[0].id+'\')" '
       + 'style="width:56px;height:76px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);">'
-      + '<img src="'+j.photos[0].data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
+      + '<img src="'+j.photos[0].data+'" onerror="this.onerror=null;this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2276%22%3E%3Crect fill=%22%23222%22 width=%2256%22 height=%2276%22/%3E%3Ctext x=%2228%22 y=%2242%22 fill=%22%23666%22 font-size=%2224%22 text-anchor=%22middle%22%3E\uD83D\uDCF7%3C/text%3E%3C/svg%3E\';" style="width:100%;height:100%;object-fit:cover;display:block;" />'
       + '</div>';
   }
 
@@ -2242,6 +2261,7 @@ function openPhotoViewerForJob(jobId, photoId) {
   // Try to load full photo from IndexedDB first
   getPhotoFromIDB(photoId).then(function(idbPhoto) {
     var imgSrc = null;
+    debugLog('viewer [' + photoId + ']: idbPhoto=' + (idbPhoto ? 'found' : 'null') + ', has full=' + !!(idbPhoto && idbPhoto.full) + ', has thumb=' + !!(idbPhoto && idbPhoto.thumb) + ', localStorage data.len=' + (photo.data ? photo.data.length : 0), 'info');
     
     // Priority 1: full photo from IndexedDB
     if (idbPhoto && idbPhoto.full && idbPhoto.full.indexOf('data:image') === 0) {
@@ -2259,6 +2279,7 @@ function openPhotoViewerForJob(jobId, photoId) {
     if (imgSrc) {
       imgEl.src = imgSrc;
     } else {
+      debugLog('viewer [' + photoId + ']: \u041d\u0418\u0427\u0415\u0413\u041e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e \u0432\u0430\u043b\u0438\u0434\u043d\u043e\u0433\u043e', 'error');
       // Show error placeholder
       imgEl.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="600"%3E%3Cdefs%3E%3ClinearGradient id="g" x1="0%25" y1="0%25" x2="100%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23222;stop-opacity:1" /%3E%3Cstop offset="100%25" style="stop-color:%23111;stop-opacity:1" /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill="url(%23g)" width="400" height="600"/%3E%3Ctext x="200" y="300" fill="%23666" font-size="48" text-anchor="middle" font-family="system-ui"%3E%3F%3C/text%3E%3Ctext x="200" y="350" fill="%23444" font-size="14" text-anchor="middle" font-family="system-ui"%3E\u041d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e%3C/text%3E%3C/svg%3E';
     }
@@ -2888,7 +2909,7 @@ function historyCard(j, compact) {
   if (j.photos && j.photos.length > 0) {
     coverThumb = '<div onclick="event.stopPropagation();openPhotoViewerForJob(\''+j.id+'\',\''+j.photos[0].id+'\')" '
       + 'style="width:62px;height:82px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;border:1px solid var(--glass-border);">'
-      + '<img src="'+j.photos[0].data+'" style="width:100%;height:100%;object-fit:cover;display:block;" />'
+      + '<img src="'+j.photos[0].data+'" onerror="this.onerror=null;this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2276%22%3E%3Crect fill=%22%23222%22 width=%2256%22 height=%2276%22/%3E%3Ctext x=%2228%22 y=%2242%22 fill=%22%23666%22 font-size=%2224%22 text-anchor=%22middle%22%3E\uD83D\uDCF7%3C/text%3E%3C/svg%3E\';" style="width:100%;height:100%;object-fit:cover;display:block;" />'
       + '</div>';
   }
 
@@ -3604,8 +3625,7 @@ function renderStats() {
     '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+tickNumHTML(dorabCount)+'</div><div class="stat-card-lbl">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>'+
     '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+tickNumHTML(vozvratPct)+'%</div><div class="stat-card-lbl">\u21a9 % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>';
   if (done.length > 0) {
-    const ss = loadSettings();
-    const fsFast = ss.fsFast || 5, fsMid = ss.fsMid || 7;
+    const ss = loadSettings();    const fsFast = ss.fsFast || 5, fsMid = ss.fsMid || 7;
     const asmFast = ss.asmFast || 3, asmMid = ss.asmMid || 4;
     const countSpeed = (jobs, type) => { let f=0,m=0,s=0; jobs.forEach(j => { const h=totalTime(j)/3600000; if(type==='full'){if(h<=fsFast)f++;else if(h<=fsMid)m++;else s++;}else{if(h<=asmFast)f++;else if(h<=asmMid)m++;else s++;} }); return {fast:f,mid:m,slow:s}; };
     const fmtNum = n => Number.isInteger(n) ? n : n.toFixed(1).replace(/\.0$/, '');
@@ -3633,6 +3653,8 @@ function renderStats() {
         '</div></div>';
     }
     document.getElementById('stats-speed').innerHTML = speedHtml;
+  } else {
+    document.getElementById('stats-speed').innerHTML = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
   }
   const stageChart = document.getElementById('stage-chart');
   if (done.length===0) { stageChart.innerHTML='<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:12px;">\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445</div>'; }
@@ -3708,13 +3730,14 @@ function addExtraDay() {
   if (!dateEl || !dateEl.value) { showToast('\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0430\u0442\u0443'); return; }
   var dateStr = dateEl.value; // YYYY-MM-DD
   var note = noteEl ? noteEl.value.trim() : '';
+  var worker = getCurrentWorkerName();
   var list = loadExtraDays();
-  var existing = list.find(function(x){ return x.date === dateStr; });
+  var existing = list.find(function(x){ return x.date === dateStr && (x.worker||'\u042f') === worker; });
   if (existing) {
     existing.note = note;
     showToast('\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u043e');
   } else {
-    list.push({date: dateStr, note: note});
+    list.push({date: dateStr, note: note, worker: worker});
     showToast('\u0414\u0435\u043d\u044c \u043e\u0442\u043c\u0435\u0447\u0435\u043d \u043a\u0430\u043a \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0439');
   }
   saveExtraDaysList(list);
@@ -3722,8 +3745,8 @@ function addExtraDay() {
   renderExtraDaysStats();
 }
 
-function removeExtraDay(dateStr) {
-  var list = loadExtraDays().filter(function(x){ return x.date !== dateStr; });
+function removeExtraDay(dateStr, worker) {
+  var list = loadExtraDays().filter(function(x){ return !(x.date === dateStr && (x.worker||'\u042f') === worker); });
   saveExtraDaysList(list);
   renderExtraDaysStats();
 }
@@ -3760,7 +3783,8 @@ function renderExtraDaysStats() {
   var countEl = document.getElementById('extradays-count');
   if (!container) return;
   var all = loadExtraDays().slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
-  var filtered = filterExtraDaysByPeriod(all);
+  var byWorker = (currentWorkerFilter === '__all__') ? all : all.filter(function(x){ return (x.worker||'\u042f') === currentWorkerFilter; });
+  var filtered = filterExtraDaysByPeriod(byWorker);
   if (countEl) countEl.textContent = filtered.length + ' \u0432 \u044d\u0442\u043e\u043c \u043f\u0435\u0440\u0438\u043e\u0434\u0435';
   if (filtered.length === 0) {
     container.innerHTML = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:16px 0;">\u041d\u0435\u0442 \u043e\u0442\u043c\u0435\u0447\u0435\u043d\u043d\u044b\u0445 \u0434\u043d\u0435\u0439 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
@@ -3770,13 +3794,14 @@ function renderExtraDaysStats() {
   container.innerHTML = filtered.map(function(x) {
     var d = new Date(x.date + 'T12:00:00');
     var dateLabel = pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
+    var w = x.worker || '\u042f';
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);">'
       + '<div style="width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;"></div>'
       + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-size:14px;font-weight:600;color:var(--text);">'+dateLabel+'</div>'
+      + '<div style="font-size:14px;font-weight:600;color:var(--text);">'+dateLabel+(currentWorkerFilter==='__all__'?' <span style="font-weight:400;color:var(--text-dim);font-size:12px;">\u00b7 '+escapeHtml(w)+'</span>':'')+'</div>'
       + (x.note ? '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+escapeHtml(x.note)+'</div>' : '')
       + '</div>'
-      + '<button onclick="removeExtraDay(\''+x.date+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:6px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">\u2715</button>'
+      + '<button onclick="removeExtraDay(\''+x.date+'\',\''+w+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:6px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">\u2715</button>'
       + '</div>';
   }).join('');
 }
@@ -3818,10 +3843,11 @@ function addWorkerProfile() {
 
 function selectWorkerProfile(name) {
   setCurrentWorker(name);
+  currentWorkerFilter = name;
   renderWorkerSettings();
   showToast('\u0422\u0435\u043a\u0443\u0449\u0438\u0439 \u043f\u0440\u043e\u0444\u0438\u043b\u044c: ' + name);
-  renderStats();
   populateWorkerFilter();
+  renderStats();
 }
 
 function removeWorkerProfile(name) {
@@ -3830,7 +3856,10 @@ function removeWorkerProfile(name) {
   s.workers = (s.workers||[]).filter(function(w){ return w !== name; });
   if (s.currentWorker === name) s.currentWorker = '\u042f';
   localStorage.setItem('rst_settings', JSON.stringify(s));
+  if (currentWorkerFilter === name) currentWorkerFilter = s.currentWorker;
   renderWorkerSettings();
+  populateWorkerFilter();
+  renderStats();
 }
 
 function renderWorkerSettings() {
@@ -3862,9 +3891,11 @@ function populateWorkerFilter() {
   (s.workers||[]).forEach(function(w){ names[w] = true; });
   names['\u042f'] = true;
   var nameList = Object.keys(names).sort();
-  var current = s.currentWorker || '\u042f';
+  // Сохраняем реально активный фильтр (включая "Все"), а не сбрасываем на настройки по умолчанию
+  var current = currentWorkerFilter;
   sel.innerHTML = '<option value="__all__">\u0412\u0441\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0438</option>'
     + nameList.map(function(n){ return '<option value="'+n+'"'+(n===current?' selected':'')+'>'+n+'</option>'; }).join('');
+  if (current === '__all__') sel.value = '__all__';
 }
 
 function onWorkerFilterChange() {
@@ -3875,7 +3906,8 @@ function onWorkerFilterChange() {
 
 function renderRefStats() {
   var d = load();
-  var allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var allDoneRaw = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var allDone = (currentWorkerFilter === '__all__') ? allDoneRaw : allDoneRaw.filter(function(j){ return (j.worker||'\u042f') === currentWorkerFilter; });
   var filtered = filterByDynamicPeriod(allDone, currentRefPeriod);
   var refMap = {};
   filtered.forEach(function(j) {
@@ -3924,7 +3956,8 @@ function renderRefStats() {
 
 function renderModelStats() {
   var d = load();
-  var allDone = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var allDoneRaw = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
+  var allDone = (currentWorkerFilter === '__all__') ? allDoneRaw : allDoneRaw.filter(function(j){ return (j.worker||'\u042f') === currentWorkerFilter; });
   var filtered = filterByDynamicPeriod(allDone, currentModelPeriod);
   var modelMap = {};
   filtered.forEach(function(j) {
@@ -3983,6 +4016,7 @@ function showModelDetail(model) {
 
 function exportData() {
   const d = load();
+  d.extraDays = loadExtraDays();
   const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3998,8 +4032,10 @@ function importData(input) {
       const data = JSON.parse(e.target.result);
       if (!data.jobs||!data.done) throw new Error('bad');
       var doMerge = confirm('\u041e\u041a = \u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0438\u0442\u044c \u0441 \u0442\u0435\u043a\u0443\u0449\u0438\u043c\u0438 \u0434\u0430\u043d\u043d\u044b\u043c\u0438 (\u0447\u0442\u043e\u0431\u044b \u0441\u043e\u0431\u0440\u0430\u0442\u044c \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0443 \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u0438\u0445 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u043e\u0432)\n\u041e\u0442\u043c\u0435\u043d\u0430 = \u0417\u0430\u043c\u0435\u043d\u0438\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0435');
+      var incomingExtraDays = Array.isArray(data.extraDays) ? data.extraDays : null;
       if (!doMerge) {
-        localStorage.setItem('rst_data',JSON.stringify(data));
+        localStorage.setItem('rst_data', JSON.stringify({jobs: data.jobs||[], done: data.done||[]}));
+        if (incomingExtraDays) saveExtraDaysList(incomingExtraDays);
         showToast('\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e '+( data.done||[]).length+' \u0437\u0430\u043f\u0438\u0441\u0435\u0439');
       } else {
         var current = load();
@@ -4021,7 +4057,18 @@ function importData(input) {
         // Сортировка по дате, чтобы история отображалась корректно после объединения
         current.done.sort(function(a,b){ return (a.completedAt||a.createdAt||0) - (b.completedAt||b.createdAt||0); });
         save(current);
-        showToast('\u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u043e: +'+addedDone+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445, +'+addedJobs+' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445');
+        var addedExtraDays = 0;
+        if (incomingExtraDays) {
+          var existingExtraDays = loadExtraDays();
+          var existingKeys = {};
+          existingExtraDays.forEach(function(x){ existingKeys[x.date+'|'+(x.worker||'\u042f')] = true; });
+          incomingExtraDays.forEach(function(x){
+            var key = x.date+'|'+(x.worker||'\u042f');
+            if (!existingKeys[key]) { existingExtraDays.push(x); existingKeys[key] = true; addedExtraDays++; }
+          });
+          saveExtraDaysList(existingExtraDays);
+        }
+        showToast('\u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u043e: +'+addedDone+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445, +'+addedJobs+' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445'+(addedExtraDays>0?', +'+addedExtraDays+' \u0434\u043e\u043f. \u0434\u043d\u0435\u0439':''));
       }
       setTimeout(()=>{renderHome();navigate('home');},1000);
     } catch(err) { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430'); }
@@ -5098,13 +5145,26 @@ function filterGlobalCatalog() {
 // Чинит миниатюры, сломанные старыми версиями (обрезка base64-строки вместо
 // настоящего уменьшения через canvas). Регенерирует thumb из full фото,
 // которое хранится в IndexedDB и не пострадало от этого бага.
+function forceRepairThumbnails() {
+  var s = loadSettings();
+  s.thumbsRepairedV2 = false; // reset flag to allow re-run
+  localStorage.setItem('rst_settings', JSON.stringify(s));
+  debugLog('\u0420\u0443\u0447\u043d\u043e\u0439 \u0437\u0430\u043f\u0443\u0441\u043a \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f \u043c\u0438\u043d\u0438\u0430\u0442\u044e\u0440...', 'info');
+  repairBrokenThumbnails().then(function() {
+    renderHome();
+    if (document.getElementById('page-history') && document.getElementById('page-history').classList.contains('active')) renderHistory();
+  });
+}
+
 function repairBrokenThumbnails() {
   return new Promise(function(resolve) {
-    if (!dbReady) { resolve(); return; }
+    if (!dbReady) { debugLog('repairBrokenThumbnails: \u0411\u0414 \u043d\u0435 \u0433\u043e\u0442\u043e\u0432\u0430', 'warn'); resolve(); return; }
     var s = loadSettings();
-    if (s.thumbsRepairedV2) { resolve(); return; } // already repaired once
+    if (s.thumbsRepairedV2) { debugLog('repairBrokenThumbnails: \u0443\u0436\u0435 \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u043b\u043e\u0441\u044c \u0440\u0430\u043d\u0435\u0435 (\u0444\u043b\u0430\u0433 thumbsRepairedV2)', 'info'); resolve(); return; }
     getAllPhotosFromIDB().then(function(allPhotosIDB) {
+      debugLog('repairBrokenThumbnails: \u0432\u0441\u0435\u0433\u043e \u0432 IndexedDB: ' + allPhotosIDB.length, 'info');
       var toFix = allPhotosIDB.filter(function(p){ return p.full && p.full.indexOf('data:image') === 0; });
+      debugLog('repairBrokenThumbnails: \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u043e\u0432 \u043d\u0430 \u0440\u0435\u043c\u043e\u043d\u0442: ' + toFix.length, 'info');
       if (toFix.length === 0) {
         s.thumbsRepairedV2 = true;
         localStorage.setItem('rst_settings', JSON.stringify(s));
@@ -5113,10 +5173,13 @@ function repairBrokenThumbnails() {
       }
       var pending = toFix.length;
       var results = [];
+      var failed = 0;
       showToast('\u0412\u043e\u0441\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u044e ' + toFix.length + ' \u043c\u0438\u043d\u0438\u0430\u0442\u044e\u0440...');
       toFix.forEach(function(photoRec) {
+        debugLog('repair [' + photoRec.id + ']: full.length=' + photoRec.full.length, 'info');
         makeThumbnail(photoRec.full, 220, 0.6).then(function(thumb) {
           if (thumb) {
+            debugLog('repair [' + photoRec.id + ']: \u0423\u0421\u041f\u0415\u0425 thumb.length=' + thumb.length, 'info');
             photoRec.thumb = thumb;
             savePhotoToIDB(photoRec.jobId, photoRec.id, photoRec.full, thumb, photoRec.ts).then(function() {
               results.push({photoId: photoRec.id, thumb: thumb});
@@ -5124,6 +5187,8 @@ function repairBrokenThumbnails() {
               if (pending === 0) finalizeRepair();
             });
           } else {
+            debugLog('repair [' + photoRec.id + ']: \u041d\u0415 \u0423\u0414\u0410\u041b\u041e\u0421\u042c \u2014 \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 \u0432 IndexedDB \u0442\u043e\u0436\u0435 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u044b (\u043d\u0435\u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u043c\u043e)', 'error');
+            failed++;
             pending--;
             if (pending === 0) finalizeRepair();
           }
@@ -5144,6 +5209,10 @@ function repairBrokenThumbnails() {
           });
           save(fresh);
           showToast('\u0424\u043e\u0442\u043e \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u044b: ' + results.length);
+        }
+        if (failed > 0) {
+          debugLog('repairBrokenThumbnails: \u0418\u0422\u041e\u0413\u041e \u043d\u0435\u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u043c\u044b\u0445 \u0444\u043e\u0442\u043e: ' + failed, 'error');
+          showToast('\u26a0\ufe0f ' + failed + ' \u0444\u043e\u0442\u043e \u043d\u0435\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u2014 \u043d\u0443\u0436\u043d\u043e \u043f\u0435\u0440\u0435\u0441\u043d\u044f\u0442\u044c');
         }
         var s2 = loadSettings();
         s2.thumbsRepairedV2 = true;
@@ -5234,6 +5303,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
       <div id="recompress-status" style="font-size:12px;color:var(--text-dim);margin-bottom:10px;min-height:18px;text-align:center;"></div>
       <button class="btn" onclick="recompressAllPhotos()" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);margin-bottom:8px;">&#9881; &#1055;&#1077;&#1088;&#1077;&#1089;&#1078;&#1072;&#1090;&#1100; &#1074;&#1089;&#1077; &#1092;&#1086;&#1090;&#1086;</button>
+      <button class="btn btn-outline" onclick="forceRepairThumbnails()" style="margin-bottom:8px;">🔌 Восстановить миниатюры фото</button>
 
       <button class="btn btn-gold" onclick="saveSettings()">Сохранить</button>
       <button class="btn btn-outline" onclick="closeModal('modal-settings')">Закрыть</button>
