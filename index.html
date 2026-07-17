@@ -594,14 +594,16 @@
     #debug-panel {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
       background: rgba(8,6,18,0.97); border-top: 1px solid rgba(255,107,107,0.3);
-      max-height: 50vh; overflow-y: auto;
+      height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y;
       padding: 12px 16px env(safe-area-inset-bottom,16px);
       display: none; font-family: monospace; font-size: 12px;
     }
     #debug-panel.open { display: block; animation: modalUp 0.25s ease; }
-    #debug-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    #debug-panel-title { color: var(--red); font-weight: 700; font-size: 13px; }
-    #debug-clear { background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--text-dim); border-radius: 6px; padding: 3px 10px; font-size: 11px; cursor: pointer; }
+    #debug-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; position: sticky; top: 0; background: rgba(8,6,18,0.97); padding-bottom: 8px; z-index: 2; }
+    #debug-panel-title { color: var(--red); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    #debug-panel-actions { display: flex; gap: 6px; }
+    #debug-clear, #debug-copy { background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--text-dim); border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; }
+    #debug-copy { border-color: rgba(240,192,96,0.3); color: var(--gold); }
     .debug-entry { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ff9090; line-height: 1.5; word-break: break-all; }
     .debug-entry.warn { color: #ffd070; }
     .debug-entry.info { color: #90c0ff; }
@@ -4118,24 +4120,65 @@ function toggleDebug() {
   var panel = document.getElementById('debug-panel');
   if (!panel) return;
   panel.classList.toggle('open');
+  if (panel.classList.contains('open')) panel.scrollTop = panel.scrollHeight;
 }
+
+var debugLogLines = [];
 
 function clearDebug() {
   var entries = document.getElementById('debug-entries');
   if (entries) entries.innerHTML = '';
+  debugLogLines = [];
   var btn = document.getElementById('debug-btn');
   if (btn) btn.classList.remove('has-error');
 }
 
+function fallbackCopyDebugLog(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e');
+  } catch(e) {
+    showToast('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c');
+  }
+  document.body.removeChild(ta);
+}
+
+function copyDebugLog() {
+  var text = debugLogLines.join('\n');
+  if (!text) { showToast('\u041b\u043e\u0433 \u043f\u0443\u0441\u0442'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e: ' + debugLogLines.length + ' \u0441\u0442\u0440\u043e\u043a');
+    }).catch(function() { fallbackCopyDebugLog(text); });
+  } else {
+    fallbackCopyDebugLog(text);
+  }
+}
+
 function debugLog(msg, type) {
+  var panel = document.getElementById('debug-panel');
   var entries = document.getElementById('debug-entries');
   if (!entries) return;
+  var timeStr = new Date().toLocaleTimeString();
+  debugLogLines.push('[' + timeStr + '] ' + (type||'log').toUpperCase() + ': ' + msg);
   var div = document.createElement('div');
   var color = type==='error'?'#ff6b6b':type==='warn'?'#e6c84c':'rgba(240,236,232,0.7)';
   div.style.cssText = 'font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);color:'+color+';';
-  div.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+  div.textContent = timeStr + ' ' + msg;
   entries.appendChild(div);
-  entries.scrollTop = entries.scrollHeight;
+  // Автоскролл только если пользователь уже был внизу (не мешаем читать историю)
+  if (panel) {
+    var nearBottom = (panel.scrollHeight - panel.scrollTop - panel.clientHeight) < 100;
+    if (nearBottom) panel.scrollTop = panel.scrollHeight;
+  }
   if (type === 'error') {
     var btn = document.getElementById('debug-btn');
     if (btn) btn.classList.add('has-error');
@@ -5329,7 +5372,10 @@ window.addEventListener('DOMContentLoaded', function() {
 <div id="debug-panel">
   <div id="debug-panel-header">
     <div id="debug-panel-title">Console</div>
-    <button id="debug-clear" onclick="clearDebug()">Clear</button>
+    <div id="debug-panel-actions">
+      <button id="debug-copy" onclick="copyDebugLog()">📋 Copy</button>
+      <button id="debug-clear" onclick="clearDebug()">Clear</button>
+    </div>
   </div>
   <div id="debug-entries"></div>
 </div>
