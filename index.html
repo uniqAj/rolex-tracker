@@ -811,6 +811,7 @@
   <div style="position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden;">
     <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:340px;height:340px;border-radius:50%;border:1px solid rgba(240,192,96,0.07);background:radial-gradient(circle at 40% 35%,rgba(240,192,96,0.05) 0%,transparent 65%);"></div><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:260px;height:260px;border-radius:50%;border:1px solid rgba(240,192,96,0.05);"></div>
   </div>
+  <div id="vacation-banner" style="display:none;"></div>
   <div id="today-widget"></div>
   <div class="section-header">
     <div class="section-title">&#1040;&#1082;&#1090;&#1080;&#1074;&#1085;&#1099;&#1077;</div>
@@ -868,7 +869,7 @@
   <div id="work-steps-container" class="steps-container"></div>
   <div id="work-events-container"></div>
   <div style="padding:16px;">
-    <button class="btn btn-gold" onclick="completeJob()">&#10003; &#1047;&#1072;&#1074;&#1077;&#1088;&#1096;&#1080;&#1090;&#1100; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</button>
+    <button class="btn btn-gold" onclick="openCompleteJobModal()">&#10003; &#1047;&#1072;&#1074;&#1077;&#1088;&#1096;&#1080;&#1090;&#1100; &#1088;&#1072;&#1073;&#1086;&#1090;&#1091;</button>
     <button class="btn" style="background:rgba(240,192,96,0.1);color:var(--gold);border:1px solid rgba(240,192,96,0.3);margin-top:8px;" onclick="openEditJob(currentJobId)">&#9998; &#1056;&#1077;&#1076;&#1072;&#1082;&#1090;&#1080;&#1088;&#1086;&#1074;&#1072;&#1090;&#1100;</button>
     <button class="btn" style="background:rgba(96,160,255,0.1);color:var(--blue);border:1px solid rgba(96,160,255,0.3);margin-top:8px;" onclick="navigate('home')">&#8592; &#1053;&#1072; &#1075;&#1083;&#1072;&#1074;&#1085;&#1091;&#1102; (&#1095;&#1072;&#1089;&#1099; &#1072;&#1082;&#1090;&#1080;&#1074;&#1085;&#1099;)</button>
     <button class="btn" style="background:rgba(230,200,50,0.1);color:#e6c832;border:1px solid rgba(230,200,50,0.35);margin-top:8px;" onclick="openEventModal('dorabotka')">&#8635; &#1044;&#1086;&#1088;&#1072;&#1073;&#1086;&#1090;&#1082;&#1072;</button>
@@ -965,6 +966,21 @@
     </div>
     <button class="btn btn-outline" style="margin-top:0;margin-bottom:12px;" onclick="addExtraDay()">+ &#1054;&#1090;&#1084;&#1077;&#1090;&#1080;&#1090;&#1100; &#1044;&#1077;&#1085;&#1100;</button>
     <div id="extradays-container"></div>
+  </div>
+
+  <div id="stats-block-vacation" class="chart-container">
+    <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>🏖️ Отпуск</span>
+      <span id="vacation-count" style="font-size:11px;color:var(--text-dim);">0</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="date" id="vacation-from" class="form-input" style="flex:1;padding:8px 10px;font-size:14px;" />
+      <span style="color:var(--text-dim);align-self:center;flex-shrink:0;">—</span>
+      <input type="date" id="vacation-to" class="form-input" style="flex:1;padding:8px 10px;font-size:14px;" />
+    </div>
+    <input type="text" id="vacation-note" placeholder="Заметка (необязательно)" class="form-input" style="width:100%;padding:8px 10px;font-size:14px;margin-bottom:8px;" />
+    <button class="btn btn-outline" style="margin-top:0;margin-bottom:12px;" onclick="addVacation()">+ Добавить отпуск</button>
+    <div id="vacation-container"></div>
   </div>
 
   <!-- &#1053;&#1086;&#1088;&#1084;&#1072;&#1090;&#1080;&#1074;&#1099; &#1087;&#1088;&#1103;&#1084;&#1086; &#1074; &#1089;&#1090;&#1072;&#1090;&#1080;&#1089;&#1090;&#1080;&#1082;&#1077; -->
@@ -1215,6 +1231,22 @@
       </div>
       <button class="btn btn-gold" onclick="applyCustomTime()">&#1055;&#1088;&#1080;&#1084;&#1077;&#1085;&#1080;&#1090;&#1100;</button>
       <button class="btn btn-outline" onclick="closeModal('modal-custom-time')">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Choose completion date when finishing an active job -->
+<div class="modal-overlay" id="modal-complete-job">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Завершить работу</div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">День завершения</label>
+        <input class="form-input" id="complete-job-date" type="date" />
+      </div>
+      <button class="btn btn-gold" onclick="confirmCompleteJob()">✓ Завершить</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-complete-job')">Отмена</button>
     </div>
   </div>
 </div>
@@ -1528,6 +1560,11 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// Экранирует одинарные кавычки/бэкслеши для безопасной подстановки в onclick="...('...')"
+function jsStr(str) {
+  return String(str == null ? '' : str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
 function fmtMs(ms) {
   if (!ms || ms <= 0) return '\u2014';
   const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
@@ -1682,11 +1719,12 @@ function navigate(page) {
   if (page === 'stats') {
     populateWorkerFilter();
     var edEl = document.getElementById('extraday-date');
-    if (edEl && !edEl.value) {
-      var t = new Date();
-      var pad2 = function(n){ return ('0'+n).slice(-2); };
-      edEl.value = t.getFullYear()+'-'+pad2(t.getMonth()+1)+'-'+pad2(t.getDate());
-    }
+    var t = new Date();
+    var pad2 = function(n){ return ('0'+n).slice(-2); };
+    var todayStr = t.getFullYear()+'-'+pad2(t.getMonth()+1)+'-'+pad2(t.getDate());
+    if (edEl && !edEl.value) edEl.value = todayStr;
+    var vfEl = document.getElementById('vacation-from');
+    if (vfEl && !vfEl.value) vfEl.value = todayStr;
     renderStats();
     setTimeout(animateBars, 50);
   }
@@ -1714,11 +1752,20 @@ function renderTodayWidget() {
   var now = Date.now();
   var dayStart = new Date(); dayStart.setHours(0,0,0,0);
   var weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
+  var monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
 
   var doneFiltered = (d.done||[]).filter(function(j){ return !j.excludeFromStats; });
   var todayJobs = doneFiltered.filter(function(j){ return (j.completedAt||j.createdAt) >= dayStart.getTime(); });
   var weekJobs  = doneFiltered.filter(function(j){ return (j.completedAt||j.createdAt) >= weekStart.getTime(); });
   var activeCount = (d.jobs||[]).length;
+
+  // Прогресс по плану на месяц — считаем только для текущего активного сотрудника (личная цель)
+  var currentWorker = getCurrentWorkerName();
+  var monthJobs = doneFiltered.filter(function(j){ return (j.completedAt||j.createdAt) >= monthStart.getTime() && (j.worker||'\u042f') === currentWorker; });
+  var plan = getMonthlyPlan();
+  var monthCount = monthJobs.length;
+  var planPct = plan > 0 ? Math.min(100, Math.round(monthCount/plan*100)) : 0;
+  var planColor = monthCount >= plan ? 'var(--green)' : 'var(--gold)';
 
   // SVG ring for today count (max 8 for full ring)
   var maxDay = 4; // typical day target
@@ -1735,7 +1782,18 @@ function renderTodayWidget() {
     + '<text x="28" y="33" text-anchor="middle" font-size="16" font-weight="800" fill="'+ringColor+'" font-family="Syne">'+todayJobs.length+'</text>'
     + '</svg>';
 
-  el.innerHTML = '<div class="today-widget">'
+  var planBarHtml = '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--glass-border);position:relative;z-index:1;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">'
+    + '<span style="font-size:11px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;">\ud83d\udcc5 \u041f\u043b\u0430\u043d \u043d\u0430 \u043c\u0435\u0441\u044f\u0446</span>'
+    + '<span style="font-size:13px;font-weight:700;color:'+planColor+';">'+monthCount+' / '+plan+'</span>'
+    + '</div>'
+    + '<div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">'
+    + '<div style="width:'+planPct+'%;height:100%;background:'+planColor+';border-radius:4px;transition:width 0.6s ease;"></div>'
+    + '</div>'
+    + '</div>';
+
+  el.innerHTML = '<div class="today-widget" style="flex-direction:column;align-items:stretch;">'
+    + '<div style="display:flex;">'
     + svg
     + '<div class="today-stats">'
     + '<div class="today-label">\u2728 \u0421\u0435\u0433\u043e\u0434\u043d\u044f</div>'
@@ -1743,7 +1801,10 @@ function renderTodayWidget() {
     + '<div class="today-num-block"><div class="today-num today-num-green">'+tickNumHTML(todayJobs.length)+'</div><div class="today-num-label">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'
     + '<div class="today-num-block"><div class="today-num today-num-gold">'+tickNumHTML(weekJobs.length)+'</div><div class="today-num-label">\u0417\u0430 \u043d\u0435\u0434\u0435\u043b\u044e</div></div>'
     + (activeCount>0?'<div class="today-num-block"><div class="today-num today-num-blue">'+tickNumHTML(activeCount)+'</div><div class="today-num-label">\u0412 \u0440\u0430\u0431\u043e\u0442\u0435</div></div>':'')
-    + '</div></div></div>';
+    + '</div></div>'
+    + '</div>'
+    + planBarHtml
+    + '</div>';
 }
 
 // ── LIVE TIMER ON CARD ────────────────────────────────────────────────────────
@@ -1854,6 +1915,7 @@ setTimeout(function() {
 }, 800);
 
 function renderHome() {
+  renderVacationBanner();
   const d = load();
   const q = (document.getElementById('home-search') ? document.getElementById('home-search').value : '').toLowerCase().trim();
   let active = d.jobs.filter(j => !j.done);
@@ -2590,15 +2652,35 @@ function applyCustomTime() {
   if (phaseCustomTarget) { addPhaseTime(phaseCustomTarget.jobId, phaseCustomTarget.phaseId, val); phaseCustomTarget = null; }
 }
 
-function completeJob() {
+function openCompleteJobModal() {
   if (!currentJobId) return;
+  var dateEl = document.getElementById('complete-job-date');
+  if (dateEl) {
+    var t = new Date();
+    var pad = function(n){ return ('0'+n).slice(-2); };
+    var todayStr = t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());
+    dateEl.value = todayStr;
+    dateEl.max = todayStr; // cannot complete a job "in the future"
+    var d = load();
+    var job = (d.jobs||[]).find(function(j){ return j.id === currentJobId; });
+    if (job && job.createdAt) dateEl.min = tsToDatetimeLocal(job.createdAt); // not earlier than job start
+  }
+  openModal('modal-complete-job');
+}
+
+function confirmCompleteJob() {
+  if (!currentJobId) return;
+  var dateEl = document.getElementById('complete-job-date');
+  var chosenTs = dateEl ? datetimeLocalToTs(dateEl.value) : null;
+  var completedAt = chosenTs || Date.now();
+  closeModal('modal-complete-job');
   const d = load(), idx = d.jobs.findIndex(j => j.id === currentJobId);
   if (idx === -1) return;
   const job = d.jobs[idx];
   job.steps.forEach(step => {
     if (step.running) { step.elapsed = (step.elapsed||0)+(Date.now()-step.startTime); step.running=false; step.startTime=null; }
   });
-  job.done = true; job.completedAt = Date.now();
+  job.done = true; job.completedAt = completedAt;
   d.jobs.splice(idx, 1); if (!d.done) d.done = []; d.done.push(job); save(d);
   showToast('\u0420\u0430\u0431\u043e\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0430 ✓'); navigate('home');
 }
@@ -2726,7 +2808,7 @@ function renderRefSuggestions() {
   var entries = Object.keys(counts).map(function(k){ return {ref:k, n:counts[k]}; });
   entries.sort(function(a,b){ return b.n - a.n; });
   el.innerHTML = entries.map(function(e) {
-    return '<button type="button" onclick="document.getElementById(\'inp-ref\').value=\''+e.ref+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.ref+' \u00b7 '+e.n+'</button>';
+    return '<button type="button" onclick="document.getElementById(\'inp-ref\').value=\''+jsStr(e.ref)+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+escapeHtml(e.ref)+' \u00b7 '+e.n+'</button>';
   }).join('');
 }
 
@@ -2762,7 +2844,7 @@ function renderModelSuggestions() {
   var entries = Object.keys(counts).map(function(k){ return {model:k, n:counts[k]}; });
   entries.sort(function(a,b){ return b.n - a.n; });
   el.innerHTML = entries.map(function(e) {
-    return '<button type="button" onclick="document.getElementById(\'inp-model\').value=\''+e.model+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+e.model+' \u00b7 '+e.n+'</button>';
+    return '<button type="button" onclick="document.getElementById(\'inp-model\').value=\''+jsStr(e.model)+'\'" style="padding:4px 10px;font-size:12px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(240,192,96,0.08);color:var(--gold);cursor:pointer;">'+escapeHtml(e.model)+' \u00b7 '+e.n+'</button>';
   }).join('');
 }
 
@@ -3564,9 +3646,11 @@ function renderHeatmap(allDone) {
         else if (lvl === 3) bg = 'rgba(240,192,96,0.70)';
         else if (lvl === 4) bg = 'rgba(240,192,96,0.95)';
       }
+      var onVac = !isFuture ? isDateOnVacation(cellMs, (currentWorkerFilter === '__all__') ? null : currentWorkerFilter) : null;
+      if (onVac) bg = 'rgba(96,160,255,0.55)'; // vacation overrides normal activity color
       var border = isToday ? '1.5px solid rgba(240,192,96,0.8)' : '1px solid transparent';
       var opacity = isFuture ? '0.25' : '1';
-      var titleTxt = cellDate.toLocaleDateString('ru', {day:'numeric',month:'short',weekday:'short'})+': '+c+' \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e';
+      var titleTxt = cellDate.toLocaleDateString('ru', {day:'numeric',month:'short',weekday:'short'})+': '+c+' \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e'+(onVac?' \ud83c\udfd6\ufe0f \u043e\u0442\u043f\u0443\u0441\u043a':'');
 
       html += '<div title="'+titleTxt+'" style="width:'+cellSz+'px;height:'+cellSz+'px;border-radius:3px;background:'+bg+';border:'+border+';opacity:'+opacity+';flex-shrink:0;transition:transform 0.15s;cursor:default;" onmouseover="this.style.transform=\'scale(1.5)\';this.style.zIndex=\'10\'" onmouseout="this.style.transform=\'\';this.style.zIndex=\'\'"></div>';
       if (col < 3) html += '<div style="width:'+cellGap+'px;flex-shrink:0;"></div>';
@@ -3583,6 +3667,9 @@ function renderHeatmap(allDone) {
   html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,192,96,0.70);"></div>';
   html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,192,96,0.95);"></div>';
   html += '&nbsp;\u0411\u043e\u043b\u044c\u0448\u0435</div>';
+  html += '<div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:4px;font-size:9px;color:var(--text-dim);">';
+  html += '<div style="width:10px;height:10px;border-radius:2px;background:rgba(96,160,255,0.55);"></div>';
+  html += '&nbsp;\ud83c\udfd6\ufe0f \u041e\u0442\u043f\u0443\u0441\u043a</div>';
   html += '</div>';
 
   container.innerHTML = html;
@@ -3610,6 +3697,7 @@ function renderStats() {
   var refBlock = document.getElementById('stats-block-ref');
   var modelBlock = document.getElementById('stats-block-model');
   var extraDaysBlock = document.getElementById('stats-block-extradays');
+  var vacationBlock = document.getElementById('stats-block-vacation');
   if (stageBlock) stageBlock.style.display = isBlockVisible('stage') ? '' : 'none';
   if (typeBlock) typeBlock.style.display = isBlockVisible('type') ? '' : 'none';
   if (speedBlock) speedBlock.style.display = isBlockVisible('speed') ? '' : 'none';
@@ -3617,15 +3705,17 @@ function renderStats() {
   if (refBlock) refBlock.style.display = isBlockVisible('ref') ? '' : 'none';
   if (modelBlock) modelBlock.style.display = isBlockVisible('model') ? '' : 'none';
   if (extraDaysBlock) extraDaysBlock.style.display = isBlockVisible('extradays') ? '' : 'none';
+  if (vacationBlock) vacationBlock.style.display = isBlockVisible('vacation') ? '' : 'none';
   if (heatmapBlock && isBlockVisible('heatmap')) renderHeatmap(allDone);
   if (extraDaysBlock && isBlockVisible('extradays')) renderExtraDaysStats();
+  if (vacationBlock && isBlockVisible('vacation')) renderVacationStats();
   document.getElementById('stats-grid').innerHTML =
     '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(totalJobs)+'</div><div class="stat-card-lbl">\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+fmtMs(avgTotal)+'</div><div class="stat-card-lbl">\u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432\u0440\u0435\u043c\u044f</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(fullJobs)+'</div><div class="stat-card-lbl">Full Service</div></div>'+
     '<div class="stat-card"><div class="stat-card-val">'+tickNumHTML(assemblyOnly)+'</div><div class="stat-card-lbl">\u0422\u043e\u043b\u044c\u043a\u043e \u0421\u0431\u043e\u0440\u043a\u0430</div></div>'+
-    '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+tickNumHTML(dorabCount)+'</div><div class="stat-card-lbl">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>'+
-    '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+tickNumHTML(vozvratPct)+'%</div><div class="stat-card-lbl">\u21a9 % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>';
+    (isBlockVisible('dorabotka') ? '<div class="stat-card" style="border-color:'+(dorabCount>0?'rgba(230,200,50,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(dorabCount>0?'#e6c832':'var(--gold)')+';">'+tickNumHTML(dorabCount)+'</div><div class="stat-card-lbl">\u21bb \u0414\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a</div></div>' : '')+
+    (isBlockVisible('dorabotka') ? '<div class="stat-card" style="border-color:'+(vozvratPct>20?'rgba(230,130,30,0.4)':'var(--border)')+'"><div class="stat-card-val" style="color:'+(vozvratPct>20?'#e6821e':vozvratPct>10?'#e6ac00':'var(--green)')+';">'+tickNumHTML(vozvratPct)+'%</div><div class="stat-card-lbl">\u21a9 % \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u043e\u0432</div></div>' : '');
   if (done.length > 0) {
     const ss = loadSettings();    const fsFast = ss.fsFast || 5, fsMid = ss.fsMid || 7;
     const asmFast = ss.asmFast || 3, asmMid = ss.asmMid || 4;
@@ -3803,14 +3893,151 @@ function renderExtraDaysStats() {
       + '<div style="font-size:14px;font-weight:600;color:var(--text);">'+dateLabel+(currentWorkerFilter==='__all__'?' <span style="font-weight:400;color:var(--text-dim);font-size:12px;">\u00b7 '+escapeHtml(w)+'</span>':'')+'</div>'
       + (x.note ? '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+escapeHtml(x.note)+'</div>' : '')
       + '</div>'
-      + '<button onclick="removeExtraDay(\''+x.date+'\',\''+w+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:6px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">\u2715</button>'
+      + '<button onclick="removeExtraDay(\''+x.date+'\',\''+jsStr(w)+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:6px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">\u2715</button>'
       + '</div>';
   }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
-// СОТРУДНИКИ (профили) — локальное переключение на одном устройстве
+// ОТПУСК — периоды дат, видимые в статистике, календаре и на главной
 // ═══════════════════════════════════════════════════════════════
+
+function loadVacations() {
+  try {
+    var raw = localStorage.getItem('rst_vacations');
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch(e) { return []; }
+}
+
+function saveVacationsList(arr) {
+  try {
+    localStorage.setItem('rst_vacations', JSON.stringify(arr));
+    return true;
+  } catch(e) { showToast('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c'); return false; }
+}
+
+function addVacation() {
+  var fromEl = document.getElementById('vacation-from');
+  var toEl = document.getElementById('vacation-to');
+  var noteEl = document.getElementById('vacation-note');
+  if (!fromEl || !fromEl.value || !toEl || !toEl.value) { showToast('\u0423\u043a\u0430\u0436\u0438\u0442\u0435 \u043e\u0431\u0435 \u0434\u0430\u0442\u044b'); return; }
+  if (fromEl.value > toEl.value) { showToast('\u0414\u0430\u0442\u0430 \u043d\u0430\u0447\u0430\u043b\u0430 \u043f\u043e\u0437\u0436\u0435 \u0434\u0430\u0442\u044b \u043e\u043a\u043e\u043d\u0447\u0430\u043d\u0438\u044f'); return; }
+  var worker = getCurrentWorkerName();
+  var note = noteEl ? noteEl.value.trim() : '';
+  var list = loadVacations();
+  list.push({from: fromEl.value, to: toEl.value, note: note, worker: worker});
+  saveVacationsList(list);
+  if (noteEl) noteEl.value = '';
+  showToast('\u041e\u0442\u043f\u0443\u0441\u043a \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d');
+  renderVacationStats();
+  renderVacationBanner();
+}
+
+function removeVacation(from, to, worker) {
+  var list = loadVacations().filter(function(v){ return !(v.from === from && v.to === to && (v.worker||'\u042f') === worker); });
+  saveVacationsList(list);
+  renderVacationStats();
+  renderVacationBanner();
+}
+
+// Периоды перекрываются, если начало одного раньше конца другого и наоборот
+function periodsOverlap(aFrom, aTo, bFrom, bTo) {
+  return aFrom <= bTo && bFrom <= aTo;
+}
+
+function filterVacationsByPeriod(list) {
+  if (currentPeriod === 'all') return list;
+  var periodFromTs, periodToTs;
+  if (currentPeriod === 'custom-month' || currentPeriod === 'custom-range') {
+    periodFromTs = customRangeFrom; periodToTs = customRangeTo;
+  } else {
+    var now = new Date();
+    if (currentPeriod === 'month') {
+      periodFromTs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      periodToTs = new Date(now.getFullYear(), now.getMonth()+1, 1).getTime() - 1; // \u0434\u043e \u043a\u043e\u043d\u0446\u0430 \u043c\u0435\u0441\u044f\u0446\u0430, \u0432\u043a\u043b\u044e\u0447\u0430\u044f \u0431\u0443\u0434\u0443\u0449\u0438\u0435 \u0434\u043d\u0438 \u2014 \u043e\u0442\u043f\u0443\u0441\u043a \u043c\u043e\u0436\u043d\u043e \u043f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0437\u0430\u0440\u0430\u043d\u0435\u0435
+    }
+    else if (currentPeriod === 'year') {
+      periodFromTs = new Date(now.getFullYear(), 0, 1).getTime();
+      periodToTs = new Date(now.getFullYear()+1, 0, 1).getTime() - 1;
+    }
+    else if (currentPeriod === 'week') {
+      var dow = now.getDay() === 0 ? 6 : now.getDay() - 1;
+      periodFromTs = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow).getTime();
+      periodToTs = periodFromTs + 7*86400000 - 1;
+    } else if (currentPeriod === 'day') {
+      periodFromTs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      periodToTs = periodFromTs + 86400000 - 1;
+    }
+    else { var ms = {'3months':90*86400000,'6months':180*86400000}; periodFromTs = now.getTime()-(ms[currentPeriod]||ms['3months']); periodToTs = Date.now(); }
+  }
+  return list.filter(function(v) {
+    var vFrom = new Date(v.from+'T00:00:00').getTime();
+    var vTo = new Date(v.to+'T23:59:59').getTime();
+    return periodsOverlap(vFrom, vTo, periodFromTs, periodToTs);
+  });
+}
+
+function isDateOnVacation(ts, worker) {
+  var list = loadVacations();
+  var dt = new Date(ts);
+  var pad = function(n){ return ('0'+n).slice(-2); };
+  var dateStr = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+  for (var i = 0; i < list.length; i++) {
+    var v = list[i];
+    if (worker !== null && (v.worker||'\u042f') !== worker) continue;
+    if (dateStr >= v.from && dateStr <= v.to) return v;
+  }
+  return null;
+}
+
+function renderVacationStats() {
+  var container = document.getElementById('vacation-container');
+  var countEl = document.getElementById('vacation-count');
+  if (!container) return;
+  var all = loadVacations().slice().sort(function(a,b){ return b.from.localeCompare(a.from); });
+  var byWorker = (currentWorkerFilter === '__all__') ? all : all.filter(function(v){ return (v.worker||'\u042f') === currentWorkerFilter; });
+  var filtered = filterVacationsByPeriod(byWorker);
+  if (countEl) countEl.textContent = filtered.length + ' \u0432 \u044d\u0442\u043e\u043c \u043f\u0435\u0440\u0438\u043e\u0434\u0435';
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:16px 0;">\u041d\u0435\u0442 \u043e\u0442\u043f\u0443\u0441\u043a\u043e\u0432 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043f\u0435\u0440\u0438\u043e\u0434</div>';
+    return;
+  }
+  var pad = function(n){ return ('0'+n).slice(-2); };
+  function fmt(str) { var d = new Date(str+'T12:00:00'); return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear(); }
+  container.innerHTML = filtered.map(function(v) {
+    var fromD = new Date(v.from+'T12:00:00'), toD = new Date(v.to+'T12:00:00');
+    var days = Math.round((toD.getTime()-fromD.getTime())/86400000) + 1;
+    var w = v.worker || '\u042f';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:14px;font-weight:600;color:var(--text);">'+fmt(v.from)+' \u2013 '+fmt(v.to)+' <span style="font-weight:400;color:var(--text-dim);font-size:12px;">\u00b7 '+days+' '+(days===1?'\u0434\u0435\u043d\u044c':'\u0434\u043d.')+(currentWorkerFilter==='__all__'?' \u00b7 '+escapeHtml(w):'')+'</span></div>'
+      + (v.note ? '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+escapeHtml(v.note)+'</div>' : '')
+      + '</div>'
+      + '<button onclick="removeVacation(\''+v.from+'\',\''+v.to+'\',\''+jsStr(w)+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:6px;color:#c94c4c;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">\u2715</button>'
+      + '</div>';
+  }).join('');
+}
+
+function renderVacationBanner() {
+  var el = document.getElementById('vacation-banner');
+  if (!el) return;
+  var worker = getCurrentWorkerName();
+  var onVacation = isDateOnVacation(Date.now(), worker);
+  if (!onVacation) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  var pad = function(n){ return ('0'+n).slice(-2); };
+  var toD = new Date(onVacation.to+'T12:00:00');
+  var toLabel = pad(toD.getDate())+'.'+pad(toD.getMonth()+1)+'.'+toD.getFullYear();
+  el.style.display = 'block';
+  el.innerHTML = '<div style="margin:0 16px 16px;padding:14px 16px;background:linear-gradient(135deg, rgba(96,160,255,0.15), rgba(96,160,255,0.06));border:1px solid rgba(96,160,255,0.3);border-radius:16px;display:flex;align-items:center;gap:12px;">'
+    + '<div style="font-size:26px;">\ud83c\udfd6\ufe0f</div>'
+    + '<div style="flex:1;">'
+    + '<div style="font-size:14px;font-weight:700;color:var(--blue);">\u0412 \u043e\u0442\u043f\u0443\u0441\u043a\u0435 \u0434\u043e ' + toLabel + '</div>'
+    + (onVacation.note ? '<div style="font-size:12px;color:var(--text-dim);margin-top:2px;">'+escapeHtml(onVacation.note)+'</div>' : '')
+    + '</div></div>';
+}
 
 function loadWorkers() {
   var s = loadSettings();
@@ -3874,10 +4101,10 @@ function renderWorkerSettings() {
   el.innerHTML = workers.map(function(w) {
     var isActive = w === current;
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;">'
-      + '<button onclick="selectWorkerProfile(\''+w+'\')" style="flex:1;text-align:left;padding:10px 14px;border-radius:10px;border:1px solid '+(isActive?'var(--gold)':'var(--glass-border)')+';background:'+(isActive?'rgba(240,192,96,0.12)':'transparent')+';color:'+(isActive?'var(--gold)':'var(--text)')+';font-size:14px;font-weight:'+(isActive?'700':'400')+';cursor:pointer;">'
-      + (isActive?'\u2713 ':'')+w
+      + '<button onclick="selectWorkerProfile(\''+jsStr(w)+'\')" style="flex:1;text-align:left;padding:10px 14px;border-radius:10px;border:1px solid '+(isActive?'var(--gold)':'var(--glass-border)')+';background:'+(isActive?'rgba(240,192,96,0.12)':'transparent')+';color:'+(isActive?'var(--gold)':'var(--text)')+';font-size:14px;font-weight:'+(isActive?'700':'400')+';cursor:pointer;">'
+      + (isActive?'\u2713 ':'')+escapeHtml(w)
       + '</button>'
-      + (w !== '\u042f' ? '<button onclick="removeWorkerProfile(\''+w+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:8px;color:#c94c4c;font-size:12px;padding:8px 10px;cursor:pointer;">\u2715</button>' : '')
+      + (w !== '\u042f' ? '<button onclick="removeWorkerProfile(\''+jsStr(w)+'\')" style="background:none;border:1px solid rgba(201,76,76,0.3);border-radius:8px;color:#c94c4c;font-size:12px;padding:8px 10px;cursor:pointer;">\u2715</button>' : '')
       + '</div>';
   }).join('');
 }
@@ -3896,7 +4123,7 @@ function populateWorkerFilter() {
   // Сохраняем реально активный фильтр (включая "Все"), а не сбрасываем на настройки по умолчанию
   var current = currentWorkerFilter;
   sel.innerHTML = '<option value="__all__">\u0412\u0441\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0438</option>'
-    + nameList.map(function(n){ return '<option value="'+n+'"'+(n===current?' selected':'')+'>'+n+'</option>'; }).join('');
+    + nameList.map(function(n){ return '<option value="'+escapeHtml(n)+'"'+(n===current?' selected':'')+'>'+escapeHtml(n)+'</option>'; }).join('');
   if (current === '__all__') sel.value = '__all__';
 }
 
@@ -4019,6 +4246,7 @@ function showModelDetail(model) {
 function exportData() {
   const d = load();
   d.extraDays = loadExtraDays();
+  d.vacations = loadVacations();
   const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -4035,9 +4263,11 @@ function importData(input) {
       if (!data.jobs||!data.done) throw new Error('bad');
       var doMerge = confirm('\u041e\u041a = \u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0438\u0442\u044c \u0441 \u0442\u0435\u043a\u0443\u0449\u0438\u043c\u0438 \u0434\u0430\u043d\u043d\u044b\u043c\u0438 (\u0447\u0442\u043e\u0431\u044b \u0441\u043e\u0431\u0440\u0430\u0442\u044c \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0443 \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u0438\u0445 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u043e\u0432)\n\u041e\u0442\u043c\u0435\u043d\u0430 = \u0417\u0430\u043c\u0435\u043d\u0438\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0435');
       var incomingExtraDays = Array.isArray(data.extraDays) ? data.extraDays : null;
+      var incomingVacations = Array.isArray(data.vacations) ? data.vacations : null;
       if (!doMerge) {
         localStorage.setItem('rst_data', JSON.stringify({jobs: data.jobs||[], done: data.done||[]}));
         if (incomingExtraDays) saveExtraDaysList(incomingExtraDays);
+        if (incomingVacations) saveVacationsList(incomingVacations);
         showToast('\u0418\u043c\u043f\u043e\u0440\u0442 \u0443\u0441\u043f\u0435\u0448\u0435\u043d! \u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e '+( data.done||[]).length+' \u0437\u0430\u043f\u0438\u0441\u0435\u0439');
       } else {
         var current = load();
@@ -4070,7 +4300,18 @@ function importData(input) {
           });
           saveExtraDaysList(existingExtraDays);
         }
-        showToast('\u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u043e: +'+addedDone+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445, +'+addedJobs+' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445'+(addedExtraDays>0?', +'+addedExtraDays+' \u0434\u043e\u043f. \u0434\u043d\u0435\u0439':''));
+        var addedVacations = 0;
+        if (incomingVacations) {
+          var existingVacations = loadVacations();
+          var existingVacKeys = {};
+          existingVacations.forEach(function(v){ existingVacKeys[v.from+'|'+v.to+'|'+(v.worker||'\u042f')] = true; });
+          incomingVacations.forEach(function(v){
+            var key = v.from+'|'+v.to+'|'+(v.worker||'\u042f');
+            if (!existingVacKeys[key]) { existingVacations.push(v); existingVacKeys[key] = true; addedVacations++; }
+          });
+          saveVacationsList(existingVacations);
+        }
+        showToast('\u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u043e: +'+addedDone+' \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445, +'+addedJobs+' \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445'+(addedExtraDays>0?', +'+addedExtraDays+' \u0434\u043e\u043f. \u0434\u043d\u0435\u0439':'')+(addedVacations>0?', +'+addedVacations+' \u043e\u0442\u043f\u0443\u0441\u043a\u043e\u0432':''));
       }
       setTimeout(()=>{renderHome();navigate('home');},1000);
     } catch(err) { showToast('\u041e\u0448\u0438\u0431\u043a\u0430 \u0444\u0430\u0439\u043b\u0430'); }
@@ -4208,6 +4449,7 @@ const STATS_BLOCKS = [
   {id:'model',    label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043f\u043e \u041a\u0430\u043b\u0438\u0431\u0440\u0430\u043c'},
   {id:'dorabotka',label:'\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043e\u043a'},
   {id:'extradays',label:'\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0434\u043d\u0438'},
+  {id:'vacation', label:'\u041e\u0442\u043f\u0443\u0441\u043a'},
 ];
 
 function loadSettings() {
@@ -4227,11 +4469,19 @@ function saveSettings() {
   var qEl   = document.getElementById('photo-q');
   if (dimEl) s.photoDim = parseInt(dimEl.value, 10);
   if (qEl)   s.photoQ   = parseFloat(qEl.value);
+  var planEl = document.getElementById('monthly-plan-input');
+  if (planEl && planEl.value) s.monthlyPlan = Math.max(1, parseInt(planEl.value, 10) || 12);
   localStorage.setItem('rst_settings', JSON.stringify(s));
   closeModal('modal-settings');
   populateWorkerFilter();
   if (document.getElementById('page-stats').classList.contains('active')) renderStats();
+  renderTodayWidget();
   showToast('\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b');
+}
+
+function getMonthlyPlan() {
+  var s = loadSettings();
+  return s.monthlyPlan || 12;
 }
 
 // Returns current photo compression settings (with defaults)
@@ -4412,6 +4662,8 @@ function openSettingsModal() {
   if (qEl)   { qEl.value   = q; }
   if (dimVal) dimVal.textContent = dim;
   if (qVal)   qVal.textContent   = parseFloat(q).toFixed(2);
+  var planEl = document.getElementById('monthly-plan-input');
+  if (planEl) planEl.value = s.monthlyPlan || 12;
   document.getElementById('recompress-status').textContent = '';
   renderStorageMeter();
   openModal('modal-settings');
@@ -5337,6 +5589,15 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>
         <div id="storage-breakdown" style="margin-top:10px;display:flex;flex-direction:column;gap:5px;"></div>
       </div>
+      <div style="border-top:1px solid var(--glass-border);margin:4px 0 18px;"></div>
+
+      <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">📅 План на месяц</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <input type="number" id="monthly-plan-input" class="form-input" min="1" max="999" style="width:100px;flex-shrink:0;padding:10px 14px;font-size:16px;text-align:center;" />
+        <span style="font-size:13px;color:var(--text-dim);">шт. часов сдано за календарный месяц — цель для отчётности</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:18px;line-height:1.5;">Прогресс виден на главной странице.</div>
+
       <div style="border-top:1px solid var(--glass-border);margin:4px 0 18px;"></div>
 
       <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">👥 Сотрудники</div>
